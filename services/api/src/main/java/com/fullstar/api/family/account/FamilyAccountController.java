@@ -10,7 +10,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.Map;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,10 +64,13 @@ public class FamilyAccountController {
 	}
 
 	@PostMapping("/pin/verify")
-	ApiResponse<GrantResponse> verifyPin(HttpServletRequest request, @AuthenticationPrincipal Jwt jwt,
+	ResponseEntity<ApiResponse<GrantResponse>> verifyPin(HttpServletRequest request, @AuthenticationPrincipal Jwt jwt,
 			@Valid @RequestBody PinRequest body) {
 		ParentGrantService.Grant grant = service.verifyPin(RequestActor.of(request), jwt.getSubject(), body.pin());
-		return ApiResponse.success(new GrantResponse(grant.token(), grant.expiresInSeconds()));
+		// The grant is a secret: never cached, never stored for Idempotency-Key replay
+		return ResponseEntity.ok()
+			.cacheControl(CacheControl.noStore())
+			.body(ApiResponse.success(new GrantResponse(grant.token(), grant.expiresInSeconds())));
 	}
 
 	@PutMapping("/pin")

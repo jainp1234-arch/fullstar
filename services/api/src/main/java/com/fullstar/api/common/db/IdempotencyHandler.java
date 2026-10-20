@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,8 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 /**
  * Idempotency-Key support (Schema §10, V12). Runs inside the request transaction: the key is
  * claimed, the request runs, and a 2xx response is stored, all in one commit. A repeat with the
- * same key and request returns the stored response; a failed request rolls back its claim.
+ * same key and request returns the stored response; a failed request rolls back its claim. Responses
+ * marked Cache-Control: no-store (e.g. the parent grant) are never stored.
  */
 @Component
 public class IdempotencyHandler {
@@ -68,6 +70,12 @@ public class IdempotencyHandler {
 		int status = response.getStatus();
 		if (status < 200 || status >= 300) {
 			return; // the request transaction rolls back, releasing the key
+		}
+		String cacheControl = response.getHeader(HttpHeaders.CACHE_CONTROL);
+		if (cacheControl != null && cacheControl.contains("no-store")) {
+			// Secrets such as the parent grant are never stored for replay; the key is released
+			jdbc.update("DELETE FROM app.processed_jobs WHERE idempotency_key = ?", key);
+			return;
 		}
 		byte[] body = response.getContentAsByteArray();
 		String json = body.length == 0 ? null : new String(body, StandardCharsets.UTF_8);

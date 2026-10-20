@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Turns the validated Keycloak token into the request actor (Schema §8). The lookups run as
@@ -44,7 +45,8 @@ public class JwtActorResolver implements ActorResolver {
 		if (jwt == null) {
 			return RequestActor.ANONYMOUS;
 		}
-		String path = request.getRequestURI();
+		// Decoded and normalized like the security chains and interceptors match it
+		String path = UrlPathHelper.defaultInstance.getLookupPathForRequest(request);
 		if (path.startsWith("/api/v1/family/")) {
 			return family(jwt);
 		}

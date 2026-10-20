@@ -127,6 +127,21 @@ class FamilyAccountTest extends ApiTestSupport {
 	}
 
 	@Test
+	void theGrantIsNeverStoredForIdempotentReplay() throws Exception {
+		Parent parent = signUp();
+		mvc.perform(pin(post("/api/v1/family/pin"), parent.bearer(), "5555")).andExpect(status().isCreated());
+		String key = UUID.randomUUID().toString();
+		for (int i = 0; i < 2; i++) {
+			mvc.perform(pin(post("/api/v1/family/pin/verify"), parent.bearer(), "5555").header("Idempotency-Key", key))
+				.andExpect(status().isOk())
+				.andExpect(header().string("Cache-Control", "no-store"))
+				.andExpect(header().doesNotExist("Idempotent-Replayed"));
+		}
+		Long stored = systemQuery("SELECT count(*) FROM app.processed_jobs WHERE idempotency_key = ?", key);
+		assertThat(stored).isZero();
+	}
+
+	@Test
 	void parentModeNeedsAValidGrantForThisFamily() throws Exception {
 		Parent parent = signUp();
 		Parent other = signUp();
