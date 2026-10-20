@@ -17,6 +17,39 @@ Lessons from your own school book. A home-learning app for children in Class 1â€
 
 The online versions are private to you until shared. Diagrams show as source text in the local files; open the online version to see them drawn.
 
+## Repository layout
+
+```
+apps/            Angular 22 apps: family-app (PWA), content-studio   (step 0.3)
+libs/ui/         shared UI components, tokens, strings               (step 0.3)
+services/        Spring Boot 4.1.1: api, book-reader                 (step 0.3)
+workers/         Python 3.12: reading-checker, voice-maker           (step 0.3)
+infra/           docker compose, Keycloak realm and email-otp SPI    (steps 0.3, 0.5)
+docs/            product and technical documents (source of truth)
+CLAUDE.md        instructions for Claude Code
+```
+
+## Requirements
+
+- Node.js 24.21.0 (`.nvmrc`), Java 21 (Temurin 21.0.12.1), Docker with Compose v5, GNU Make
+- Maven is not needed: use `./mvnw` (Maven Wrapper, pinned to Maven 3.9.16)
+- Copy `.env.example` to `.env` and fill in values locally. Never commit `.env`.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `make up` / `make down` | start / stop local services (docker compose) |
+| `make test` | all tests |
+| `make lint` | all linters |
+| `make api` / `make family` / `make studio` | run one app locally |
+
+`make lint` and `make test` skip parts of the repository that do not exist yet.
+
+## Working on a step
+
+Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<short-name>` and merged into `main` by squash merge through a pull request using the template.
+
 ## Next step
 
-Follow `docs/06-implementation-plan.html`, starting with step 0.1 (create the GitHub repository and buy the domain), then ask Claude Code: "Do step 0.2 of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 0.3 of docs/06-implementation-plan.html."

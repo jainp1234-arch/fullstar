@@ -1,0 +1,36 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+coverage/
+playwright-report/
+test-results/
+npm-debug.log*
+
+# Java / Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE and OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Claude Code local settings
+.claude/settings.local.json
