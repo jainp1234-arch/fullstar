@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import org.jboss.logging.Logger;
@@ -22,6 +23,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.light.LightweightUserAdapter;
+import org.keycloak.services.managers.BruteForceProtector;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
 /**
@@ -55,6 +57,13 @@ public class EmailOtpAuthenticator implements Authenticator {
 
 	@Override
 	public void authenticate(AuthenticationFlowContext context) {
+		// A refresh during a challenge re-shows the code page, whether or not the account exists.
+		AuthenticationSessionModel authSession = context.getAuthenticationSession();
+		String pendingEmail = authSession.getAuthNote(NOTE_EMAIL);
+		if (pendingEmail != null && OtpChallenge.fromNotes(notes(authSession)) != null) {
+			context.challenge(codeForm(context, pendingEmail, null, null));
+			return;
+		}
 		UserModel known = context.getUser();
 		if (known != null && known.getEmail() != null) {
 			startChallenge(context, known.getEmail());
@@ -135,7 +144,8 @@ public class EmailOtpAuthenticator implements Authenticator {
 			if (user == null) {
 				user = createUser(context, email);
 			}
-			if (user == null || !user.isEnabled()) {
+			if (user == null || !user.isEnabled() || bruteForce(context).isTemporarilyDisabled(context.getSession(),
+					context.getRealm(), user)) {
 				failWrongCode(context, email, user, result.challenge());
 				return;
 			}
@@ -161,8 +171,11 @@ public class EmailOtpAuthenticator implements Authenticator {
 
 	private void failWrongCode(AuthenticationFlowContext context, String email, UserModel user, OtpChallenge challenge) {
 		if (user != null) {
-			// Lets Keycloak brute-force detection count the failure for this account
-			context.setUser(user);
+			// Counted by brute-force detection without attaching the account to the session: an attached
+			// user would change later responses and reveal that the account exists.
+			context.getEvent().user(user);
+			bruteForce(context).failedLogin(context.getRealm(), user, context.getConnection(), context.getUriInfo(),
+					Set.of());
 		}
 		context.failureChallenge(AuthenticationFlowError.INVALID_CREDENTIALS,
 				codeForm(context, email, "fullstarWrongCode", null, challenge.attemptsLeft()));
@@ -222,6 +235,10 @@ public class EmailOtpAuthenticator implements Authenticator {
 		user.setEmailVerified(true);
 		user.setEnabled(true);
 		return user;
+	}
+
+	private static BruteForceProtector bruteForce(AuthenticationFlowContext context) {
+		return context.getSession().getProvider(BruteForceProtector.class);
 	}
 
 	private static UserModel findUser(AuthenticationFlowContext context, String email) {
