@@ -113,6 +113,57 @@ export const EN = {
     'avatar-frog': 'Frog',
     'avatar-unicorn': 'Unicorn',
   },
+
+  common: {
+    comingSoon: 'Coming soon',
+    done: 'Done',
+    new: 'New',
+    offlineItem: 'Needs the internet',
+  },
+
+  /** Sample text for the dev-only UI gallery (/dev/ui). */
+  dev: {
+    gallery: {
+      title: 'UI gallery',
+      intro: 'Every component in every state. Dev builds only.',
+      sections: {
+        buttons: 'Buttons',
+        iconButtons: 'Icon buttons',
+        stars: 'Star pill',
+        cards: 'List cards',
+        tabs: 'Corner tabs',
+        tiles: 'Tiles',
+        banner: 'Banner card',
+        progress: 'Progress',
+        notice: 'Notice card',
+        actions: 'Action cards',
+        headers: 'Section headers',
+      },
+      startLesson: 'Start lesson',
+      readAlong: 'Read along',
+      printWorksheet: 'Print worksheet',
+      eraseProgress: 'Erase progress',
+      chapterCard: 'Chapter 4',
+      chapterCardBody: '3 of 12 chapters done',
+      practiceCard: 'Maths practice',
+      practiceCardBody: 'Tables, addition, shapes',
+      chapterTab: 'Chapter 4',
+      classTab: 'Class 3 practice',
+      bannerEyebrow: 'New lessons ready',
+      bannerBody: 'Hindi Chapter 4 is ready to watch.',
+      progressTitle: 'This week',
+      progressBody: '3 of 10 worksheets done',
+      noticeTitle: 'Upload your books',
+      noticeBody: 'Lessons follow your school book, chapter by chapter.',
+      mySubjects: 'My subjects',
+      activity: 'Activity',
+      seeAll: 'See all',
+      actionChildren: 'Children',
+      actionTimeLimit: 'Daily time limit',
+      actionHelp: 'Help and contact',
+      actionPrivacy: 'Privacy',
+    },
+  },
 } as const;
 
 export type Strings = typeof EN;

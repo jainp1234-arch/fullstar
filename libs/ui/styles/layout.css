@@ -1,0 +1,24 @@
+/* Layout helpers for the components (Guidelines §5, §11, §13). */
+.ui-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.ui-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.ui-tile-grid--wide-labels {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ui-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+@media (min-width: 600px) {
+  .ui-tile-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
