@@ -20,7 +20,7 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api family studio
+.PHONY: help up down test lint api family studio db-bootstrap db-migrate
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
@@ -29,6 +29,8 @@ help:
 	@echo "make api              run services/api locally"
 	@echo "make family           run apps/family-app locally"
 	@echo "make studio           run apps/content-studio locally"
+	@echo "make db-bootstrap     create app_owner/app_api/app_system on NEON_OWNER_URL, write .env"
+	@echo "make db-migrate       run Flyway migrations as app_owner (DB_MIGRATE_JDBC_URL)"
 
 up:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
@@ -67,6 +69,15 @@ test:
 api:
 	@test -f services/api/pom.xml || { echo "services/api is missing (created in step 0.3)"; exit 1; }
 	$(MVNW) -f services/api/pom.xml spring-boot:run
+
+db-bootstrap:
+	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
+	MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" postgres:18.6 sh /w/infra/db/bootstrap-roles.sh
+
+db-migrate:
+	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
+	$(MVNW) -q -f services/api/pom.xml spring-boot:run -Dspring-boot.run.profiles=migrate \
+		"-Dspring-boot.run.arguments=--spring.config.import=optional:file:$(CURDIR)/.env[.properties]"
 
 family:
 	@test -f angular.json || { echo "Angular workspace is missing (created in step 0.3)"; exit 1; }

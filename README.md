@@ -66,6 +66,14 @@ CLAUDE.md        instructions for Claude Code
 
 All ports bind to 127.0.0.1. Alloy reads container logs through the Docker socket, so run this stack only on your own laptop.
 
+## Database (Neon, trial)
+
+1. Put the Neon owner connection string in `.env` as `NEON_OWNER_URL` (Neon Console → Connect, dev branch).
+2. `make db-bootstrap`: creates the roles `app_owner`, `app_api` and `app_system` with new random passwords and writes the `DB_*` settings into `.env`. Passwords are never printed. Re-running it rotates the passwords.
+3. `make db-migrate`: runs Flyway V1–V11 (`services/api/src/main/resources/db/migration`) as `app_owner` over the direct connection.
+
+Database tests (`make test`) use a throwaway PostgreSQL 18.6 container (Testcontainers), prepared the same way.
+
 ## CI
 
 GitHub Actions in `.github/workflows/`. Path filters run only the parts a change touches:
@@ -86,4 +94,4 @@ Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<
 
 ## Next step
 
-Ask Claude Code: "Do step 1.1 of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 1.3 of docs/06-implementation-plan.html."

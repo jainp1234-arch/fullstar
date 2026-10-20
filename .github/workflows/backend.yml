@@ -5,6 +5,7 @@ on:
     paths: &paths
       - 'services/**'
       - 'infra/keycloak/email-otp/**'
+      - 'infra/db/**'
       - 'mvnw'
       - '.mvn/**'
       - '.github/workflows/backend.yml'
