@@ -204,7 +204,7 @@ flowchart LR
       <tr><td class="tool">io.github.resilience4j:resilience4j-spring-boot4</td><td class="v">2.4.0</td><td>Retry with backoff, circuit breaker, time limiter</td><td>Use the <code>-spring-boot4</code> artifact, not <code>-spring-boot3</code>.</td></tr>
       <tr><td class="tool">org.postgresql:postgresql</td><td class="v">42.7.13</td><td>Database driver</td><td>Boot-managed.</td></tr>
       <tr><td class="tool">org.flywaydb:flyway-core + flyway-database-postgresql</td><td class="v">12.4.0</td><td>Database migrations</td><td>Boot-managed. Do not override to 13.x.</td></tr>
-      <tr><td class="tool">software.amazon.awssdk:bom</td><td class="v">2.55.11</td><td>SQS client; S3 client for Cloudflare R2</td><td>Not Boot-managed; import the BOM.</td></tr>
+      <tr><td class="tool">software.amazon.awssdk:bom</td><td class="v">2.55.11</td><td>SQS client; S3 client for Cloudflare R2</td><td>Not Boot-managed; import the BOM. Modules (versions from the BOM): <code>s3</code>, <code>sqs</code>, and <code>url-connection-client</code> as the synchronous HTTP client (Plan 1.6). S3 client: path-style, chunked encoding off.</td></tr>
       <tr><td class="tool">org.apache.pdfbox:pdfbox</td><td class="v">3.0.8</td><td>Read text and pages from PDFs</td><td>book-reader service.</td></tr>
       <tr><td class="tool">org.springdoc:springdoc-openapi-starter-webmvc-ui</td><td class="v">3.1.1</td><td>API docs</td><td>Run a startup smoke test; 4.1 support is assumed from the 3.x line.</td></tr>
       <tr><td class="tool">com.anthropic:anthropic-java</td><td class="v">2.68.0</td><td>Claude API</td><td>Content Studio drafting and content-check agent.</td></tr>

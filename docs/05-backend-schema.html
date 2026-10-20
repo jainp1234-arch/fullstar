@@ -1228,6 +1228,7 @@ sequenceDiagram
     </tbody>
   </table></div>
   <ul>
+    <li>Implemented in Plan 1.6: <code>make bootstrap</code> creates every queue and its <code>-dlq</code> (visibility as listed, max receives 3, DLQ kept 14 days; optional name prefix <code>QUEUE_PREFIX</code>). The API publishes only after its transaction commits. The consumer de-duplicates on the original job's <code>idempotency_key</code> (the one in the job-results payload), inserting it as <code>job:&lt;key&gt;</code> (so it can never collide with a client Idempotency-Key) into <code>processed_jobs</code> in the same <code>app_system</code> transaction as the handler's changes; a duplicate is deleted, a failure stays on the queue and reaches the DLQ after 3 receives.</li>
     <li>A message in a DLQ marks the related row <code>failed</code> (or <code>needs_attention</code> for uploads) and sends the parent a plain message; CloudWatch/Grafana alerts when any DLQ depth is above 0.</li>
     <li>Book pipeline status changes: upload <code>awaiting_files → scanning → processing → processed</code>; chapter <code>processing → (suggested) → readalong_ready</code> → admin linked → <code>lessons_being_prepared</code> → <code>lessons_ready</code>. Any unclear page → chapter <code>needs_attention</code>, message <code>pages_unclear</code>.</li>
     <li>When a chapter reaches <code>readalong_ready</code> and has no ready catalog chapter linked, the consumer opens a <code>prep_task</code> (notifies the Studio dashboard).</li>

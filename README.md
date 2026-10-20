@@ -77,7 +77,8 @@ All ports bind to 127.0.0.1. Alloy reads container logs through the Docker socke
 
 1. Put the Neon owner connection string in `.env` as `NEON_OWNER_URL` (Neon Console → Connect, dev branch).
 2. `make db-bootstrap`: creates the roles `app_owner`, `app_api` and `app_system` with new random passwords and writes the `DB_*` settings into `.env`. Passwords are never printed. Re-running it rotates the passwords.
-3. `make db-migrate`: runs Flyway V1–V11 (`services/api/src/main/resources/db/migration`) as `app_owner` over the direct connection.
+3. `make db-migrate`: runs the Flyway migrations (`services/api/src/main/resources/db/migration`) as `app_owner` over the direct connection.
+4. `make bootstrap`: creates the queues and their DLQs in ElasticMQ and (trial) the `S3_BUCKET` bucket in SeaweedFS, whose S3 keys come from `.env`. Safe to run again.
 
 Database tests (`make test`) use a throwaway PostgreSQL 18.6 container (Testcontainers), prepared the same way.
 
@@ -101,4 +102,4 @@ Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<
 
 ## Next step
 
-Ask Claude Code: "Do step 1.6 of docs/06-implementation-plan.html."
+Phase 1 is complete. Ask Claude Code: "Do step 2.1 of docs/06-implementation-plan.html."

@@ -41,6 +41,7 @@ public abstract class ApiTestSupport {
 	static void database(DynamicPropertyRegistry registry) {
 		TestDatabase.register(registry);
 		TestTokens.register(registry);
+		TestAws.register(registry);
 	}
 
 	protected static String parent(UUID familyId) {
@@ -93,6 +94,39 @@ public abstract class ApiTestSupport {
 					case "staff" -> RequestActor.staff(RequestActor.StaffRole.valueOf(parts[1].toUpperCase(Locale.ROOT)));
 					default -> throw new IllegalArgumentException("Unknown test actor " + header);
 				};
+			};
+		}
+
+		/** Queues and the bucket exist before the job-results consumer starts polling. */
+		@Bean
+		org.springframework.beans.factory.InitializingBean cloudReady(com.fullstar.api.common.jobs.QueueBootstrap queues,
+				software.amazon.awssdk.services.s3.S3Client s3) {
+			return () -> {
+				queues.createAll();
+				try {
+					s3.headBucket(request -> request.bucket(TestAws.BUCKET));
+				}
+				catch (software.amazon.awssdk.services.s3.model.NoSuchBucketException ex) {
+					s3.createBucket(request -> request.bucket(TestAws.BUCKET));
+				}
+			};
+		}
+
+		/** A worker-result handler for tests: records each applied result in audit_log. */
+		@Bean
+		com.fullstar.api.common.jobs.JobResultHandler echoHandler() {
+			return new com.fullstar.api.common.jobs.JobResultHandler() {
+				@Override
+				public String type() {
+					return "test.echo";
+				}
+
+				@Override
+				public void apply(com.fullstar.api.common.jobs.JobResult result,
+						org.springframework.jdbc.core.JdbcTemplate system) {
+					system.update("INSERT INTO app.audit_log (actor_type, action, entity_type, entity_id) "
+							+ "VALUES ('system', 'test.echo', 'job', ?)", result.result().path("tag").asString());
+				}
 			};
 		}
 
