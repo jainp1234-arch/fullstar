@@ -1,0 +1,5 @@
+{
+  "themes": [
+    { "name": "fullstar", "types": ["login", "email"] }
+  ]
+}

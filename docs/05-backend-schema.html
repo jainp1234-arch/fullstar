@@ -1023,7 +1023,7 @@ sequenceDiagram
   <ul>
     <li>Same realm, client <code>content-studio</code>; login flow = email code <strong>and</strong> TOTP (required action on first login). Realm roles <code>content_admin</code>, <code>super_admin</code>.</li>
     <li>The API accepts audience <code>studio-api</code> only, then requires an active <code>staff_users</code> row with the same <code>keycloak_user_id</code>; the role in our table is the one enforced (Keycloak role must match, else <code>403 ROLE_MISMATCH</code>).</li>
-    <li>Staff sessions: access 5 minutes, refresh 8 hours, no offline sessions.</li>
+    <li>Staff sessions: access 5 minutes, refresh 8 hours, no offline sessions. Implemented in Plan 1.4 (<code>infra/keycloak/realm/fullstar-realm.json</code>): the staff browser flow has no SSO-cookie step, so a session started in the family app never skips TOTP; the realm SSO idle timeout is 8 hours so the Studio client can keep 8-hour sessions. The parent flow creates the Keycloak account only after the emailed code is proven; the user profile asks for email only.</li>
   </ul>
 
   <h3>8.4 Uploads and file access</h3>

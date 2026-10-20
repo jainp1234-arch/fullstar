@@ -48,8 +48,17 @@ services:
       context: ..
       dockerfile: infra/keycloak/Dockerfile
     image: fullstar/keycloak:local
-    command: ["start-dev"]
+    # Imports infra/keycloak/realm/fullstar-realm.json when the realm does not exist yet.
+    command: ["start-dev", "--import-realm"]
+    volumes:
+      - ./keycloak/realm:/opt/keycloak/data/import:ro
     environment:
+      # Resolved inside the realm import (SMTP via Brevo, Schema §12a)
+      SMTP_HOST: ${SMTP_HOST:?set SMTP_HOST in .env}
+      SMTP_PORT: ${SMTP_PORT:?set SMTP_PORT in .env}
+      SMTP_USERNAME: ${SMTP_USERNAME:?set SMTP_USERNAME in .env}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:?set SMTP_PASSWORD in .env}
+      MAIL_FROM: ${MAIL_FROM:?set MAIL_FROM in .env}
       KC_DB: postgres
       KC_DB_URL_HOST: keycloak-db
       KC_DB_URL_DATABASE: keycloak
