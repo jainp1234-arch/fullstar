@@ -66,6 +66,14 @@ class MigrationsTest extends DatabaseTestSupport {
 	}
 
 	@Test
+	void appFunctionsAreNotExecutableByPublic() {
+		List<List<Object>> publicFunctions = asSystem(c -> rows(c, """
+				SELECT p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+				 WHERE n.nspname = 'app' AND has_function_privilege('public', p.oid, 'EXECUTE')"""));
+		assertThat(publicFunctions).isEmpty();
+	}
+
+	@Test
 	void flywayHistoryLivesOutsideTheAppSchema() {
 		Long applied = inTransaction("app_owner", OWNER_PASSWORD, null, null, null, c -> count(c,
 				"SELECT count(*) FROM flyway.flyway_schema_history WHERE success AND version IS NOT NULL"));

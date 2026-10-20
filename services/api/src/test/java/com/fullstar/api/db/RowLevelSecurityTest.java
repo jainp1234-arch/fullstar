@@ -154,6 +154,8 @@ class RowLevelSecurityTest extends DatabaseTestSupport {
 		asParent(familyA.id, c -> exec(c, insert, "parent", tag));
 		asStaff("content_admin", c -> exec(c, insert, "staff", tag));
 		assertRlsDenied(() -> inTransaction("app_api", API_PASSWORD, null, null, null, c -> exec(c, insert, "system", tag)));
+		assertRlsDenied(() -> asParent(familyA.id, c -> exec(c, insert, "staff", tag)));
+		assertRlsDenied(() -> asStaff("content_admin", c -> exec(c, insert, "parent", tag)));
 
 		String read = "SELECT count(*) FROM app.audit_log WHERE entity_id = ?";
 		Long parent = asParent(familyA.id, c -> count(c, read, tag));
@@ -212,6 +214,17 @@ class RowLevelSecurityTest extends DatabaseTestSupport {
 		assertThat(superTotals).isEqualTo(1);
 		assertRlsDenied(() -> asStaff("super_admin", c -> exec(c,
 				"INSERT INTO app.anonymous_totals (metric, period_month, value) VALUES ('x', '2026-01-01', 1)")));
+	}
+
+	@Test
+	void parentsReadAndMarkTheirMessagesButCannotCreateThem() {
+		assertRlsDenied(() -> asParent(familyA.id, c -> exec(c,
+				"INSERT INTO app.messages (family_id, kind, title, body) VALUES (?, 'system', 'Fake', 'Fake')", familyA.id)));
+		Integer marked = asParent(familyA.id,
+				c -> exec(c, "UPDATE app.messages SET read_at = now() WHERE family_id = ?", familyA.id));
+		assertThat(marked).isPositive();
+		assertRlsDenied(() -> asParent(familyA.id,
+				c -> exec(c, "UPDATE app.messages SET family_id = ? WHERE family_id = ?", familyB.id, familyA.id)));
 	}
 
 	// ---- helpers ----

@@ -19,6 +19,9 @@ BEGIN
   END LOOP;
 END $$;
 
+-- Functions are executable only by the app roles (V1 grants them EXECUTE)
+REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA app FROM PUBLIC;
+
 -- 1. Family-only tables (staff have NO access)
 DO $$
 DECLARE t text;
@@ -59,7 +62,9 @@ CREATE POLICY staff_insert ON app.support_messages FOR INSERT WITH CHECK (app.is
 CREATE POLICY own_family ON app.families USING (id = app.current_family()) WITH CHECK (id = app.current_family());
 
 -- 4. messages: parents read/update their own; staff may INSERT (support replies, lessons ready)
-CREATE POLICY family_messages ON app.messages USING (family_id = app.current_family());
+CREATE POLICY family_messages ON app.messages FOR SELECT USING (family_id = app.current_family());
+CREATE POLICY family_messages_update ON app.messages FOR UPDATE
+  USING (family_id = app.current_family()) WITH CHECK (family_id = app.current_family());
 CREATE POLICY staff_insert_messages ON app.messages FOR INSERT WITH CHECK (app.is_staff());
 
 -- 5. Content: parents read only published content they are entitled to
@@ -96,7 +101,9 @@ CREATE POLICY super_admin ON app.staff_users FOR ALL USING (app.is_super_admin()
 CREATE POLICY super_admin ON app.deletion_requests FOR ALL USING (app.is_super_admin()) WITH CHECK (app.is_super_admin());
 CREATE POLICY parent_request ON app.deletion_requests FOR INSERT WITH CHECK (family_id = app.current_family());
 
-CREATE POLICY actor_insert ON app.audit_log FOR INSERT WITH CHECK (app.is_staff() OR app.current_family() IS NOT NULL);
+CREATE POLICY actor_insert ON app.audit_log FOR INSERT WITH CHECK (
+  (actor_type = 'staff' AND app.is_staff()) OR
+  (actor_type = 'parent' AND current_setting('app.actor', true) = 'parent' AND app.current_family() IS NOT NULL));
 CREATE POLICY super_admin_read ON app.audit_log FOR SELECT USING (app.is_super_admin());
 
 -- 7. Operations
