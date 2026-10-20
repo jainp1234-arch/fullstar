@@ -28,7 +28,7 @@ for (const mode of MODES) {
   });
 }
 
-test('the gallery shows every 2.2a and 2.2b component', async ({ page }) => {
+test('the gallery shows every 2.2 component', async ({ page }) => {
   await page.goto('/dev/ui');
   for (const selector of [
     'app-button',
@@ -53,6 +53,16 @@ test('the gallery shows every 2.2a and 2.2b component', async ({ page }) => {
     'app-skeleton',
     'app-message-item',
     'app-data-table',
+    'app-speech-bubble',
+    'app-owl-loader',
+    'app-read-aloud',
+    'app-time-indicator',
+    'app-answer-button',
+    'app-question-card',
+    'app-avatar',
+    'app-profile-picker',
+    'app-flag-item',
+    'app-celebration',
   ]) {
     await expect(page.locator(selector).first(), selector).toBeVisible();
   }
@@ -125,5 +135,69 @@ test.describe('forms', () => {
     await expect(pad.locator('.dot--filled')).toHaveCount(0);
     await page.keyboard.type('1234');
     await expect(page.getByText('PIN accepted.')).toBeVisible();
+  });
+});
+
+test.describe('kid mode', () => {
+  test('a quiz: not correct shakes and the owl says try again; correct pops green', async ({
+    page,
+  }) => {
+    await page.goto('/dev/ui');
+    const quiz = page.locator('[data-section="quiz"] app-question-card').first();
+    await quiz.getByRole('button', { name: /^B Cat/ }).click();
+    await expect(quiz.locator('.answer--shake')).toHaveCount(1);
+    await expect(page.locator('app-speech-bubble').nth(1)).toContainText("Let's try again.");
+    await expect(quiz.locator('.answer--shake')).toHaveCount(0);
+    await quiz.getByRole('button', { name: /^A Cow/ }).click();
+    await expect(quiz.getByRole('button', { name: 'A Cow Right answer' })).toBeVisible();
+    await expect(page.locator('app-speech-bubble').nth(1)).toContainText("Yes! That's right.");
+  });
+
+  test('the celebration plays over 1.2 s and ends on the final frame', async ({ page }) => {
+    await page.goto('/dev/ui');
+    const celebration = page.locator('app-celebration');
+    await expect(celebration).toHaveAttribute('data-celebration', 'final', { timeout: 3000 });
+    await celebration.getByRole('button', { name: 'Play again' }).click();
+    await expect(celebration).toHaveAttribute('data-celebration', 'playing');
+    await expect(celebration).toHaveAttribute('data-celebration', 'final', { timeout: 3000 });
+    expect(
+      await celebration
+        .locator('.burst__star')
+        .first()
+        .evaluate((el) => getComputedStyle(el).opacity),
+    ).toBe('1');
+  });
+
+  test('reduced motion: final frame at once, no bob, pulse, shake or shimmer', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/dev/ui');
+    const celebration = page.locator('app-celebration');
+    await expect(celebration).toHaveAttribute('data-celebration', 'final');
+    await celebration.getByRole('button', { name: 'Play again' }).click();
+    await expect(celebration).toHaveAttribute('data-celebration', 'final');
+    const star = celebration.locator('.burst__star').first();
+    expect(await star.evaluate((el) => getComputedStyle(el).opacity)).toBe('1');
+    expect(await star.evaluate((el) => getComputedStyle(el).transform)).not.toBe('none');
+
+    const animation = (selector: string, pseudo?: string) =>
+      page
+        .locator(selector)
+        .first()
+        .evaluate((el, p) => getComputedStyle(el, p).animationName, pseudo);
+    expect(await animation('app-owl-loader .owl')).toBe('none');
+    expect(await animation('app-read-aloud .ra--speaking', '::after')).toBe('none');
+
+    // The shake lasts 240 ms; apply its class directly so the check does not race it
+    const shaken = await page
+      .locator('app-answer-button .answer')
+      .first()
+      .evaluate((el) => {
+        el.classList.add('answer--shake');
+        return getComputedStyle(el).animationName;
+      });
+    expect(shaken).toBe('none');
+
+    await page.getByRole('button', { name: 'parent', exact: true }).click();
+    expect(await animation('app-skeleton .block')).toBe('none');
   });
 });

@@ -14,6 +14,7 @@ import { Tile } from '../components/tile';
 import { DisplayMode, DisplayModeService } from '../mode/display-mode';
 import { EN } from '../strings/en';
 import { GalleryForms } from './gallery-forms';
+import { GalleryKid } from './gallery-kid';
 
 /**
  * Dev-only UI gallery (Guidelines §18, /dev/ui): every component in every state, on the sky and
@@ -28,6 +29,7 @@ import { GalleryForms } from './gallery-forms';
     Button,
     CornerTab,
     GalleryForms,
+    GalleryKid,
     IconButton,
     ListCard,
     NoticeCard,
@@ -163,6 +165,8 @@ import { GalleryForms } from './gallery-forms';
       </section>
 
       <app-gallery-forms />
+
+      <app-gallery-kid />
     </main>
   `,
   styles: `
