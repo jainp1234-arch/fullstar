@@ -1,0 +1,64 @@
+name: docker
+
+on:
+  pull_request:
+    paths: &paths
+      - 'services/**'
+      - 'workers/**'
+      - 'infra/keycloak/**'
+      - 'mvnw'
+      - '.mvn/**'
+      - '.dockerignore'
+      - '.github/workflows/docker.yml'
+  push:
+    branches: [main]
+    paths: *paths
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build ${{ matrix.name }} (amd64 + arm64)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: api, context: ., file: services/api/Dockerfile }
+          - { name: book-reader, context: ., file: services/book-reader/Dockerfile }
+          - { name: keycloak, context: ., file: infra/keycloak/Dockerfile }
+          - {
+              name: reading-checker,
+              context: workers/reading-checker,
+              file: workers/reading-checker/Dockerfile,
+            }
+          - {
+              name: voice-maker,
+              context: workers/voice-maker,
+              file: workers/voice-maker/Dockerfile,
+            }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+        with:
+          image: tonistiigi/binfmt:qemu-v10.2.3-68
+          platforms: arm64
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          driver-opts: image=moby/buildkit:v0.33.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}

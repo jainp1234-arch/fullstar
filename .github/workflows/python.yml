@@ -1,0 +1,38 @@
+name: python
+
+on:
+  pull_request:
+    paths: &paths
+      - 'workers/**'
+      - 'requirements-dev.txt'
+      - 'pyproject.toml'
+      - '.github/workflows/python.yml'
+  push:
+    branches: [main]
+    paths: *paths
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    container: python:3.12.15-slim
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: pip install --root-user-action=ignore --disable-pip-version-check -r requirements-dev.txt
+      - run: python -m ruff check workers
+      - run: python -m ruff format --check workers
+      - name: pytest
+        run: |
+          for p in workers/*/; do
+            echo "== $p"
+            (cd "$p" && pip install --root-user-action=ignore --disable-pip-version-check -r requirements.txt && python -m pytest -q -p no:cacheprovider) || exit 1
+          done

@@ -109,6 +109,7 @@ footer{font-size:13px;color:var(--muted)}
       <tr><td class="tool">angular-eslint</td><td>1.8k</td><td>Official Angular lint rules.</td></tr>
       <tr><td class="tool">ClamAV</td><td>7.4k</td><td>The standard open-source virus scanner (Cisco Talos).</td></tr>
       <tr><td class="tool">Fluent Emoji 3D (microsoft/fluentui-emoji)</td><td>~9k</td><td>Vendored PNG illustrations, MIT. Official Microsoft set; no comparable free 3D set. Exact files listed in the Content Guidelines.</td></tr>
+      <tr><td class="tool">docker/setup-qemu-action, docker/setup-buildx-action</td><td>0.6k, 1.4k</td><td>Docker's official actions; needed to build arm64 images on free private-repo runners.</td></tr>
       <tr><td class="tool">Grafana Alloy</td><td>3.5k</td><td>Grafana's official log collector; Promtail reached end of life on 2 Mar 2026.</td></tr>
     </tbody>
   </table></div>
@@ -197,7 +198,7 @@ flowchart LR
   <div class="tbl"><table>
     <thead><tr><th>Dependency</th><th>Version</th><th>Use</th><th>Notes</th></tr></thead>
     <tbody>
-      <tr><td class="tool">Eclipse Temurin JDK 21</td><td class="v">21.0.12.1+1</td><td>Runtime</td><td>Docker: <code>eclipse-temurin:21.0.12.1_1-jre</code>. Java 21 LTS.</td></tr>
+      <tr><td class="tool">Eclipse Temurin JDK 21</td><td class="v">21.0.12.1+1</td><td>Runtime</td><td>Docker: <code>eclipse-temurin:21.0.12.1_1-jre</code> (runtime), <code>eclipse-temurin:21.0.12.1_1-jdk</code> (Maven build stage only). Java 21 LTS.</td></tr>
       <tr><td class="tool">Apache Maven</td><td class="v">3.9.16</td><td>Build</td><td>Use the Maven Wrapper pinned to this version. Not Maven 4 (not GA).</td></tr>
       <tr><td class="tool">org.springframework.boot:spring-boot-starter-parent</td><td class="v">4.1.1</td><td>Framework</td><td>Spring Framework 7.0.9. Generate starters with Spring Initializr for 4.1.1. <code>api</code>: Web MVC, Security, OAuth2 Resource Server, Validation, Data JPA, Actuator, Flyway, PostgreSQL driver. <code>book-reader</code>: Web MVC, Validation, Actuator only (it never touches the database). Group <code>com.fullstar</code>.</td></tr>
       <tr><td class="tool">io.github.resilience4j:resilience4j-spring-boot4</td><td class="v">2.4.0</td><td>Retry with backoff, circuit breaker, time limiter</td><td>Use the <code>-spring-boot4</code> artifact, not <code>-spring-boot3</code>.</td></tr>
@@ -244,6 +245,8 @@ flowchart LR
       <tr><td class="hi" rowspan="3">voice-maker</td><td class="tool">parler-tts</td><td class="v">git commit (pin at setup)</td><td>Install from <code>github.com/huggingface/parler-tts</code> pinned to a full commit hash; record it here. Model: <code>ai4bharat/indic-parler-tts</code> (accept terms on Hugging Face).</td></tr>
       <tr><td class="tool">transformers</td><td class="v">4.46.1</td><td>Exact version required by parler-tts. Keep this worker in its own environment.</td></tr>
       <tr><td class="tool">boto3</td><td class="v">1.43.108</td><td>SQS and R2.</td></tr>
+      <tr><td class="hi" rowspan="2">dev tools (all workers, <code>requirements-dev.txt</code>)</td><td class="tool">ruff</td><td class="v">0.16.10</td><td>Lint and format. MIT, ~50k stars, since 2022. Config in root <code>pyproject.toml</code> (target py312).</td></tr>
+      <tr><td class="tool">pytest</td><td class="v">9.1.1</td><td>Tests. MIT, ~14.6k stars. Its dependencies are pinned too: iniconfig 2.3.1, packaging 26.3, pluggy 1.7.0, Pygments 2.21.0.</td></tr>
     </tbody>
   </table></div>
   <p>The voice-maker also needs PyTorch (CPU build). Its version is not verified yet: during setup, choose the newest 2.x CPU wheel that works with transformers 4.46.1, then record it here before committing.</p>
@@ -260,7 +263,7 @@ flowchart LR
       <tr><td class="hi">Oracle Cloud Always Free</td><td>Demo server (API, workers, Keycloak, Gotenberg, ClamAV)</td><td>4 ARM cores, 24 GB RAM, 200 GB disk</td><td>ARM64: images must be multi-arch. Idle machines can be reclaimed after 7 days under 20% use.</td></tr>
       <tr><td class="hi">Cloudflare Pages</td><td>Family app and Content Studio</td><td>500 builds/month, unlimited static requests</td><td>Git-connected build. Cloudflare now suggests Workers static assets for new projects; Pages is fine for the prototype.</td></tr>
       <tr><td class="hi">Brevo</td><td>Sending sign-in codes (SMTP)</td><td>300 emails/day, adds a "Sent with Brevo" footer</td><td>Configured as Keycloak's SMTP server. Set up SPF and DKIM on the sending domain so codes don't land in spam.</td></tr>
-      <tr><td class="hi">GitHub Actions</td><td>CI</td><td>Free plan minutes</td><td><code>actions/checkout@v7.0.1</code>, <code>actions/setup-java@v6.0.1</code>, <code>actions/setup-node@v7.0.0</code>, <code>actions/cache@v6.1.0</code>, <code>docker/build-push-action@v7.4.0</code>.</td></tr>
+      <tr><td class="hi">GitHub Actions</td><td>CI</td><td>Free plan minutes</td><td><code>actions/checkout@v7.0.1</code>, <code>actions/setup-java@v6.0.1</code>, <code>actions/setup-node@v7.0.0</code>, <code>actions/cache@v6.1.0</code>, <code>docker/build-push-action@v7.4.0</code>, <code>docker/setup-qemu-action@v4.4.0</code> (image <code>tonistiigi/binfmt:qemu-v10.2.3-68</code>), <code>docker/setup-buildx-action@v4.4.1</code> (image <code>moby/buildkit:v0.33.1</code>). Actions are pinned by full commit SHA with the version in a comment. Secret scanning: <code>ghcr.io/gitleaks/gitleaks:v8.30.1</code> (MIT, ~30k stars, since 2018) over the full git history on every PR and push.</td></tr>
     </tbody>
   </table></div>
 </section>

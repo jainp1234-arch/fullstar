@@ -1,0 +1,40 @@
+# Version updates. Security updates are enabled in the repository settings.
+# cooldown: only propose releases at least 14 days old (Tech Stack rule).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly }
+    cooldown: { default-days: 14 }
+    groups:
+      angular:
+        patterns: ['@angular/*', '@angular-devkit/*', 'angular-eslint', '@angular-eslint/*']
+      lint:
+        patterns: ['eslint', '@eslint/*', 'typescript-eslint', 'prettier']
+
+  - package-ecosystem: maven
+    directories: [/services/api, /services/book-reader, /infra/keycloak/email-otp]
+    schedule: { interval: weekly }
+    cooldown: { default-days: 14 }
+
+  - package-ecosystem: pip
+    directories: [/, /workers/reading-checker, /workers/voice-maker]
+    schedule: { interval: weekly }
+    cooldown: { default-days: 14 }
+
+  - package-ecosystem: docker
+    directories:
+      [
+        /services/api,
+        /services/book-reader,
+        /infra/keycloak,
+        /workers/reading-checker,
+        /workers/voice-maker,
+      ]
+    schedule: { interval: weekly }
+    cooldown: { default-days: 14 }
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    cooldown: { default-days: 14 }
