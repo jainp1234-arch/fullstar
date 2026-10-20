@@ -13,6 +13,7 @@ import { StarPill } from '../components/star-pill';
 import { Tile } from '../components/tile';
 import { DisplayMode, DisplayModeService } from '../mode/display-mode';
 import { EN } from '../strings/en';
+import { GalleryForms } from './gallery-forms';
 
 /**
  * Dev-only UI gallery (Guidelines §18, /dev/ui): every component in every state, on the sky and
@@ -26,6 +27,7 @@ import { EN } from '../strings/en';
     BannerCard,
     Button,
     CornerTab,
+    GalleryForms,
     IconButton,
     ListCard,
     NoticeCard,
@@ -159,6 +161,8 @@ import { EN } from '../strings/en';
           <app-action-card icon="lock" [label]="t.actionPrivacy" />
         </div>
       </section>
+
+      <app-gallery-forms />
     </main>
   `,
   styles: `
