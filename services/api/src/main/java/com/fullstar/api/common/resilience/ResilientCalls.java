@@ -43,7 +43,11 @@ public class ResilientCalls implements DisposableBean {
 		this.timeLimiters = timeLimiters;
 	}
 
-	/** Runs the call as the named dependency (r2, sqs, claude, gotenberg). */
+	/**
+	 * Runs the call as the named dependency (r2, sqs, claude, gotenberg). The call runs on another
+	 * thread, outside the request transaction: never touch the database inside it (RLS session values
+	 * would be missing). Do the outside call here and the database work after it returns.
+	 */
 	public <T> T call(Dependency dependency, Supplier<T> call) {
 		String name = dependency.instanceName();
 		CircuitBreaker circuitBreaker = circuitBreakers.circuitBreaker(name);
