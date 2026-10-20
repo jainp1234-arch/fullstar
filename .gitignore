@@ -6,6 +6,7 @@
 # Node / Angular
 node_modules/
 dist/
+/out-tsc/
 .angular/
 coverage/
 playwright-report/

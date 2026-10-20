@@ -1,0 +1,1 @@
+# Exact == pins only (Tech Stack §1, §7). Dependencies are added in phase 8.
