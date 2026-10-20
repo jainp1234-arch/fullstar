@@ -53,7 +53,7 @@ CLAUDE.md        instructions for Claude Code
 
 1. Start Docker Desktop. Copy `.env.example` to `.env` and set at least `KEYCLOAK_ADMIN_USERNAME`, `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_DB_PASSWORD` and `GRAFANA_ADMIN_PASSWORD` (long random values).
 2. `make up`: builds the Keycloak image (with `email-otp`), starts every service from `infra/docker-compose.yml` and waits until all are healthy (limit 3 minutes; the first start downloads the ClamAV signatures).
-3. In separate terminals, as needed: `make family`, `make studio`, `make api`.
+3. In separate terminals, as needed: `make family`, `make studio`, `make api` (reads `.env`, local profile; API docs at http://localhost:8081/swagger-ui.html, never through Caddy).
 4. Open http://localhost:8080. Studio: /studio/. Keycloak admin: /auth/admin/. Grafana: http://localhost:3001 (user `admin`).
 5. `make down` stops everything. Data stays in named Docker volumes; `docker compose -f infra/docker-compose.yml down -v` deletes it.
 
@@ -94,4 +94,4 @@ Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<
 
 ## Next step
 
-Ask Claude Code: "Do step 1.3 of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 1.4 of docs/06-implementation-plan.html."

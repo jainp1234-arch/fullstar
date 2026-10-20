@@ -3,7 +3,6 @@ package com.fullstar.api.db;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,54 +11,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import org.flywaydb.core.Flyway;
-import org.testcontainers.containers.Container.ExecResult;
-import org.testcontainers.postgresql.PostgreSQLContainer;
-import org.testcontainers.utility.MountableFile;
+import com.fullstar.api.testsupport.TestDatabase;
 
 /**
- * One PostgreSQL 18 container per test run, prepared exactly like Neon: infra/db/bootstrap-roles.sql
- * (as the database owner), then Flyway V1–V11 as app_owner. Tests talk to it as app_api (RLS) or
- * app_system (BYPASSRLS), always inside one transaction with the Schema §7 session values.
+ * Database tests through plain JDBC, as app_api (RLS) or app_system (BYPASSRLS), always inside one
+ * transaction with the Schema §7 session values. The database is {@link TestDatabase}.
  */
 abstract class DatabaseTestSupport {
 
-	static final String OWNER_PASSWORD = "owner-test-password";
-	static final String API_PASSWORD = "api-test-password";
-	static final String SYSTEM_PASSWORD = "system-test-password";
+	static final String OWNER_PASSWORD = TestDatabase.OWNER_PASSWORD;
 
-	static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:18.6")
-		.withDatabaseName("fullstar")
-		.withCopyFileToContainer(
-				MountableFile.forHostPath(Path.of("../../infra/db/bootstrap-roles.sql").toAbsolutePath()),
-				"/tmp/bootstrap-roles.sql");
+	static final String API_PASSWORD = TestDatabase.API_PASSWORD;
 
-	static {
-		POSTGRES.start();
-		bootstrapRoles();
-		Flyway.configure()
-			.dataSource(POSTGRES.getJdbcUrl(), "app_owner", OWNER_PASSWORD)
-			.schemas("flyway")
-			.defaultSchema("flyway")
-			.locations("classpath:db/migration")
-			.load()
-			.migrate();
-	}
-
-	private static void bootstrapRoles() {
-		try {
-			ExecResult result = POSTGRES.execInContainer("sh", "-c",
-					"APP_OWNER_PASSWORD=" + OWNER_PASSWORD + " APP_API_PASSWORD=" + API_PASSWORD
-							+ " APP_SYSTEM_PASSWORD=" + SYSTEM_PASSWORD + " psql -X -q -U " + POSTGRES.getUsername()
-							+ " -d fullstar -f /tmp/bootstrap-roles.sql");
-			if (result.getExitCode() != 0) {
-				throw new IllegalStateException("bootstrap-roles.sql failed: " + result.getStderr());
-			}
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Could not bootstrap roles", ex);
-		}
-	}
+	static final String SYSTEM_PASSWORD = TestDatabase.SYSTEM_PASSWORD;
 
 	@FunctionalInterface
 	interface SqlWork<T> {
@@ -69,7 +33,7 @@ abstract class DatabaseTestSupport {
 	}
 
 	static Connection connect(String role, String password) throws SQLException {
-		return DriverManager.getConnection(POSTGRES.getJdbcUrl(), role, password);
+		return DriverManager.getConnection(TestDatabase.jdbcUrl(), role, password);
 	}
 
 	static <T> T inTransaction(String role, String password, String actor, UUID familyId, String staffRole,

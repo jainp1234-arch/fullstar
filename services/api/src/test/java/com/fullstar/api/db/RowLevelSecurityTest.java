@@ -192,10 +192,19 @@ class RowLevelSecurityTest extends DatabaseTestSupport {
 
 	@Test
 	void operationsTablesFollowTheApprovedAccess() {
+		// V12: http idempotency records are visible only to their owner
 		String key = "idem-" + UUID.randomUUID();
-		asParent(familyA.id, c -> exec(c, "INSERT INTO app.processed_jobs (idempotency_key, job_type) VALUES (?, 'http')", key));
-		Long jobs = asParent(familyB.id, c -> count(c, "SELECT count(*) FROM app.processed_jobs WHERE idempotency_key = ?", key));
-		assertThat(jobs).isEqualTo(1);
+		String insertJob = "INSERT INTO app.processed_jobs (idempotency_key, job_type, owner, request) VALUES (?, 'http', ?, 'POST /x')";
+		asParent(familyA.id, c -> exec(c, insertJob, key, familyA.id.toString()));
+		String readJob = "SELECT count(*) FROM app.processed_jobs WHERE idempotency_key = ?";
+		Long ownJobs = asParent(familyA.id, c -> count(c, readJob, key));
+		Long otherJobs = asParent(familyB.id, c -> count(c, readJob, key));
+		assertThat(ownJobs).isEqualTo(1);
+		assertThat(otherJobs).isZero();
+		assertRlsDenied(() -> asParent(familyB.id, c -> exec(c, insertJob, "idem-" + UUID.randomUUID(), familyA.id.toString())));
+		assertRlsDenied(() -> asParent(familyA.id, c -> exec(c,
+				"INSERT INTO app.processed_jobs (idempotency_key, job_type, owner, request) VALUES (?, 'job', ?, 'x')",
+				"job-" + UUID.randomUUID(), familyA.id.toString())));
 
 		String event = "event-" + UUID.randomUUID();
 		asParent(familyA.id, c -> exec(c, "INSERT INTO app.usage_events (event_type, props) VALUES (?, '{}')", event));

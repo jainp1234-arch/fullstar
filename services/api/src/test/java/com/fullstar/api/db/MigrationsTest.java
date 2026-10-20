@@ -77,7 +77,7 @@ class MigrationsTest extends DatabaseTestSupport {
 	void flywayHistoryLivesOutsideTheAppSchema() {
 		Long applied = inTransaction("app_owner", OWNER_PASSWORD, null, null, null, c -> count(c,
 				"SELECT count(*) FROM flyway.flyway_schema_history WHERE success AND version IS NOT NULL"));
-		assertThat(applied).isEqualTo(11);
+		assertThat(applied).isEqualTo(12);
 	}
 
 }

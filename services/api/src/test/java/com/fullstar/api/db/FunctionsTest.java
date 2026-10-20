@@ -160,9 +160,9 @@ class FunctionsTest extends DatabaseTestSupport {
 					child, family);
 			exec(c, "INSERT INTO app.usage_minutes (child_id, minute_at, family_id) VALUES (?, date_trunc('minute', now() - interval '399 days'), ?)",
 					child, family);
-			exec(c, "INSERT INTO app.processed_jobs (idempotency_key, job_type, processed_at) VALUES (?, 'http', now() - interval '15 days')",
+			exec(c, "INSERT INTO app.processed_jobs (idempotency_key, job_type, owner, request, processed_at) VALUES (?, 'http', 'staff', 'POST /x', now() - interval '15 days')",
 					"old-" + tag);
-			exec(c, "INSERT INTO app.processed_jobs (idempotency_key, job_type) VALUES (?, 'http')", "new-" + tag);
+			exec(c, "INSERT INTO app.processed_jobs (idempotency_key, job_type, owner, request) VALUES (?, 'http', 'staff', 'POST /x')", "new-" + tag);
 			return null;
 		});
 
