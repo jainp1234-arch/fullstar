@@ -1,11 +1,16 @@
 # Version updates. Security updates are enabled in the repository settings.
 # cooldown: only propose releases at least 14 days old (Tech Stack rule).
+# Major updates are never proposed: moving a major version is a Tech Stack decision
+# (e.g. Java 21 LTS, TypeScript 6.0.x for Angular 22). The Python image also stays on 3.12.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }
     cooldown: { default-days: 14 }
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
     groups:
       angular:
         patterns: ['@angular/*', '@angular-devkit/*', 'angular-eslint', '@angular-eslint/*']
@@ -16,11 +21,17 @@ updates:
     directories: [/services/api, /services/book-reader, /infra/keycloak/email-otp]
     schedule: { interval: weekly }
     cooldown: { default-days: 14 }
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: pip
     directories: [/, /workers/reading-checker, /workers/voice-maker]
     schedule: { interval: weekly }
     cooldown: { default-days: 14 }
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: docker
     directories:
@@ -33,8 +44,16 @@ updates:
       ]
     schedule: { interval: weekly }
     cooldown: { default-days: 14 }
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: python
+        update-types: ['version-update:semver-minor']
 
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
     cooldown: { default-days: 14 }
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
