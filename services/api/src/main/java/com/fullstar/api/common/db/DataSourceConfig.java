@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
@@ -76,10 +75,5 @@ public class DataSourceConfig {
 		return new TransactionTemplate(systemTransactionManager);
 	}
 
-	@Bean
-	@ConditionalOnMissingBean
-	ActorResolver anonymousActorResolver() {
-		return request -> RequestActor.ANONYMOUS;
-	}
 
 }

@@ -58,6 +58,7 @@ public class RequestTransactionFilter extends OncePerRequestFilter {
 		ContentCachingResponseWrapper buffered = new ContentCachingResponseWrapper(response);
 		try {
 			RequestActor actor = actors.resolve(request);
+			request.setAttribute(RequestActor.ATTRIBUTE, actor);
 			transactions.executeWithoutResult(status -> {
 				rlsSession.apply(actor);
 				try {
