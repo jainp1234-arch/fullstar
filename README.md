@@ -20,11 +20,12 @@ The online versions are private to you until shared. Diagrams show as source tex
 ## Repository layout
 
 ```
-apps/            Angular 22 apps: family-app (PWA), content-studio   (step 0.3)
-libs/ui/         shared UI components, tokens, strings               (step 0.3)
-services/        Spring Boot 4.1.1: api, book-reader                 (step 0.3)
-workers/         Python 3.12: reading-checker, voice-maker           (step 0.3)
-infra/           docker compose, Keycloak realm and email-otp SPI    (steps 0.3, 0.5)
+apps/            Angular 22 apps: family-app (PWA), content-studio
+libs/ui/         shared UI library, imported as @fullstar/ui
+services/        Spring Boot 4.1.1: api, book-reader
+workers/         Python 3.12: reading-checker, voice-maker
+infra/           Keycloak email-otp SPI; docker compose from step 0.5
+e2e/             Playwright end-to-end tests
 docs/            product and technical documents (source of truth)
 CLAUDE.md        instructions for Claude Code
 ```
@@ -33,6 +34,8 @@ CLAUDE.md        instructions for Claude Code
 
 - Node.js 24.21.0 (`.nvmrc`), Java 21 (Temurin 21.0.12.1), Docker with Compose v5, GNU Make
 - Maven is not needed: use `./mvnw` (Maven Wrapper, pinned to Maven 3.9.16)
+- Python 3.12 is optional: without it, `make` runs the workers in `python:3.12.15-slim` (Docker must be running)
+- First time: `npm ci` and `npx playwright install chromium`
 - Copy `.env.example` to `.env` and fill in values locally. Never commit `.env`.
 
 ## Commands
@@ -52,4 +55,4 @@ Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<
 
 ## Next step
 
-Ask Claude Code: "Do step 0.3 of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 0.4 of docs/06-implementation-plan.html."

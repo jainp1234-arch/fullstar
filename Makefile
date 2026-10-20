@@ -7,7 +7,14 @@ COMPOSE_FILE  := infra/docker-compose.yml
 MVNW          := ./mvnw -B
 JAVA_PROJECTS := services/api services/book-reader infra/keycloak/email-otp
 PY_PROJECTS   := workers/reading-checker workers/voice-maker
-PYTHON        ?= python3
+PY_IMAGE      := python:3.12.15-slim
+
+# Use a local Python 3.12 when there is one; otherwise run in the Tech Stack image.
+ifeq ($(shell python3 -c "import sys; print(sys.version_info[:2] == (3, 12))" 2>/dev/null),True)
+py = (cd $(1) && python3 $(2))
+else
+py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR)/$(1):/w" -w /w $(PY_IMAGE) python $(2)
+endif
 
 .PHONY: help up down test lint api family studio
 
@@ -35,14 +42,14 @@ lint:
 	@for p in $(PY_PROJECTS); do \
 		if [ -d $$p ]; then \
 			echo "== $$p: syntax check"; \
-			$(PYTHON) -m compileall -q $$p || exit 1; \
+			$(call py,$$p,-m compileall -q .) || exit 1; \
 		else echo "-- $$p: not created yet, skipped"; fi; \
 	done
 
 test:
 	@if [ -f package.json ]; then \
-		echo "== frontend: tests"; \
-		npm test --if-present || exit 1; \
+		echo "== frontend: unit tests + e2e"; \
+		npm test && npm run e2e || exit 1; \
 	else echo "-- frontend: no package.json yet, skipped"; fi
 	@for p in $(JAVA_PROJECTS); do \
 		if [ -f $$p/pom.xml ]; then \
@@ -53,7 +60,7 @@ test:
 	@for p in $(PY_PROJECTS); do \
 		if [ -d $$p/tests ]; then \
 			echo "== $$p: tests"; \
-			(cd $$p && $(PYTHON) -m unittest discover -s tests) || exit 1; \
+			$(call py,$$p,-m unittest discover -s tests -t .) || exit 1; \
 		else echo "-- $$p: no tests yet, skipped"; fi; \
 	done
 
