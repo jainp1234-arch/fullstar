@@ -49,6 +49,23 @@ CLAUDE.md        instructions for Claude Code
 
 `make lint` and `make test` skip parts of the repository that do not exist yet.
 
+## Run locally
+
+1. Start Docker Desktop. Copy `.env.example` to `.env` and set at least `KEYCLOAK_ADMIN_USERNAME`, `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_DB_PASSWORD` and `GRAFANA_ADMIN_PASSWORD` (long random values).
+2. `make up`: builds the Keycloak image (with `email-otp`), starts every service from `infra/docker-compose.yml` and waits until all are healthy (limit 3 minutes; the first start downloads the ClamAV signatures).
+3. In separate terminals, as needed: `make family`, `make studio`, `make api`.
+4. Open http://localhost:8080. Studio: /studio/. Keycloak admin: /auth/admin/. Grafana: http://localhost:3001 (user `admin`).
+5. `make down` stops everything. Data stays in named Docker volumes; `docker compose -f infra/docker-compose.yml down -v` deletes it.
+
+| Service | Address |
+|---|---|
+| Caddy (app, Studio, API, Keycloak) | http://localhost:8080 |
+| SeaweedFS S3 / ElasticMQ SQS | http://localhost:8333 / http://localhost:9324 (UI :9325) |
+| Gotenberg / ClamAV | http://localhost:3000 / localhost:3310 |
+| Grafana / Prometheus / Alloy | http://localhost:3001 / :9090 / :12345 |
+
+All ports bind to 127.0.0.1. Alloy reads container logs through the Docker socket, so run this stack only on your own laptop.
+
 ## CI
 
 GitHub Actions in `.github/workflows/`. Path filters run only the parts a change touches:
@@ -69,4 +86,4 @@ Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<
 
 ## Next step
 
-Ask Claude Code: "Do step 0.5 of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 1.1 of docs/06-implementation-plan.html."

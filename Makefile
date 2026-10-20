@@ -3,7 +3,7 @@
 
 .DEFAULT_GOAL := help
 
-COMPOSE_FILE  := infra/docker-compose.yml
+COMPOSE       := docker compose --env-file .env -f infra/docker-compose.yml
 MVNW          := ./mvnw -B
 JAVA_PROJECTS := services/api services/book-reader infra/keycloak/email-otp
 PY_PROJECTS   := workers/reading-checker workers/voice-maker
@@ -31,12 +31,12 @@ help:
 	@echo "make studio           run apps/content-studio locally"
 
 up:
-	@test -f $(COMPOSE_FILE) || { echo "$(COMPOSE_FILE) is missing (created in step 0.5)"; exit 1; }
-	docker compose -f $(COMPOSE_FILE) up -d --wait
+	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
+	$(COMPOSE) up -d --build --wait --wait-timeout 180
+	@echo "Local services healthy. App, Studio, /api and /auth: http://localhost:8080"
 
 down:
-	@test -f $(COMPOSE_FILE) || { echo "$(COMPOSE_FILE) is missing (created in step 0.5)"; exit 1; }
-	docker compose -f $(COMPOSE_FILE) down
+	$(COMPOSE) down
 
 lint:
 	@if [ -f package.json ]; then \
@@ -70,8 +70,8 @@ api:
 
 family:
 	@test -f angular.json || { echo "Angular workspace is missing (created in step 0.3)"; exit 1; }
-	npx ng serve family-app
+	npx ng serve family-app --host 127.0.0.1 --port 4200
 
 studio:
 	@test -f angular.json || { echo "Angular workspace is missing (created in step 0.3)"; exit 1; }
-	npx ng serve content-studio
+	npx ng serve content-studio --host 127.0.0.1 --port 4201

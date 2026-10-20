@@ -1,0 +1,24 @@
+# One local address for everything (Schema §12a): http://localhost:8080
+{
+	auto_https off
+	admin 127.0.0.1:2019
+	metrics
+}
+
+:80 {
+	handle /auth/* {
+		reverse_proxy keycloak:8080
+	}
+	handle /api/* {
+		# make api (Spring Boot on the laptop, API_PORT 8081)
+		reverse_proxy host.docker.internal:8081
+	}
+	handle /studio/* {
+		# make studio (ng serve content-studio on 4201, base href /studio/)
+		reverse_proxy host.docker.internal:4201
+	}
+	handle {
+		# make family (ng serve family-app on 4200)
+		reverse_proxy host.docker.internal:4200
+	}
+}

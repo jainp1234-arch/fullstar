@@ -93,7 +93,8 @@
                 "input": "apps/content-studio/public"
               }
             ],
-            "styles": ["apps/content-studio/src/styles.css"]
+            "styles": ["apps/content-studio/src/styles.css"],
+            "baseHref": "/studio/"
           },
           "configurations": {
             "production": {

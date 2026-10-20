@@ -223,6 +223,7 @@ flowchart LR
     <thead><tr><th>Service</th><th>Image</th><th>Use</th><th>Notes</th></tr></thead>
     <tbody>
       <tr><td class="hi">Keycloak</td><td class="tool">quay.io/keycloak/keycloak:26.8.0</td><td>Parent and staff login</td><td>Parents: email + one-time code. Keycloak has no built-in email OTP, so we write a small authenticator in <code>infra/keycloak/email-otp/</code> using Keycloak's own SPI (no community plugin). 6-digit code, 10-minute expiry, 5 tries. Staff: email code + TOTP two-step login.</td></tr>
+      <tr><td class="hi">PostgreSQL (local)</td><td class="tool">postgres:18.6</td><td>Keycloak database on the laptop; Testcontainers</td><td>Official image, same major version as Neon (PostgreSQL 18). Released 11 Aug 2026. The app database stays on Neon.</td></tr>
       <tr><td class="hi">Gotenberg</td><td class="tool">gotenberg/gotenberg:8.37.0</td><td>A4 worksheets and answer keys</td><td>Bundle Noto Sans Devanagari for Hindi.</td></tr>
       <tr><td class="hi">ClamAV</td><td class="tool">clamav/clamav:1.4.6</td><td>Scan every upload</td><td>1.4 LTS, supported to Aug 2027.</td></tr>
       <tr><td class="hi">Tesseract OCR</td><td class="tool">built in book-reader image, 5.5.3</td><td>Text from page photos</td><td>Compile tag 5.5.3 in a build stage; add <code>eng</code> and <code>hin</code> from tessdata_best.</td></tr>
@@ -286,6 +287,17 @@ flowchart LR
       <tr><td>Monitoring</td><td class="tool">Grafana stack locally; alerts off</td><td class="was">Alerts by email</td><td>Turn on alert rules</td></tr>
     </tbody>
   </table></div>
+  <h3>Local addresses (make up)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Address</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td class="v">http://localhost:8080</td><td>Caddy: family app <code>/</code> (ng serve :4200), Studio <code>/studio/</code> (ng serve :4201, base href <code>/studio/</code>), API <code>/api/</code> (Spring Boot :8081, <code>API_PORT</code>), Keycloak <code>/auth/</code></td></tr>
+      <tr><td class="v">localhost:8333 · :9324 (UI :9325)</td><td>SeaweedFS S3 API · ElasticMQ SQS API (queues and DLQs from <code>infra/elasticmq.conf</code>)</td></tr>
+      <tr><td class="v">localhost:3000 · :3310</td><td>Gotenberg · ClamAV (clamd)</td></tr>
+      <tr><td class="v">localhost:3001 · :9090 · :12345</td><td>Grafana · Prometheus · Alloy UI. Loki is internal only.</td></tr>
+    </tbody>
+  </table></div>
+  <p>All host ports bind to 127.0.0.1. Alloy reads container logs through the Docker socket (local only).</p>
   <h3>Trial-only versions (verify the tag at setup)</h3>
   <div class="tbl"><table>
     <thead><tr><th>Tool</th><th>Pin</th><th>Notes</th></tr></thead>
