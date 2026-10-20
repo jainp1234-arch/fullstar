@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Progress – parent mode</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+.sky{background:radial-gradient(1.5px 1.5px at 8% 6%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 24% 14%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 46% 4%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 63% 18%,#cfc8ff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 86% 9%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 52% 16%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 92% 20%,#fff 50%,transparent 51%),linear-gradient(180deg,#2A0C5E 0,#0A0838 240px,#0A0838 100%)}
+button{font-family:inherit}
+a{color:#4F52BD}a:hover{color:#2D137E}
+</style>
+</helmet>
+<div class="sky" style="width: 390px; height: 844px; position: relative; overflow: hidden; box-sizing: border-box; font-family: Poppins, 'Noto Sans Devanagari', system-ui, sans-serif; color: #1D1B2E;">
+
+  <div style="height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; margin-top: 12px;">
+    <button type="button" aria-label="Back to kids" style="width: 48px; height: 48px; border-radius: 999px; background: transparent; border: 1.5px solid rgba(255,255,255,.5); display: grid; place-items: center; cursor: pointer; padding: 0;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+    </button>
+    <h1 style="margin: 0; font-size: 28px; line-height: 36px; font-weight: 700; color: #FFFFFF;">Progress</h1>
+    <button type="button" aria-label="Messages, 2 unread" style="position: relative; width: 48px; height: 48px; border-radius: 999px; background: transparent; border: 1.5px solid rgba(255,255,255,.5); display: grid; place-items: center; cursor: pointer; padding: 0;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+      <span style="position: absolute; top: 9px; right: 10px; width: 8px; height: 8px; border-radius: 999px; background: #E8386A;"></span>
+    </button>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 16px; padding: 8px 16px 0;">
+    <span style="width: 64px; height: 64px; border-radius: 999px; background: #EAEAF6; border: 3px solid #FFFFFF; display: grid; place-items: center; box-sizing: border-box; flex: none;">
+      <svg width="46" height="46" viewBox="0 0 40 40" aria-hidden="true"><path d="M8 14 L10 4 L17 10 Z" fill="#F0A63A"></path><path d="M32 14 L30 4 L23 10 Z" fill="#F0A63A"></path><circle cx="20" cy="22" r="13" fill="#F0A63A"></circle><ellipse cx="20" cy="27" rx="8" ry="6" fill="#FFF4E0"></ellipse><circle cx="15" cy="20" r="2" fill="#1D1B2E"></circle><circle cx="25" cy="20" r="2" fill="#1D1B2E"></circle><path d="M18 25 L22 25 L20 27 Z" fill="#1D1B2E"></path></svg>
+    </span>
+    <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+      <span style="font-size: 20px; line-height: 28px; font-weight: 600; color: #FFFFFF;">Asha</span>
+      <span style="font-size: 14px; line-height: 20px; color: #D9D6F5;">Class 3 · English, Hindi, Maths, EVS</span>
+    </div>
+    <div style="display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 999px; background: #2E1D7D; color: #FFFFFF; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; flex: none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#FFC83D" stroke="#F0A63A" stroke-width="1"></path></svg>
+      128
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; top: 172px; bottom: 0; background: #F7F7FA; border-radius: 28px 28px 0 0; padding: 24px 16px 96px; box-sizing: border-box; display: flex; flex-direction: column;">
+
+    <div style="display: flex; gap: 16px; align-items: flex-start; padding: 16px; background: #FFFBEF; border: 1px solid #F0C94A; border-radius: 20px;">
+      <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" style="flex: none;"><rect x="8" y="14" width="12" height="40" rx="2" fill="#4F52BD"></rect><rect x="22" y="10" width="12" height="44" rx="2" fill="#E8386A"></rect><rect x="38" y="16" width="12" height="38" rx="2" fill="#F0A63A" transform="rotate(12 44 35)"></rect><rect x="6" y="54" width="52" height="4" rx="2" fill="#A8620A"></rect><path d="M11 22h6M25 18h6M11 46h6M25 46h6" stroke="#FFFFFF" stroke-width="2"></path></svg>
+      <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+        <span style="font-size: 18px; line-height: 26px; font-weight: 600; color: #1D1B2E;">Upload Hindi and EVS books</span>
+        <span style="font-size: 16px; line-height: 24px; color: #5B5B6E;">Our team will prepare lessons for them.</span>
+        <a href="#" style="font-size: 15px; line-height: 22px; font-weight: 600; text-decoration: none; margin-top: 2px;">Upload book</a>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 12px;">
+      <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; color: #413C8C;">This week</h2>
+      <a href="#" style="font-size: 15px; line-height: 22px; font-weight: 600; text-decoration: none;">Details</a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: #FFFFFF; border: 2px solid #F0C94A; border-radius: 20px;">
+      <svg width="64" height="64" viewBox="0 0 72 72" aria-hidden="true" style="flex: none;"><path d="M36 6l8.7 18.3 20 2.4-14.7 13.8 3.9 19.8L36 50.5 18.1 60.3 22 40.5 7.3 26.7l20-2.4z" fill="#FFC83D" stroke="#F0A63A" stroke-width="2" stroke-linejoin="round"></path></svg>
+      <div style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0;">
+        <span style="font-size: 18px; line-height: 26px; font-weight: 700; color: #A8620A;">Active 4 of 7 days</span>
+        <span style="font-size: 14px; line-height: 20px; color: #5B5B6E;">2 h 10 min · 3 chapters · 2 worksheets</span>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex: 1; height: 10px; border-radius: 999px; background: #E6E7EB; overflow: hidden;"><div style="width: 57%; height: 10px; border-radius: 999px; background: #4F52BD;"></div></div>
+          <span style="font-size: 14px; line-height: 20px; font-weight: 500; color: #5B5B6E; font-variant-numeric: tabular-nums;">4/7</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: baseline; justify-content: space-between; margin: 24px 0 12px;">
+      <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600; color: #413C8C;">Areas to work on</h2>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <button type="button" style="position: relative; display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 16px; background: #FFFFFF; border: 0; border-radius: 16px; box-shadow: 0 4px 0 #C8C8CC, 0 2px 8px rgba(20,16,60,.08); text-align: left; cursor: pointer; width: 100%; box-sizing: border-box;">
+        <span style="width: 56px; height: 56px; border-radius: 14px; background: #EAEAF6; display: grid; place-items: center; flex: none;">
+          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect x="5" y="6" width="30" height="28" rx="3" fill="none" stroke="#A8620A" stroke-width="3"></rect><path d="M6 14h28M6 21h28M6 28h28" stroke="#A8620A" stroke-width="1.5"></path><circle cx="11" cy="14" r="2.6" fill="#E8386A"></circle><circle cx="17" cy="14" r="2.6" fill="#E8386A"></circle><circle cx="13" cy="21" r="2.6" fill="#4F52BD"></circle><circle cx="23" cy="21" r="2.6" fill="#4F52BD"></circle><circle cx="11" cy="28" r="2.6" fill="#2EAE6B"></circle><circle cx="27" cy="28" r="2.6" fill="#2EAE6B"></circle></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+          <span style="font-size: 18px; line-height: 26px; font-weight: 600; color: #413C8C;">Carrying in addition</span>
+          <span style="font-size: 14px; line-height: 20px; color: #5B5B6E;">Maths · ticked in 2 worksheets</span>
+        </span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6E6E85" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+      </button>
+      <button type="button" style="position: relative; display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 16px; background: #FFFFFF; border: 0; border-radius: 16px; box-shadow: 0 4px 0 #C8C8CC, 0 2px 8px rgba(20,16,60,.08); text-align: left; cursor: pointer; width: 100%; box-sizing: border-box;">
+        <span style="width: 56px; height: 56px; border-radius: 14px; background: #EAEAF6; display: grid; place-items: center; flex: none;">
+          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><path d="M4 10 Q12 6 20 10 L20 34 Q12 30 4 34 Z" fill="#4F52BD"></path><path d="M36 10 Q28 6 20 10 L20 34 Q28 30 36 34 Z" fill="#7677D1"></path><path d="M7 12 Q12 10 17 12 L17 31 Q12 29 7 31 Z" fill="#FFFFFF"></path><path d="M33 12 Q28 10 23 12 L23 31 Q28 29 33 31 Z" fill="#FFFFFF"></path></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+          <span style="font-size: 18px; line-height: 26px; font-weight: 600; color: #413C8C;">Pronouns</span>
+          <span style="font-size: 14px; line-height: 20px; color: #5B5B6E;">English · 6 of 10 right in practice</span>
+        </span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6E6E85" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <nav aria-label="Parent mode" style="position: absolute; left: 0; right: 0; bottom: 0; height: 72px; background: #FFFFFF; box-shadow: 0 -4px 16px rgba(20,16,60,.08); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <a href="#" aria-current="page" style="position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #4F52BD; font-size: 12px; line-height: 16px; font-weight: 500;">
+      <span style="position: absolute; top: 0; width: 48px; height: 3px; border-radius: 0 0 3px 3px; background: #4F52BD;"></span>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4F52BD" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 4 8-8"></path><circle cx="8" cy="12" r="1.6" fill="#4F52BD"></circle><circle cx="12" cy="16" r="1.6" fill="#4F52BD"></circle><circle cx="20" cy="8" r="1.6" fill="#4F52BD"></circle></svg>
+      Progress
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #6E6E85; font-size: 12px; line-height: 16px; font-weight: 500;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6E6E85" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 6c3-1.5 6-1.5 9 0v13c-3-1.5-6-1.5-9 0z"></path><path d="M21 6c-3-1.5-6-1.5-9 0v13c3-1.5 6-1.5 9 0z"></path></svg>
+      Books
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #6E6E85; font-size: 12px; line-height: 16px; font-weight: 500;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6E6E85" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"></rect><rect x="9" y="2.5" width="6" height="3" rx="1"></rect><path d="M8.5 10h7M8.5 14h7M8.5 18h4"></path></svg>
+      Worksheets
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #6E6E85; font-size: 12px; line-height: 16px; font-weight: 500;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6E6E85" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+      Settings
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

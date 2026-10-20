@@ -1,0 +1,275 @@
+<title>FullStar PRD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Hind:wght@400;500;600&display=swap">
+<style>
+/* Layout: a single readable column like a school notebook, with ruled section headers and compact tables. */
+:root{
+  --bg:#f7f9fc; --surface:#ffffff; --fg:#1d2433; --muted:#5a6478; --line:#dfe4ee;
+  --ink:#24489c; --marigold:#e8a317; --marigold-soft:#fff4dc; --ok:#1f7a4d; --ok-soft:#e5f4ec;
+  --display:"Baloo 2","Hind",system-ui,sans-serif;
+  --body:"Hind","Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121722; --surface:#1a2130; --fg:#e7ebf3; --muted:#a2acc0; --line:#2c3547;
+  --ink:#8fb0ff; --marigold:#f2b84b; --marigold-soft:#33291a; --ok:#6fd4a0; --ok-soft:#18302a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121722; --surface:#1a2130; --fg:#e7ebf3; --muted:#a2acc0; --line:#2c3547;
+  --ink:#8fb0ff; --marigold:#f2b84b; --marigold-soft:#33291a; --ok:#6fd4a0; --ok-soft:#18302a; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:32px 64px;display:grid;gap:36px}
+header{display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-size:clamp(30px,5vw,42px);line-height:1.1;margin:0;color:var(--ink);text-wrap:balance}
+.lede{font-size:18px;margin:0;max-width:65ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:var(--muted)}
+section{display:grid;gap:12px}
+h2{font-family:var(--display);font-size:24px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--line);display:flex;gap:10px;align-items:baseline}
+h2 .n{color:var(--marigold);font-size:18px}
+h3{font-size:17px;margin:0;font-weight:600}
+p{margin:0;max-width:65ch}
+ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.callout{background:var(--marigold-soft);border-left:4px solid var(--marigold);padding:14px 16px;border-radius:4px}
+.callout p{max-width:none}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:8px;align-content:start;min-width:0}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--ok-soft);color:var(--ok)}
+.tag.later{background:var(--marigold-soft);color:var(--fg)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.hi{font-weight:600;white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+.steps{counter-reset:s;list-style:none;padding:0;display:grid;gap:8px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:10px}
+.steps li::before{content:counter(s);width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--surface);font-size:13px;font-weight:600;display:grid;place-items:center;margin-top:2px}
+footer{font-size:13px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Product Requirements · Draft v1.2</div>
+  <h1>FullStar</h1>
+  <p class="lede" style="font-weight:600">Lessons from your own school book.</p>
+  <p class="lede">A home-learning app for children in Class 1–5. It turns a child's own school books into short animated lessons, practice and printable worksheets, with grade-level grammar and concepts ready from day one. Content is in Hindi and English; the app itself is in English.</p>
+  <div class="meta"><span>Owner: Atul Singh</span><span>Status: For review</span><span>Launch scope: Class 3, NCERT/CBSE</span></div>
+</header>
+
+<section>
+  <h2><span class="n">1</span>Why we are building this</h2>
+  <p>Parents of young children want daily, structured study at home that follows the school syllabus. Today they juggle textbooks, YouTube videos and worksheets bought online, none of which tracks how the child is improving.</p>
+  <div class="callout"><p><strong>Goal:</strong> in about 20–30 minutes a day, a child learns a chapter, practises it, reads aloud, and the parent can see exactly where the child needs help.</p></div>
+</section>
+
+<section>
+  <h2><span class="n">2</span>Who it is for</h2>
+  <div class="grid2">
+    <div class="card"><h3>Child (6–10 years)</h3><p>Uses the app on a tablet or phone. Needs big buttons, pictures, sound, read-aloud instructions and stars for fun. Cannot type much.</p></div>
+    <div class="card"><h3>Parent</h3><p>Signs up, uploads the child's books, prints worksheets and checks progress. Wants it to be safe and simple.</p></div>
+    <div class="card"><h3>Admin / content team (internal)</h3><p>Prepares lessons and question banks with Claude, checks them, and publishes them. Handles problem reports from parents.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>What the app does</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Feature</th><th>What it means for the user</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Sign-up</td><td>Required. Email address + a one-time code sent by email (mobile/SMS later). One parent login per family. The parent sets a 4-digit PIN that protects parent mode.</td></tr>
+      <tr><td class="hi">Child profiles</td><td>Up to <strong>2 children</strong>: name, age, class and a picture. Subjects come from the class: <strong>English, Hindi, Maths, EVS</strong> (Computer later). No child PIN: the child taps their picture.</td></tr>
+      <tr><td class="hi">My books</td><td><strong>One book per subject</strong>, uploaded by the parent, either the <strong>whole book</strong> or <strong>chapter by chapter</strong> (see section 4). Parents are asked to upload books at sign-up so lessons are ready early.</td></tr>
+      <tr><td class="hi">Grade-level content</td><td>Before a book is uploaded, the child still has plenty to do: grammar for English and Hindi, practice for Maths, and general concepts for EVS, for their class.</td></tr>
+      <tr><td class="hi">Animated lessons</td><td>Every grade-level topic <strong>and</strong> every uploaded chapter gets a short animated lesson with a narrator, pictures and small quizzes. Uploaded chapters also get read-along while their lesson is being prepared.</td></tr>
+      <tr><td class="hi">Practice</td><td>English: comprehension, nouns, articles, pronouns. Hindi: अपठित गद्यांश, संज्ञा, सर्वनाम, विशेषण. Maths: tables 2–20 with a 60-second challenge. EVS quizzes. Mistakes come back later for review.</td></tr>
+      <tr><td class="hi">Reading test</td><td>The child reads a 2-minute passage aloud. The app checks accuracy and speed and highlights words to practise. If the recording can't be understood, the child is asked to try again and no score is given.</td></tr>
+      <tr><td class="hi">Worksheets</td><td>The parent picks a chapter or practice topic; the app shuffles questions from that chapter's question bank, so each worksheet is different. Print or share the A4 PDF. Solutions are provided so the parent can check the child's work and tick weak spots. Marks entry is optional.</td></tr>
+      <tr><td class="hi">Parent dashboard</td><td>A "This week" summary with time spent, chapters done, worksheets done and <strong>areas to work on</strong>, plus progress by subject and reading trend.</td></tr>
+      <tr><td class="hi">Daily time limit</td><td>Shown to the child as an indicator that turns from green to red. The app reminds, it never locks the child out.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">4</span>Adding content: whole book or chapter by chapter</h2>
+  <p>Many schools hand out content one chapter at a time, so uploading a single chapter must be as easy as uploading a full book. Each subject has one book, built either way.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>Option A · Upload the whole book</h3>
+      <ul>
+        <li>Upload one PDF, or photos of all the pages.</li>
+        <li>The app suggests where each chapter starts, using the contents page and chapter headings.</li>
+        <li>The parent checks the split, renames or merges chapters if needed, and saves.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Option B · Upload chapter by chapter</h3>
+      <ul>
+        <li>Pick the subject, then <em>Add chapter</em>.</li>
+        <li>Upload a PDF or page photos for that chapter only, and give it a name and number (e.g. "Ch 4 · पानी").</li>
+        <li>Add more chapters later as the school covers them. Chapters can be reordered, replaced or deleted.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Rule</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">File types and limits</td><td>PDF up to 50 MB and 300 pages. JPG/PNG photos up to 10 MB each, 50 per upload. Photos can be taken with the device camera.</td></tr>
+      <tr><td class="hi">Checks</td><td>Every upload is virus-scanned. If pages are unclear, the parent retakes only those pages.</td></tr>
+      <tr><td class="hi">What happens next</td><td>The upload notifies our admin, who prepares the lesson and question bank (section 7). The parent gets an in-app message when each chapter is ready.</td></tr>
+      <tr><td class="hi">Replacing a book</td><td>Allowed; progress on the old book's chapters is removed after a warning.</td></tr>
+      <tr><td class="hi">Privacy</td><td>Uploads are private to the family.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">5</span>App structure</h2>
+  <p>The app opens on <em>Who is learning?</em>. Children only see kid mode. Parent mode is behind the parent PIN. Every kid-mode screen has a 🔊 button that reads the instructions aloud. Full screen-by-screen detail is in the App Flow document.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3>Kid mode · 3 tabs</h3>
+      <ul>
+        <li><strong>Learn:</strong> subjects → chapter or topic → lesson, read-along or worksheet.</li>
+        <li><strong>Practice:</strong> English, Hindi, Maths tables, EVS quiz, fix my mistakes.</li>
+        <li><strong>Read:</strong> reading test, words to practise, reading level.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Parent mode · 4 tabs</h3>
+      <ul>
+        <li><strong>Progress:</strong> This week, areas to work on, reading trend.</li>
+        <li><strong>Books:</strong> upload a whole book or a chapter, preview new lessons, fix pages, replace a book.</li>
+        <li><strong>Worksheets:</strong> create, print or share, view solutions, tick weak spots.</li>
+        <li><strong>Settings:</strong> children, move to next class, PIN, time limit, sound, help, privacy.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">6</span>Key user journeys</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Parent sets up (about 5 minutes)</h3>
+      <ol class="steps">
+        <li>Signs up with email + one-time code and gives consent for the child.</li>
+        <li>Sets the parent PIN and adds the child (Class 3).</li>
+        <li>Uploads the books, or the first chapters, for each subject.</li>
+        <li>Sets a daily time limit and hands the tablet to the child.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Child's session (20–30 minutes)</h3>
+      <ol class="steps">
+        <li>Taps their picture and picks a subject.</li>
+        <li>Watches a 10-minute lesson and answers the quiz questions.</li>
+        <li>Does a practice set or tables challenge.</li>
+        <li>Reads a passage aloud and gets stars and words to practise.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Parent prints a worksheet</h3>
+      <ol class="steps">
+        <li>Picks a chapter or topic; the app shuffles questions.</li>
+        <li>Prints or shares the PDF.</li>
+        <li>Checks the child's work against the solutions and ticks weak spots.</li>
+        <li>Weak spots show up in <em>Areas to work on</em>.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">7</span>How we create content</h2>
+  <p>Our admin uses <strong>Claude</strong> in the Content Studio to prepare animated lessons and question banks, both for grade-level topics and for every chapter a family uploads. Each upload sends a notification to the admin so lessons are ready quickly.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Check</th><th>Who</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">1. Prepare and review</td><td>Admin</td><td>Drafts with Claude, edits, previews.</td></tr>
+      <tr><td class="hi">2. Content check</td><td>Content-check agent</td><td>Flags content unsuitable for the child's age, facts that don't match the chapter, wrong answers, spelling or Hindi script errors, wrong difficulty, bias, and personal information. Critical flags block publishing.</td></tr>
+      <tr><td class="hi">3. Parent preview</td><td>Parent (recommended, not required)</td><td>Watches new lessons for uploaded chapters and taps <em>Looks good</em> or <em>Report a problem</em>.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><p>Children never talk to an AI and never see content that has not passed the admin review and the content check.</p></div>
+</section>
+
+<section>
+  <h2><span class="n">8</span>Privacy &amp; safety</h2>
+  <ul>
+    <li>Follows India's Digital Personal Data Protection Act (DPDP) 2023: the parent gives consent at sign-up, we collect only the parent's email and the child's first name, age and class, there are no ads and no tracking.</li>
+    <li>Parents can request deletion of their data from Settings; our team completes it.</li>
+    <li>Reading recordings are processed on our own servers, never shared with outside companies, and deleted automatically after 7 days.</li>
+    <li>Uploaded books are private to the family. Book text is used with Claude only to prepare that family's lessons; no child data is sent.</li>
+    <li>No chat and no contact with strangers. Parents can report a problem on any lesson or worksheet.</li>
+    <li>All messages stay inside the app.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">9</span>Release plan</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Phase</th><th>What ships</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="hi num">1</td><td>Sign-up, child profiles, whole-book and chapter-wise upload, read-along</td><td><span class="tag">MVP</span></td></tr>
+      <tr><td class="hi num">2</td><td>Content Studio with Claude, content-check agent, grade-level lessons for English, Hindi, Maths, EVS (Class 3)</td><td><span class="tag">MVP</span></td></tr>
+      <tr><td class="hi num">3</td><td>Lessons for uploaded chapters, parent preview, practice and question banks</td><td><span class="tag">MVP</span></td></tr>
+      <tr><td class="hi num">4</td><td>Shuffled worksheets with solutions and weak spots</td><td><span class="tag">MVP</span></td></tr>
+      <tr><td class="hi num">5</td><td>Reading test with automatic scoring</td><td><span class="tag">MVP</span></td></tr>
+      <tr><td class="hi num">6</td><td>Parent dashboard, offline use</td><td><span class="tag">MVP</span></td></tr>
+      <tr><td class="hi num">Next</td><td>Classes 1, 2, 4 and 5; Computer subject; Hindi app language; payments; Android/iOS store apps; more boards</td><td><span class="tag later">Later</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">10</span>How we will measure success</h2>
+  <p>Proposed targets for the first 3 months after launch. To be confirmed.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Measure</th><th>Target</th></tr></thead>
+    <tbody>
+      <tr><td>Children who use the app at least 4 days a week</td><td class="num">40%</td></tr>
+      <tr><td>Families who upload at least one book in the first week</td><td class="num">60%</td></tr>
+      <tr><td>Uploaded chapters with a lesson ready within 24 hours</td><td class="num">90%</td></tr>
+      <tr><td>Children whose reading speed improves over 8 weeks</td><td class="num">60%</td></tr>
+      <tr><td>Reading score matches a teacher's manual check</td><td class="num">within ±5%</td></tr>
+      <tr><td>Problem reports per 100 published lessons</td><td class="num">under 2</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2><span class="n">11</span>Not in the first version</h2>
+  <ul>
+    <li>Payments, free trial and subscriptions.</li>
+    <li>Hindi app language (the Hindi subject is included).</li>
+    <li>Computer subject; more than one book per subject; a book list to pick from.</li>
+    <li>Daily plan, streaks, bonus activities, parent assigning lessons.</li>
+    <li>Child PIN, second parent login, sibling comparison.</li>
+    <li>Mobile number sign-in by SMS.</li>
+    <li>SMS, WhatsApp or email notifications (email is used only for sign-in codes).</li>
+    <li>Self-service account deletion (handled as a request).</li>
+    <li>Native Android/iOS apps, pronunciation scoring, live tutors, chat, school accounts.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">12</span>Risks &amp; open questions</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Risk / question</th><th>Plan</th></tr></thead>
+    <tbody>
+      <tr><td>Admin workload grows with every family's uploads</td><td>Claude drafts most of the work; track turnaround and add admins or automation as families grow.</td></tr>
+      <tr><td>Content-check agent misses a problem</td><td>Admin review first, parent preview recommended, and fast handling of problem reports.</td></tr>
+      <tr><td>Speech recognition is less accurate on young children's voices</td><td>Score generously, test with real children before launch, and ask to retry when unsure.</td></tr>
+      <tr><td>Automatic chapter split is wrong for some books</td><td>The parent always confirms the split, and can upload chapter by chapter instead.</td></tr>
+      <tr><td>Poor-quality phone photos of pages</td><td>Guide the parent while taking the photo, flag unclear pages, and ask for a retake.</td></tr>
+      <tr><td>Copyright on textbook content</td><td>Uploads stay private to the family; lessons explain concepts in our own words. Check NCERT licensing before any wider use.</td></tr>
+      <tr><td>Moving to the next class erases progress</td><td>Clear warning before confirming.</td></tr>
+      <tr><td>Sign-in codes land in spam or are slow</td><td>Set up SPF/DKIM on the sending domain, show "Check your spam folder" and a resend button.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>Companion documents: FullStar App Flow and FullStar Tech Stack.</footer>
+</div>

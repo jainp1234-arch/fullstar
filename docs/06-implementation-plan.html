@@ -1,0 +1,459 @@
+<title>FullStar Implementation Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: phases as ruled sections; each step is one table row Claude Code can pick up as a single session. */
+:root{
+  --bg:#F7F7FA; --surface:#FFFFFF; --fg:#1D1B2E; --muted:#5B5B6E; --line:#E4E4EE;
+  --ink:#413C8C; --accent:#4F52BD; --pink:#E8386A; --cyan:#3BD3EA; --cream:#FFFBEF; --gold:#F0C94A;
+  --you-bg:#FDF5D6; --you-fg:#8F5F0A; --ms-bg:#DDF5E8; --ms-fg:#1A7347;
+  --sky1:#2A0C5E; --sky2:#0A0838;
+  --font:"Poppins",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121722; --surface:#1A2130; --fg:#E7EBF3; --muted:#A2ACC0; --line:#2C3547; --ink:#B3B5FF; --accent:#8F93FF; --cream:#2A2618; --gold:#B8963A;
+  --you-bg:#33291A; --you-fg:#F2C77A; --ms-bg:#18302A; --ms-fg:#6FD4A0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121722; --surface:#1A2130; --fg:#E7EBF3; --muted:#A2ACC0; --line:#2C3547; --ink:#B3B5FF; --accent:#8F93FF; --cream:#2A2618; --gold:#B8963A;
+  --you-bg:#33291A; --you-fg:#F2C77A; --ms-bg:#18302A; --ms-fg:#6FD4A0; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15.5px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:0 64px;display:grid;gap:40px}
+.hero{background:radial-gradient(1.5px 1.5px at 12% 30%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 38% 70%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 72% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 88% 64%,#fff 50%,transparent 51%),linear-gradient(180deg,var(--sky1),var(--sky2));color:#fff;padding:40px 16px 48px;margin-inline:-16px;border-radius:0 0 28px 28px}
+.hero .inner{max-width:1040px;margin:0 auto;display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--cyan)}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0;font-weight:700;text-wrap:balance}
+.lede{font-size:17px;margin:0;max-width:70ch;color:#D9D6F5}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13.5px;color:#D9D6F5}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 18px}
+nav.toc ol{margin:0;padding-left:20px;columns:3 220px;column-gap:24px}
+nav.toc a{color:var(--ink);text-decoration:none}
+nav.toc a:hover{text-decoration:underline}
+section{display:grid;gap:14px;min-width:0}
+h2{font-size:23px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--line);display:flex;gap:10px;align-items:baseline;color:var(--ink);font-weight:700;text-wrap:balance}
+h2 .n{color:var(--pink);font-size:17px}
+h3{font-size:17px;margin:8px 0 0;font-weight:600;color:var(--ink)}
+p{margin:0;max-width:76ch}
+ul,ol{margin:0;padding-left:20px;display:grid;gap:3px}
+code{font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0 4px;overflow-wrap:anywhere}
+pre.code{font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0;overflow-x:auto;line-height:1.5}
+.callout{background:var(--cream);border:1px solid var(--gold);padding:14px 16px;border-radius:12px}
+.callout p{max-width:none}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.id{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--accent);white-space:nowrap}
+td.sz{font-family:var(--mono);font-size:12.5px;text-align:center;white-space:nowrap}
+td .t{font-weight:600;display:block;margin-bottom:2px}
+td ul{padding-left:18px}
+.who{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--you-bg);color:var(--you-fg);margin-right:6px;vertical-align:1px}
+tr.ms td{background:var(--ms-bg);color:var(--ms-fg);font-weight:600}
+.ref{font-size:12.5px;color:var(--muted)}
+footer{font-size:13px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header class="hero"><div class="inner">
+  <div class="eyebrow">Delivery · v1.0</div>
+  <h1>FullStar Implementation Plan</h1>
+  <p class="lede">The ordered build plan Claude Code follows from an empty repository to the live demo. One step = one Claude Code session = one pull request. Steps marked YOU are done by Atul.</p>
+  <div class="meta"><span>Owner: Atul Singh</span><span>Date: 19 Oct 2026</span><span>Inputs: PRD v1.2 · App Flow v1 · Tech Stack v2.0 · Content Guidelines v1.0 · Backend Schema v1.0</span></div>
+</div></header>
+
+<nav class="toc" aria-label="Contents"><ol>
+  <li><a href="#how">How to run each step</a></li>
+  <li><a href="#trial">Trial phase overrides</a></li>
+  <li><a href="#claude">CLAUDE.md</a></li>
+  <li><a href="#map">Phases and milestones</a></li>
+  <li><a href="#p0">Phase 0 · Repository and tooling</a></li>
+  <li><a href="#p1">Phase 1 · Backend foundations</a></li>
+  <li><a href="#p2">Phase 2 · Frontend foundations</a></li>
+  <li><a href="#p3">Phase 3 · Family onboarding</a></li>
+  <li><a href="#p4">Phase 4 · Content Studio core</a></li>
+  <li><a href="#p5">Phase 5 · Book upload pipeline</a></li>
+  <li><a href="#p6">Phase 6 · Kid learning slice</a></li>
+  <li><a href="#p7">Phase 7 · Remaining MVP features</a></li>
+  <li><a href="#p8">Phase 8 · Voice and reading workers</a></li>
+  <li><a href="#p9">Phase 9 · Hardening</a></li>
+  <li><a href="#p10">Phase 10 · Deploy and test week</a></li>
+  <li><a href="#accounts">Account checklist</a></li>
+</ol></nav>
+
+<section id="how">
+  <h2><span class="n">1</span>How to run each step</h2>
+  <ol>
+    <li><strong>Start:</strong> open a new Claude Code session in the repository and say: <code>Do step &lt;ID&gt; of docs/06-implementation-plan.html.</code></li>
+    <li>Claude Code reads <code>CLAUDE.md</code>, the step, and the document sections listed under it. It creates branch <code>step/&lt;id&gt;-&lt;short-name&gt;</code> from an up-to-date <code>main</code>.</li>
+    <li>It builds only what the step lists. Anything unclear or missing from the documents: stop and ask; never invent a design, table, endpoint or dependency.</li>
+    <li><strong>Done when</strong> (every step, in addition to its own checks):
+      <ul>
+        <li>All tests pass locally and in CI; lint and format clean.</li>
+        <li>New behaviour has tests (backend service coverage stays at or above 80%).</li>
+        <li><code>/security-review</code> run on the branch; findings fixed or listed in the PR.</li>
+        <li>The feature can be shown working (running app, UI gallery or test output).</li>
+        <li>Any document affected is updated in <code>docs/</code> in the same PR.</li>
+      </ul></li>
+    <li><strong>Finish:</strong> push, open a PR using the template (what changed, how to test, screenshots, document updates, open questions). Atul reviews, then squash-merges.</li>
+    <li>Sizes: <strong>S</strong> about 2 hours, <strong>M</strong> about half a day, <strong>L</strong> a full day (split into a/b sessions if it runs over).</li>
+  </ol>
+</section>
+
+<section id="trial">
+  <h2><span class="n">1a</span>Trial phase (current) — overrides to the steps below</h2>
+  <p>Until go-live the build runs in <strong>trial mode</strong> (Tech Stack §8a): laptop only, free no-card accounts only (GitHub, Neon, Brevo). Where a step below mentions a paid or card-required service, apply this table instead. The full stack is switched on in phase G before going live.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Trial override</th></tr></thead>
+    <tbody>
+      <tr><td class="id">0.1</td><td>No domain, no Cloudflare. GitHub repo only (already have an account).</td></tr>
+      <tr><td class="id">0.5</td><td>Local compose also runs SeaweedFS, ElasticMQ and a Caddy that serves app, Studio, <code>/api</code> and <code>/auth</code> on <code>http://localhost:8080</code>.</td></tr>
+      <tr><td class="id">1.1</td><td>Only Neon (already have) and Brevo (sender = project Gmail). Skip R2, AWS, Anthropic. Neon: only the default owner role's connection string is provided (<code>NEON_OWNER_URL</code> in <code>.env</code>).</td></tr>
+      <tr><td class="id">1.2</td><td>Before V1, a one-time bootstrap script (<code>infra/db/bootstrap-roles.sql</code>, run with <code>NEON_OWNER_URL</code>) creates roles <code>app_owner</code>, <code>app_api</code>, <code>app_system</code> with generated strong passwords and writes the resulting connection strings into the local <code>.env</code> (never printed, never committed). Flyway then runs as <code>app_owner</code>.</td></tr>
+      <tr><td class="id">1.6</td><td>Build against SeaweedFS and ElasticMQ through the same AWS SDK clients; endpoints from env.</td></tr>
+      <tr><td class="id">4.3</td><td>Build the API integration behind <code>FEATURE_AI_DRAFTS</code> (off, tested with a mock) plus the "Paste draft" path that the admin uses in trial.</td></tr>
+      <tr><td class="id">4.4</td><td>Build the agent behind <code>FEATURE_AI_CHECK</code> (off, tested with a mock) plus the manual check (Schema §12a). Publishing works with a passed manual check.</td></tr>
+      <tr><td class="id">4.5</td><td>Seed content drafted in a Claude chat and pasted in; checked with the manual check.</td></tr>
+      <tr><td class="id">8.1</td><td>Hugging Face account is free, no card: keep.</td></tr>
+      <tr><td class="id">9.1</td><td>Dashboards local; email alerts off.</td></tr>
+      <tr><td class="id">Phone</td><td>New step <strong>6.5 · Phone testing</strong> (S): add <code>make tunnel</code> (cloudflared quick tunnel → <code>localhost:8080</code>), trial Keycloak redirect rules, and a README section "Try it on your phone". Done when the app installs on an Android phone from the tunnel address and sign-in, camera upload and microphone work.</td></tr>
+      <tr><td class="id">10.x</td><td><strong>Replaced by phase G</strong> (below). The trial ends when M2 is reached and you have tested on your own phone.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Phase G · Go-live switch (before any real users)</h3>
+  <ol>
+    <li><span class="who">YOU</span> Buy the domain; create Cloudflare (Pages, R2), AWS (SQS), Anthropic API ($10 cap), and a server (Oracle Always Free or paid).</li>
+    <li>Set <code>FULLSTAR_MODE=full</code>, <code>FEATURE_AI_DRAFTS=true</code>, <code>FEATURE_AI_CHECK=true</code>; point S3/SQS endpoints to R2/SQS; Brevo domain authentication.</li>
+    <li>Run phase 10 steps 10.1–10.5 as written (server, production compose, deploy pipeline, release checks, test week).</li>
+  </ol>
+</section>
+
+<section id="claude">
+  <h2><span class="n">2</span>CLAUDE.md (created in step 0.2)</h2>
+<pre class="code"># FullStar – instructions for Claude Code
+
+## Source of truth (read the sections a step names; never contradict them)
+docs/01-prd.html                PRD v1.2           – what the product does
+docs/02-app-flow.html           App Flow v1        – every screen (IDs A*, B*, C*, K*, P*, S*)
+docs/03-tech-stack.html         Tech Stack v2.0    – locked versions; no other dependencies
+docs/04-content-guidelines.html Content Guidelines – tokens, components, shells, copy
+docs/05-backend-schema.html     Backend Schema     – SQL, RLS, auth flows, endpoints, jobs
+docs/06-implementation-plan.html This plan         – do one step per session
+
+## Always
+- Exact versions only (no ^ ~ latest). Docker tags pinned. Multi-arch images (amd64 + arm64).
+- API: /api/v1, envelope { status, data, error }, error codes from Schema §10.
+- Java 21, Spring Boot 4.1.1, constructor injection, custom exceptions, Bean Validation,
+  SLF4J structured logs (no personal data), Resilience4j on every outside call.
+- SQS jobs: idempotency key, DLQ, max 3 receives. Only the API touches the database.
+- Angular 22: standalone components, reactive forms, signals, OnPush, no `any`,
+  UI only from libs/ui, text only from libs/ui/strings/en.ts.
+- Never commit secrets; update .env.example with new variable names.
+- Stop and ask if a document is silent or two documents disagree.
+
+## Commands
+make up / make down        start / stop local services (docker compose)
+make test                  all tests          make lint      all linters
+make api / make family / make studio          run one app locally</pre>
+</section>
+
+<section id="map">
+  <h2><span class="n">3</span>Phases and milestones</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Phase</th><th>Goal</th><th>Ends with</th></tr></thead>
+    <tbody>
+      <tr><td class="id">0</td><td>Repository, CI, local services</td><td><strong>M0</strong> — empty apps build and CI is green</td></tr>
+      <tr><td class="id">1</td><td>Database, API skeleton, login, files, queues</td><td>Signed-in API call works end-to-end</td></tr>
+      <tr><td class="id">2</td><td>Design tokens, UI components, shells, app login</td><td>UI gallery shows every component</td></tr>
+      <tr><td class="id">3</td><td>Sign-up, setup, PIN, children, settings</td><td>A family can be created on a laptop</td></tr>
+      <tr><td class="id">4</td><td>Content Studio: topics, editors, Claude drafts, content check, publish, seed content</td><td>Class 3 starter content published</td></tr>
+      <tr><td class="id">5</td><td>Uploads, scan, page reading, chapter split, admin preparation</td><td>An uploaded chapter gets lessons</td></tr>
+      <tr><td class="id">6</td><td>Kid home, lessons, read-along, sync, stars, progress</td><td><strong>M1</strong> — thin slice works on a laptop</td></tr>
+      <tr><td class="id">7</td><td>Practice, worksheets, reports, support, every state</td><td><strong>M2</strong> — all MVP features on a laptop</td></tr>
+      <tr><td class="id">8</td><td>Real narration and reading-test scoring</td><td>Stand-ins replaced</td></tr>
+      <tr><td class="id">9</td><td>Monitoring, security, speed, accessibility, full end-to-end tests</td><td>Release checks pass</td></tr>
+      <tr><td class="id">10</td><td>Oracle demo server, domains, deploy pipeline, test week</td><td><strong>M3</strong> — demo live · <strong>M4</strong> — one clean test week</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p0">
+  <h2><span class="n">4</span>Phase 0 · Repository and tooling</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">0.1</td><td><span class="who">YOU</span><span class="t">GitHub repository and domain</span>
+        <ul><li>Private repo <code>fullstar</code>; protect <code>main</code>: PR required, CI required, squash merge only, no force push.</li>
+        <li>Enable Dependabot alerts and security updates.</li>
+        <li>Buy one domain; add it to Cloudflare (free plan) and switch its name servers.</li>
+        <li>Save the six documents into <code>docs/</code> with the names in section 2 (use the docs bundle provided with this plan).</li></ul></td>
+        <td>Repo exists with <code>docs/</code>; domain shows "Active" in Cloudflare.</td><td class="sz">S</td></tr>
+      <tr><td class="id">0.2</td><td><span class="t">Monorepo scaffold and CLAUDE.md</span>
+        <ul><li>Folder layout from Tech Stack §4; <code>CLAUDE.md</code> exactly as section 2.</li>
+        <li><code>.editorconfig</code>, <code>.gitignore</code>, <code>.nvmrc</code> (24.21.0), Maven Wrapper (3.9.16), <code>.env.example</code>, <code>Makefile</code> with the commands in section 2, PR template, <code>README.md</code>.</li></ul>
+        <span class="ref">Tech Stack §1, §4</span></td>
+        <td><code>make lint</code> runs (nothing to lint yet) without errors.</td><td class="sz">S</td></tr>
+      <tr><td class="id">0.3</td><td><span class="t">Empty apps that build</span>
+        <ul><li>Angular 22.2.1 workspace: apps <code>family-app</code>, <code>content-studio</code>, library <code>libs/ui</code>; Vitest, Playwright, ESLint, Prettier at Tech Stack versions; PWA service worker on <code>family-app</code>.</li>
+        <li>Spring Boot 4.1.1 projects <code>services/api</code> and <code>services/book-reader</code> from Spring Initializr with the listed starters; <code>infra/keycloak/email-otp</code> Maven module.</li>
+        <li>Python 3.12.15 projects <code>workers/reading-checker</code>, <code>workers/voice-maker</code> with pinned <code>requirements.txt</code> (dependencies added in phase 8).</li></ul>
+        <span class="ref">Tech Stack §5–§7</span></td>
+        <td>Every project builds and its hello test passes.</td><td class="sz">M</td></tr>
+      <tr><td class="id">0.4</td><td><span class="t">CI pipeline</span>
+        <ul><li>GitHub Actions at pinned versions: frontend (npm ci, lint, test, build), backend (Maven verify), Python (lint, test), Docker build check for all images (amd64 + arm64).</li>
+        <li><code>npm audit --audit-level=high</code>, Dependabot config, and secret scanning with gitleaks (add gitleaks to the Tech Stack with an exact version first).</li>
+        <li>Path filters so only changed parts run.</li></ul>
+        <span class="ref">Tech Stack §8</span></td>
+        <td>A PR shows all checks green; a planted fake secret fails the check.</td><td class="sz">M</td></tr>
+      <tr><td class="id">0.5</td><td><span class="t">Local services</span>
+        <ul><li><code>infra/docker-compose.yml</code>: Keycloak 26.8.0 (dev mode, local Postgres container for Keycloak only), Gotenberg 8.37.0, ClamAV 1.4.6, Grafana, Loki, Prometheus, Alloy; health checks; named volumes.</li>
+        <li><code>make up</code> / <code>make down</code>; README section "Run locally".</li></ul>
+        <span class="ref">Tech Stack §7</span></td>
+        <td>All services healthy within 3 minutes of <code>make up</code>.</td><td class="sz">S</td></tr>
+      <tr class="ms"><td class="id">M0</td><td colspan="3">Empty apps build, CI is green, local services run.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p1">
+  <h2><span class="n">5</span>Phase 1 · Backend foundations</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">1.1</td><td><span class="who">YOU</span><span class="t">Cloud accounts (part 1)</span>
+        <ul><li>Neon, Cloudflare R2, AWS (SQS), Brevo with domain authentication, Anthropic API key with $10/month limit. Exact settings in <a href="#accounts">section 15</a>.</li>
+        <li>Put the values in your local <code>.env</code> (never committed).</li></ul></td>
+        <td>Each account works with the test listed in section 15.</td><td class="sz">S</td></tr>
+      <tr><td class="id">1.2</td><td><span class="t">Database migrations</span>
+        <ul><li>Flyway V1–V11 exactly as Schema §4, §6, §7, §14 (including full <code>run_retention</code>).</li>
+        <li>Testcontainers (PostgreSQL 18) tests: every trigger and function and its error code; RLS tests (family A cannot read family B through <code>app_api</code>; staff cannot read <code>activity_attempts</code>, <code>reading_tests</code>).</li>
+        <li>Run migrations against the Neon <code>dev</code> branch.</li></ul>
+        <span class="ref">Schema §4–§7, §14</span></td>
+        <td>All database tests green; Neon dev branch has all tables.</td><td class="sz">L</td></tr>
+      <tr><td class="id">1.3</td><td><span class="t">API skeleton</span>
+        <ul><li>Response envelope, error codes, one <code>@RestControllerAdvice</code>, mapping of database error codes (P0001 messages) to HTTP codes.</li>
+        <li>Transaction filter that sets <code>app.actor</code>, <code>app.family_id</code>, <code>app.staff_role</code> (SET LOCAL); <code>app_api</code> and <code>app_system</code> data sources.</li>
+        <li>Structured logging, Actuator health, springdoc OpenAPI, Resilience4j defaults, rate limiter, <code>Idempotency-Key</code> support, cursor pagination helper, <code>/public/health</code>, <code>/public/config</code>.</li></ul>
+        <span class="ref">Schema §7, §10; Tech Stack §10</span></td>
+        <td>Tests cover envelope, error mapping, RLS session values, idempotency replay.</td><td class="sz">L</td></tr>
+      <tr><td class="id">1.4</td><td><span class="t">Keycloak realm and email-code login</span>
+        <ul><li>Email OTP authenticator (Keycloak SPI 26.8.0): 6 digits, 10 min, 5 tries, resend 30 s; email template in English.</li>
+        <li>Realm <code>fullstar</code> export: clients, audiences, token lifetimes, brute-force detection, staff flow with TOTP, roles; SMTP via Brevo from env.</li></ul>
+        <span class="ref">Schema §8.1, §8.3; Tech Stack §7</span></td>
+        <td>On a laptop, signing in sends a real code by email and returns tokens; authenticator unit tests pass.</td><td class="sz">L</td></tr>
+      <tr><td class="id">1.5</td><td><span class="t">API security</span>
+        <ul><li>Resource server for <code>family-api</code> and <code>studio-api</code>; <code>GET/POST /family/me</code>.</li>
+        <li>PIN set / verify / reset, BCrypt, lockout, parent grant (HS256, 15 min sliding), <code>X-Child-Id</code> check, staff guard with role match.</li></ul>
+        <span class="ref">Schema §8.2, §9, §11 (account rows)</span></td>
+        <td>Tests for every 401/403/423 path and the fresh-login rule for PIN reset.</td><td class="sz">M</td></tr>
+      <tr><td class="id">1.6</td><td><span class="t">Files and queues</span>
+        <ul><li>R2 service (S3 client, path-style, chunked encoding off): signed PUT/GET URLs 10 min, key layout from Schema §13.</li>
+        <li>SQS: queue bootstrap command (creates queues + DLQs from Schema §12), publisher with envelope, <code>job-results</code> consumer running as <code>app_system</code> with <code>processed_jobs</code> de-duplication.</li></ul>
+        <span class="ref">Schema §12, §13</span></td>
+        <td>Integration test: publish → fake worker result → consumer applies once, ignores a duplicate.</td><td class="sz">M</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p2">
+  <h2><span class="n">6</span>Phase 2 · Frontend foundations</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">2.1</td><td><span class="t">Design tokens and assets</span>
+        <ul><li><code>libs/design-tokens/tokens.css</code> exactly as Guidelines §17; Material system-token mapping.</li>
+        <li>Vendor Poppins, Material Symbols Rounded and the Fluent Emoji files listed in Guidelines §9 (record commit hashes in the Tech Stack); <code>sky-stars.svg</code>; strings file; <code>data-mode</code> switch.</li></ul>
+        <span class="ref">Guidelines §3–§9, §17, §18</span></td>
+        <td>Every listed asset present (script fails if one is missing); fonts load offline.</td><td class="sz">M</td></tr>
+      <tr><td class="id">2.2a</td><td><span class="t">Components: basics</span> — button, icon-button, star-pill, list-card, corner-tab, tile, banner-card, progress-card, progress-bar, notice-card, action-card, section-header.<br><span class="ref">Guidelines §11–§12</span></td>
+        <td>Each in the <code>/dev/ui</code> gallery in every state; unit tests; axe shows no violations.</td><td class="sz">L</td></tr>
+      <tr><td class="id">2.2b</td><td><span class="t">Components: forms and feedback</span> — text-field, code-input, pin-pad, upload-zone, page-thumb, status-chip, toast, dialog, bottom-sheet, empty-state, skeleton, message-item, data-table.</td>
+        <td>Same as 2.2a.</td><td class="sz">L</td></tr>
+      <tr><td class="id">2.2c</td><td><span class="t">Components: kid mode</span> — speech-bubble, owl loader, read-aloud, time-indicator, answer-button, question-card, avatar, profile-picker, flag-item; celebration animation (GSAP) with reduced-motion fallback.</td>
+        <td>Same as 2.2a; reduced-motion verified.</td><td class="sz">L</td></tr>
+      <tr><td class="id">2.3</td><td><span class="t">Shells, navigation and routes</span>
+        <ul><li>Sky header, shells A–E, bottom navigation, tablet rail, Studio side navigation, breakpoints.</li>
+        <li>A route for every App Flow screen ID with a placeholder page using the right shell.</li></ul>
+        <span class="ref">Guidelines §10, §13; App Flow §3–§7</span></td>
+        <td>Playwright clicks through every route at phone, tablet and desktop widths.</td><td class="sz">M</td></tr>
+      <tr><td class="id">2.4</td><td><span class="t">Login in both apps and API client</span>
+        <ul><li><code>AuthService</code> on keycloak-js (PKCE), screens A1–A3, staff S1.</li>
+        <li>Typed API client: envelope parsing, error-code mapping to messages (Guidelines §16), interceptors for token, <code>X-Child-Id</code>, <code>X-Parent-Grant</code>, <code>Idempotency-Key</code>.</li></ul>
+        <span class="ref">App Flow §4; Schema §8, §10</span></td>
+        <td>End-to-end: sign in with a real email code on a laptop and see <code>/family/me</code> response.</td><td class="sz">M</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p3">
+  <h2><span class="n">7</span>Phase 3 · Family onboarding</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">3.1</td><td><span class="t">Sign-up setup and mode switching</span> — consent, B1 PIN, B2 add child, B3 books (skip only for now), B4 time limit, B5, C1 Who is learning, P0 PIN, A4 forgot PIN; API rows for children and settings.<br><span class="ref">App Flow §4, §8; Schema §11</span></td>
+        <td>Playwright: new parent signs up, adds 2 children, a 3rd is refused, switches kid ↔ parent with PIN; lockout after 5 wrong PINs.</td><td class="sz">L</td></tr>
+      <tr><td class="id">3.2</td><td><span class="t">Settings and privacy</span> — P14, P15 (edit, remove, move to next class with warning), P17 deletion request, P16 FAQs (static) and Contact us form shell.<br><span class="ref">App Flow P14–P17; Schema §6 move_child_to_next_class</span></td>
+        <td>Move-to-next-class erases progress (test); deletion request row created once.</td><td class="sz">M</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p4">
+  <h2><span class="n">8</span>Phase 4 · Content Studio core</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">4.1</td><td><span class="t">Studio shell, dashboard, staff</span> — S2 dashboard counts, staff list and roles (super admin), audit log writes for staff actions; bootstrap command to create the first super admin.</td>
+        <td>Content admin cannot open staff pages (test); audit rows written.</td><td class="sz">M</td></tr>
+      <tr><td class="id">4.2</td><td><span class="t">Topics and content editors</span> — S3 library tree, topic CRUD, content items and versions API with JSON Schema validation (Schema §5), editors for lesson scenes, the 4 question types, and passages, S5 preview as a child sees it.</td>
+        <td>Saving creates a new version; old versions read-only; invalid JSON body rejected with field errors.</td><td class="sz">L</td></tr>
+      <tr><td class="id">4.3</td><td><span class="t">Claude drafts</span> — <code>/studio/ai/drafts</code> with anthropic-java, prompt templates in <code>services/api/src/main/resources/prompts/</code>, model ID from config, Resilience4j; S4 screen fills the editor with the draft.</td>
+        <td>Unit tests with a mocked client; one manual draft per content type works.</td><td class="sz">M</td></tr>
+      <tr><td class="id">4.4</td><td><span class="t">Content check and publishing</span> — <code>content-check</code> job, structured flag output, S11 report, accept-with-note for warnings, publish/unpublish (S6) guarded by the database rule.</td>
+        <td>Publishing with an open critical flag returns 409 CHECK_NOT_PASSED (test); a clean item publishes.</td><td class="sz">L</td></tr>
+      <tr><td class="id">4.5</td><td><span class="who">YOU</span><span class="t">Seed starter content</span> — With Claude Code's help in the Studio: Class 3, 5 topics each for English, Hindi, Maths, EVS; per topic 1 lesson and 10 questions; 10 reading passages. Every item checked and published.</td>
+        <td>Library shows 20 published lessons, 200 questions, 10 passages.</td><td class="sz">L</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p5">
+  <h2><span class="n">9</span>Phase 5 · Book upload pipeline</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">5.1</td><td><span class="t">Books and uploads</span> — P4 books list, B3 real upload, P5 whole book, P7 add chapter, signed uploads, file-type check by content, limits (413 UPLOAD_LIMIT), share with sibling.<br><span class="ref">App Flow P4–P7; Schema §4.3, §11</span></td>
+        <td>Upload of a 10-photo chapter reaches status <code>scanning</code>; over-limit files refused.</td><td class="sz">L</td></tr>
+      <tr><td class="id">5.2</td><td><span class="t">Virus scan worker</span> — book-reader consumes <code>upload-scan</code>, streams files to ClamAV, reports results; infected → upload <code>rejected</code> + parent message.</td>
+        <td>EICAR test file is rejected; clean file continues.</td><td class="sz">M</td></tr>
+      <tr><td class="id">5.3</td><td><span class="t">Page reading and chapter split</span> — <code>book-process</code>: PDF pages (PDFBox) and photos to WebP, Tesseract 5.5.3 (eng + hin), confidence → unclear pages, suggested chapters from contents page/headings; P6 confirm split, P8 retake unclear pages.</td>
+        <td>A sample Hindi and English chapter produce readable text; unclear photo flagged; retake replaces only that page.</td><td class="sz">L</td></tr>
+      <tr><td class="id">5.4</td><td><span class="t">Read-along stand-in</span> — <code>readalong-narrate</code> handled by a stand-in that returns silent audio and evenly spaced word timings, so K5 can be built before the real voice (phase 8).</td>
+        <td>Chapter reaches <code>readalong_ready</code>; message sent; prep task opened.</td><td class="sz">S</td></tr>
+      <tr><td class="id">5.5</td><td><span class="t">Admin preparation</span> — S8 queue (waiting time), claim, S9 prepare chapter (pages beside Claude draft), catalog book search/create, link to existing prepared chapter (instant lessons), mark chapter ready → messages; P19 messages; P8a preview (Looks good / Report).</td>
+        <td>Two families uploading the same book: the second gets lessons instantly after linking (test).</td><td class="sz">L</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p6">
+  <h2><span class="n">10</span>Phase 6 · Kid learning slice</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">6.1</td><td><span class="t">Kid home and subjects</span> — K1, K2, K3 for both uploaded chapters and grade-level topics; "Coming soon" state; continue card.<br><span class="ref">App Flow K1–K3; Guidelines shells A, B</span></td>
+        <td>Matches the mock screens; empty subject shows Class 3 practice.</td><td class="sz">M</td></tr>
+      <tr><td class="id">6.2</td><td><span class="t">Lesson player, stars and sync</span> — K4 (GSAP + Lottie scenes, inline quiz with answer buttons), K7 well done, offline event store in IndexedDB, <code>/family/kid/sync</code> with server-side stars, resume where left off.</td>
+        <td>Lesson completed offline syncs once when back online (test); stars total correct.</td><td class="sz">L</td></tr>
+      <tr><td class="id">6.3</td><td><span class="t">Read-along</span> — K5 with page images, word highlight from timings, next/previous, offline caching of the open chapter.</td>
+        <td>Works with stand-in audio; highlight follows timings.</td><td class="sz">M</td></tr>
+      <tr><td class="id">6.4</td><td><span class="t">Time and progress</span> — usage minutes every minute via sync, time indicator green → amber → red, P1 This week (child_week_summary), P2 subject detail.</td>
+        <td>Indicator states correct at 0%, 85%, 110% (test); P1 numbers match test data.</td><td class="sz">M</td></tr>
+      <tr class="ms"><td class="id">M1</td><td colspan="3">Thin slice on a laptop: sign up → add child → upload a chapter → admin prepares lessons → child watches → progress shows.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p7">
+  <h2><span class="n">11</span>Phase 7 · Remaining MVP features</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">7.1</td><td><span class="t">Practice</span> — K8 practice home, K9 sets (10 shuffled questions), K10 tables 2–20 and 60-second challenge, K11 fix my mistakes.</td>
+        <td>A question leaves mistakes after 2 right answers in a row (test).</td><td class="sz">L</td></tr>
+      <tr><td class="id">7.2</td><td><span class="t">Worksheets</span> — P10–P13, K6 on screen, shuffle from question bank, <code>worksheet-render</code> via Gotenberg (A4 + answer key, Noto Sans Devanagari), signed PDF, 30-day expiry and re-render, weak-spot ticks feeding Areas to work on.</td>
+        <td>Hindi worksheet PDF renders conjuncts correctly; reprint gives the same questions.</td><td class="sz">L</td></tr>
+      <tr><td class="id">7.3</td><td><span class="t">Reports and support</span> — P18 report a problem, S7 queue with Fixed message, P16 Contact us tickets, S12 support inbox with replies.</td>
+        <td>Report and ticket round-trips show messages in P19.</td><td class="sz">M</td></tr>
+      <tr><td class="id">7.4</td><td><span class="t">Book management</span> — P9 replace book with warning, delete chapter, reorder chapters, sibling share rules (same class only).</td>
+        <td>Replacing removes old chapter progress (test).</td><td class="sz">S</td></tr>
+      <tr><td class="id">7.5</td><td><span class="t">Every empty, loading, error and offline state</span> — go through App Flow §9–§11 tables one by one; exact copy from Guidelines §16.</td>
+        <td>Playwright test per row of App Flow §9 and §10; offline matrix §11 verified.</td><td class="sz">L</td></tr>
+      <tr class="ms"><td class="id">M2</td><td colspan="3">All MVP features work on a laptop (with stand-in narration and reading scores).</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p8">
+  <h2><span class="n">12</span>Phase 8 · Voice and reading workers</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">8.1</td><td><span class="who">YOU</span><span class="t">Hugging Face</span> — create a free account, accept the terms of <code>ai4bharat/indic-parler-tts</code>, create a read-only token for the worker.</td>
+        <td>Model page shows access granted.</td><td class="sz">S</td></tr>
+      <tr><td class="id">8.2</td><td><span class="t">Voice maker</span> — Python worker for <code>readalong-narrate</code> and <code>lesson-narrate</code> (Indic Parler-TTS, CPU), word timings, MP3 to R2; pin the parler-tts commit and PyTorch version in the Tech Stack in this PR; replace the 5.4 stand-in.</td>
+        <td>Hindi and English sample pages narrate; timings within ±150 ms of a manual check on 3 pages.</td><td class="sz">L</td></tr>
+      <tr><td class="id">8.3</td><td><span class="t">Reading test</span> — reading-checker worker (faster-whisper <code>small</code>, int8), accuracy and words per minute against the passage, "not understood" rule; K12–K14 with microphone handling; P3 reading history with 7-day recordings; 2-per-day limit.</td>
+        <td>Scores within ±5% of a manual check on 5 recordings; third test in a day refused (429).</td><td class="sz">L</td></tr>
+      <tr><td class="id">8.4</td><td><span class="t">Retention and backups</span> — daily <code>run_retention</code> at 02:00 IST with R2 deletes; nightly <code>pg_dump</code> of Neon to R2 (<code>backups/</code>), keep 7; documented restore.</td>
+        <td>Expired recording deleted from R2 (test); restore of last night's backup into a Neon branch works.</td><td class="sz">M</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p9">
+  <h2><span class="n">13</span>Phase 9 · Hardening</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">9.1</td><td><span class="t">Monitoring and alerts</span> — Alloy → Loki logs, Prometheus metrics (Actuator, queue depths), Grafana dashboards (API, jobs, DLQs, prep turnaround), alerts by email through Brevo SMTP: API down, any DLQ above 0, error rate over 2%, disk over 80%.</td>
+        <td>A forced job failure sends an alert email within 5 minutes.</td><td class="sz">M</td></tr>
+      <tr><td class="id">9.2</td><td><span class="t">Security pass</span> — security headers and Content-Security-Policy for both apps, CORS allow-list, rate limits verified, OWASP Top 10 checklist in <code>docs/security-checklist.md</code>, OWASP ZAP baseline scan in CI against a local stack (add ZAP to the Tech Stack with an exact version first).</td>
+        <td>ZAP baseline has no high or medium findings; checklist complete.</td><td class="sz">M</td></tr>
+      <tr><td class="id">9.3</td><td><span class="t">Speed and installable app</span> — bundle budget (kid app first load ≤ 300 KB compressed) enforced in the build, image and font preloading, service-worker precache list, Lighthouse CI.</td>
+        <td>Budget check passes; Lighthouse PWA ≥ 90 on phone profile.</td><td class="sz">M</td></tr>
+      <tr><td class="id">9.4</td><td><span class="t">Accessibility pass</span> — axe on every route, keyboard-only walkthrough, screen-reader labels, <code>lang="hi"</code> on Hindi, 200% zoom.</td>
+        <td>No axe violations; keyboard walkthrough recorded in the PR.</td><td class="sz">M</td></tr>
+      <tr><td class="id">9.5</td><td><span class="t">Full end-to-end journeys</span> — every journey in App Flow §8 as a Playwright test against the full local stack (stand-in Claude responses).</td>
+        <td>All journeys pass 3 runs in a row in CI.</td><td class="sz">L</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="p10">
+  <h2><span class="n">14</span>Phase 10 · Deploy and test week</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Build</th><th>Done when</th><th>Size</th></tr></thead>
+    <tbody>
+      <tr><td class="id">10.1</td><td><span class="who">YOU</span><span class="t">Demo server and DNS</span>
+        <ul><li>Oracle Cloud Always Free: Ampere A1, 4 cores, 24 GB, Ubuntu LTS, 200 GB disk, region Mumbai if available; SSH key login only; open ports 80 and 443.</li>
+        <li>Cloudflare DNS: <code>api.</code>, <code>auth.</code> → server IP (DNS only); <code>app.</code>, <code>studio.</code> → Cloudflare Pages.</li>
+        <li>Second Neon project <code>keycloak</code> for Keycloak's own database.</li></ul></td>
+        <td>SSH works; DNS names resolve.</td><td class="sz">S</td></tr>
+      <tr><td class="id">10.2</td><td><span class="t">Production compose</span> — <code>infra/prod/docker-compose.yml</code>: Caddy 2.11.4 (automatic HTTPS for <code>api.</code> and <code>auth.</code>), API, book-reader, workers, Keycloak (production mode, Neon database), Gotenberg, ClamAV, monitoring; memory limits; restart policies; server setup script (Docker, firewall, unattended upgrades, keep-alive to avoid idle reclaim).</td>
+        <td>Stack starts on the server with all health checks green.</td><td class="sz">L</td></tr>
+      <tr><td class="id">10.3</td><td><span class="t">Deploy pipeline</span> — build multi-arch images to GitHub Container Registry; deploy job with a GitHub "demo" environment requiring your approval: migrate (Flyway), pull, restart, smoke test, automatic rollback to previous tags on failure. Cloudflare Pages projects for <code>family-app</code> and <code>content-studio</code>. Secrets in GitHub environment secrets and a server <code>.env</code> (mode 600).</td>
+        <td>A merge to main deploys after approval; a broken build rolls back by itself.</td><td class="sz">L</td></tr>
+      <tr><td class="id">10.4</td><td><span class="t">Release checks and runbook</span> — ZAP scan against the demo, Lighthouse on the demo URL, <code>docs/runbook.md</code>: restart, read logs, replay a DLQ, restore a backup, rotate keys, complete a deletion request.</td>
+        <td>Every runbook procedure tried once on the demo.</td><td class="sz">M</td></tr>
+      <tr class="ms"><td class="id">M3</td><td colspan="3">Demo live at the domain with all MVP features.</td></tr>
+      <tr><td class="id">10.5</td><td><span class="who">YOU</span><span class="t">Test week</span> — you plus 3 test families use the demo for 7 days; daily check of dashboards and reports; issues logged as GitHub issues labelled <code>test-week</code>; Claude Code fixes each in its own PR.</td>
+        <td>7 consecutive days with no critical bug open.</td><td class="sz">L</td></tr>
+      <tr class="ms"><td class="id">M4</td><td colspan="3">Plan complete. Next: real pilot (separate plan).</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="accounts">
+  <h2><span class="n">15</span>Account checklist</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Account</th><th>When</th><th>Settings</th><th>Check it works</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GitHub</strong></td><td>0.1</td><td>Private repo, branch protection, Dependabot, Actions enabled</td><td>A test PR shows required checks</td></tr>
+      <tr><td><strong>Domain + Cloudflare</strong></td><td>0.1</td><td>Free plan; name servers switched</td><td>Status "Active"</td></tr>
+      <tr><td><strong>Neon</strong></td><td>1.1</td><td>Project <code>fullstar</code>, PostgreSQL 18, region closest to Mumbai; branches <code>main</code> and <code>dev</code>; roles <code>app_owner</code>, <code>app_api</code>, <code>app_system</code></td><td><code>psql</code> connects with the pooled string</td></tr>
+      <tr><td><strong>Cloudflare R2</strong></td><td>1.1</td><td>Bucket <code>fullstar-dev</code> (later <code>-demo</code>), private; API token limited to that bucket; CORS for <code>localhost</code> and the app domains (PUT, GET)</td><td>Upload and download a test file with a signed URL</td></tr>
+      <tr><td><strong>AWS</strong></td><td>1.1</td><td>Region <code>ap-south-1</code>; IAM user <code>fullstar-sqs</code> with SQS rights only on <code>kl-*</code> queues; billing alert at $1</td><td>Queue bootstrap (1.6) creates queues</td></tr>
+      <tr><td><strong>Brevo</strong></td><td>1.1</td><td>Free plan; sender <code>no-reply@&lt;domain&gt;</code>; SPF, DKIM and DMARC records added in Cloudflare; SMTP key</td><td>Test email reaches a Gmail inbox, not spam</td></tr>
+      <tr><td><strong>Anthropic</strong></td><td>1.1</td><td>API key for this project only; monthly spend limit $10</td><td>One test draft call succeeds</td></tr>
+      <tr><td><strong>Hugging Face</strong></td><td>8.1</td><td>Accept Indic Parler-TTS terms; read-only token</td><td>Model downloads in the worker</td></tr>
+      <tr><td><strong>Oracle Cloud</strong></td><td>10.1</td><td>Always Free A1 instance as in 10.1</td><td>SSH login</td></tr>
+      <tr><td><strong>Cloudflare Pages</strong></td><td>10.3</td><td>Two projects linked to the repo, build commands from the Angular apps, custom domains <code>app.</code> and <code>studio.</code></td><td>Preview build loads</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><p><strong>Trial phase:</strong> only GitHub, Neon and Brevo are needed now (plus Hugging Face in step 8.1). Every other account in this table is created in phase G.</p></div>
+  <div class="callout"><p><strong>Additions this plan makes to the Tech Stack</strong> (in the step named): Caddy 2.11.4 (step 10.2), gitleaks (0.4), OWASP ZAP (9.2), parler-tts commit and PyTorch (8.2). Each is pinned to an exact version in the Tech Stack before use.</p></div>
+</section>
+
+<footer>Companion documents: PRD v1.2, App Flow v1, Tech Stack v2.0, Content Guidelines v1.0, Backend Schema v1.0.</footer>
+</div>

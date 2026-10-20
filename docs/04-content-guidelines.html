@@ -1,0 +1,584 @@
+<title>FullStar Content Guidelines</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: documentation column on a light page; live specimens use the same tokens the app will use. */
+:root{
+  --color-sky-top:#2A0C5E; --color-sky-bottom:#0A0838; --color-sky-pill:#2E1D7D;
+  --color-primary-900:#1E0E5C; --color-primary-800:#2D137E; --color-primary-600:#4F52BD; --color-primary-400:#7677D1; --color-primary-100:#EAEAF6;
+  --color-ink-heading:#413C8C; --color-text:#1D1B2E; --color-text-2:#5B5B6E; --color-text-muted:#6E6E85;
+  --color-surface:#FFFFFF; --color-page:#F7F7FA; --color-border:#E4E4EE; --color-edge:#C8C8CC;
+  --color-cyan:#3BD3EA; --color-pink:#E8386A; --color-gold-800:#8F5F0A; --color-gold-600:#A8620A; --color-gold-400:#F0C94A; --color-gold-100:#FDF5D6; --color-cream:#FFFBEF;
+  --color-blue-700:#1A62A0; --color-blue-100:#D6EEFD; --color-star:#FFC83D;
+  --color-success-700:#1A7347; --color-success-100:#DDF5E8; --color-error-700:#B8222E; --color-error-100:#FDE4E5;
+  --font:"Poppins","Noto Sans Devanagari",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+body{background:var(--color-page);color:var(--color-text);font-family:var(--font);font-size:15.5px;line-height:1.6}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:0 64px;display:grid;gap:40px}
+.hero{background:radial-gradient(1.5px 1.5px at 12% 30%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 38% 70%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 72% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 88% 64%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 55% 40%,#cfc8ff 50%,transparent 51%),linear-gradient(180deg,var(--color-sky-top),var(--color-sky-bottom));color:#fff;padding:40px 16px 56px;margin-inline:-16px;display:grid;gap:8px;border-radius:0 0 28px 28px}
+.hero .inner{max-width:1000px;margin:0 auto;width:100%;display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--color-cyan)}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0;font-weight:700;text-wrap:balance}
+.lede{font-size:17px;margin:0;max-width:68ch;color:#D9D6F5}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13.5px;color:#D9D6F5}
+nav.toc{background:var(--color-surface);border:1px solid var(--color-border);border-radius:16px;padding:14px 18px}
+nav.toc ol{margin:0;padding-left:20px;columns:3 200px;column-gap:24px}
+nav.toc a{color:var(--color-ink-heading);text-decoration:none}
+nav.toc a:hover{text-decoration:underline}
+section{display:grid;gap:14px}
+h2{font-size:23px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--color-border);display:flex;gap:10px;align-items:baseline;color:var(--color-ink-heading);font-weight:700;text-wrap:balance}
+h2 .n{color:var(--color-pink);font-size:17px}
+h3{font-size:17px;margin:8px 0 0;font-weight:600;color:var(--color-ink-heading)}
+p{margin:0;max-width:74ch}
+ul,ol{margin:0;padding-left:20px;display:grid;gap:4px}
+code{font-family:var(--mono);font-size:12.5px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:4px;padding:0 4px;overflow-wrap:anywhere}
+pre.code{font-family:var(--mono);font-size:12.5px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:12px;padding:12px 14px;margin:0;overflow-x:auto;line-height:1.5}
+.callout{background:var(--color-cream);border:1px solid var(--color-gold-400);padding:14px 16px;border-radius:12px}
+.callout p{max-width:none}
+.tbl{overflow-x:auto;border:1px solid var(--color-border);border-radius:12px;background:var(--color-surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--color-border);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-muted);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.t{font-family:var(--mono);font-size:12.5px;color:var(--color-ink-heading);white-space:nowrap}
+td.hi{font-weight:600}
+.sw{display:inline-block;width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.12);vertical-align:-4px;margin-right:6px}
+/* Live specimens */
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.stage{border-radius:16px;padding:20px 16px;display:grid;gap:16px;align-content:start;min-width:0}
+.stage.sky{background:radial-gradient(1.5px 1.5px at 20% 20%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 70% 35%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 40% 80%,#fff 50%,transparent 51%),linear-gradient(180deg,var(--color-sky-top),var(--color-sky-bottom))}
+.stage.light{background:var(--color-page);border:1px solid var(--color-border)}
+.k-card{position:relative;background:#fff;border-radius:16px;box-shadow:0 4px 0 var(--color-edge),0 2px 8px rgba(20,16,60,.08);padding:20px 16px;display:flex;gap:16px;align-items:center;min-height:96px}
+.k-card .ill{width:56px;height:56px;border-radius:14px;background:var(--color-primary-100);display:grid;place-items:center;font-size:30px;flex:none}
+.k-card .ttl{font-size:20px;font-weight:600;color:var(--color-ink-heading);line-height:1.3}
+.k-card .sub{font-size:15px;color:var(--color-text-2)}
+.k-tab{position:absolute;top:0;right:0;font-size:13px;font-weight:600;padding:3px 14px;border-radius:0 16px 0 14px;background:var(--color-gold-100);color:var(--color-gold-800)}
+.k-tab.blue{background:var(--color-blue-100);color:var(--color-blue-700)}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--color-sky-pill);color:#fff;border-radius:999px;padding:6px 16px;font-weight:600;font-size:17px;justify-self:center}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tile{background:#fff;border-radius:16px;box-shadow:0 4px 0 var(--color-primary-400),0 2px 8px rgba(20,16,60,.08);padding:14px 6px 12px;display:grid;justify-items:center;gap:6px;font-weight:600;font-size:14px;text-align:center}
+.tile .ill{font-size:34px;line-height:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:0 24px;border-radius:16px;font:600 17px/1 var(--font);border:0;cursor:pointer}
+.btn.primary{background:var(--color-primary-600);color:#fff;box-shadow:0 4px 0 var(--color-primary-800)}
+.btn.secondary{background:#fff;color:var(--color-primary-600);box-shadow:inset 0 0 0 2px var(--color-primary-600),0 4px 0 var(--color-primary-400)}
+.btn:active{transform:translateY(2px)}
+.banner{background:linear-gradient(135deg,var(--color-primary-800),#3A1E9E);color:#fff;border-radius:20px;padding:20px;display:grid;gap:4px}
+.banner .eb{color:var(--color-cyan);font-weight:600;font-size:17px}
+.prog{background:#fff;border:2px solid var(--color-gold-400);border-radius:20px;padding:16px;display:grid;gap:8px}
+.prog .ttl{color:var(--color-gold-600);font-weight:700;font-size:19px}
+.bar{height:10px;border-radius:999px;background:#E6E7EB;overflow:hidden}
+.bar i{display:block;height:100%;width:30%;background:var(--color-primary-600);border-radius:999px}
+.bubble{background:#fff;border:2px solid var(--color-primary-400);border-radius:18px;padding:10px 16px;font-weight:500;font-size:16px;max-width:220px;position:relative}
+footer{font-size:13px;color:var(--color-text-muted)}
+</style>
+
+<div class="wrap">
+<header class="hero"><div class="inner">
+  <div class="eyebrow">Design system · v1.0</div>
+  <h1>FullStar Content Guidelines</h1>
+  <p class="lede">The single source of truth for every screen and component. Claude Code implements exactly what is written here and makes no design decisions of its own. Covers kid mode, parent mode and the Content Studio.</p>
+  <div class="meta"><span>Owner: Atul Singh</span><span>Date: 19 Oct 2026</span><span>Companions: PRD v1.2 · App Flow v1 · Tech Stack v2.0</span></div>
+</div></header>
+
+<nav class="toc" aria-label="Contents"><ol>
+  <li><a href="#rules">Rules for Claude Code</a></li>
+  <li><a href="#look">The look</a></li>
+  <li><a href="#color">Colour</a></li>
+  <li><a href="#type">Typography</a></li>
+  <li><a href="#space">Spacing and layout</a></li>
+  <li><a href="#shape">Shape, edges, shadows</a></li>
+  <li><a href="#motion">Motion</a></li>
+  <li><a href="#icons">Icons</a></li>
+  <li><a href="#ill">Illustrations and mascot</a></li>
+  <li><a href="#shell">Screen shells</a></li>
+  <li><a href="#comp">Components</a></li>
+  <li><a href="#states">States</a></li>
+  <li><a href="#resp">Responsive rules</a></li>
+  <li><a href="#a11y">Accessibility</a></li>
+  <li><a href="#voice">Writing rules</a></li>
+  <li><a href="#copy">Message patterns</a></li>
+  <li><a href="#tokens">Token file</a></li>
+  <li><a href="#impl">Angular implementation</a></li>
+</ol></nav>
+
+<section id="rules">
+  <h2><span class="n">1</span>Rules for Claude Code</h2>
+  <ol>
+    <li>Use only the tokens in <a href="#tokens">section 17</a>. No hard-coded colours, sizes, radii, shadows or durations in components.</li>
+    <li>Build only the components in <a href="#comp">section 11</a>. If a screen needs something that is not listed, stop and ask.</li>
+    <li>Every screen uses one of the shells in <a href="#shell">section 10</a>.</li>
+    <li>Every piece of text follows <a href="#voice">sections 15–16</a>. Use the exact strings given; put all strings in one English strings file (no text inside templates).</li>
+    <li>One fixed look: no dark mode. Do not read <code>prefers-color-scheme</code>.</li>
+    <li>Do not copy the name, logo, characters or artwork of any other app. Only the assets listed in <a href="#ill">section 9</a> may be used.</li>
+  </ol>
+</section>
+
+<section id="look">
+  <h2><span class="n">2</span>The look</h2>
+  <p>A <strong>night-sky header</strong> (deep purple gradient with small stars) sits on top of every screen. Content lives on <strong>white rounded cards</strong> with a <strong>thick solid bottom edge</strong> that makes them feel pressable, like toy blocks. Headings are indigo, accents are cyan, pink and gold. The tone is calm and friendly, never noisy.</p>
+  <div class="spec">
+    <div class="stage sky">
+      <span class="pill">⭐ 128</span>
+      <div class="k-card"><span class="k-tab">Chapter 4</span><span class="ill">📖</span><div><div class="ttl">English</div><div class="sub">3 of 12 chapters done</div></div></div>
+      <div class="k-card"><span class="k-tab blue">Class 3 practice</span><span class="ill">🧮</span><div><div class="ttl">Maths</div><div class="sub">Tables, addition, shapes</div></div></div>
+    </div>
+    <div class="stage light">
+      <div class="banner"><span class="eb">New lessons ready</span><span>Hindi Chapter 4 is ready to watch.</span></div>
+      <div class="tiles"><div class="tile"><span class="ill">🎬</span>Lesson</div><div class="tile"><span class="ill">📋</span>Worksheet</div><div class="tile"><span class="ill">🔊</span>Read along</div></div>
+      <div class="prog"><span class="ttl">This week</span><span style="font-size:15px;color:var(--color-text-2)">3 of 10 worksheets done</span><div class="bar"><i></i></div></div>
+      <button class="btn primary" type="button">Start lesson</button>
+      <button class="btn secondary" type="button">Read along</button>
+    </div>
+  </div>
+  <p style="font-size:13.5px;color:var(--color-text-muted)">Specimens above use emoji only as stand-ins; the app uses the Fluent Emoji 3D images from section 9.</p>
+</section>
+
+<section id="color">
+  <h2><span class="n">3</span>Colour</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td class="t">--color-sky-top</td><td><span class="sw" style="background:#2A0C5E"></span>#2A0C5E</td><td>Sky gradient start (top)</td></tr>
+      <tr><td class="t">--color-sky-bottom</td><td><span class="sw" style="background:#0A0838"></span>#0A0838</td><td>Sky gradient end (bottom)</td></tr>
+      <tr><td class="t">--color-sky-pill</td><td><span class="sw" style="background:#2E1D7D"></span>#2E1D7D</td><td>Pills and round buttons on the sky</td></tr>
+      <tr><td class="t">--color-primary-900</td><td><span class="sw" style="background:#1E0E5C"></span>#1E0E5C</td><td>Side navigation background (tablet/desktop)</td></tr>
+      <tr><td class="t">--color-primary-800</td><td><span class="sw" style="background:#2D137E"></span>#2D137E</td><td>Banner card, primary button bottom edge</td></tr>
+      <tr><td class="t">--color-primary-600</td><td><span class="sw" style="background:#4F52BD"></span>#4F52BD</td><td>Primary buttons, active tab, progress fill, links</td></tr>
+      <tr><td class="t">--color-primary-400</td><td><span class="sw" style="background:#7677D1"></span>#7677D1</td><td>Tile bottom edge, secondary button edge, speech-bubble border</td></tr>
+      <tr><td class="t">--color-primary-100</td><td><span class="sw" style="background:#EAEAF6"></span>#EAEAF6</td><td>Illustration backgrounds, selected rows, info bars</td></tr>
+      <tr><td class="t">--color-ink-heading</td><td><span class="sw" style="background:#413C8C"></span>#413C8C</td><td>Card titles and section headings on white</td></tr>
+      <tr><td class="t">--color-text</td><td><span class="sw" style="background:#1D1B2E"></span>#1D1B2E</td><td>Body text</td></tr>
+      <tr><td class="t">--color-text-2</td><td><span class="sw" style="background:#5B5B6E"></span>#5B5B6E</td><td>Secondary text, subtitles</td></tr>
+      <tr><td class="t">--color-text-muted</td><td><span class="sw" style="background:#6E6E85"></span>#6E6E85</td><td>Captions, inactive tab icon and label</td></tr>
+      <tr><td class="t">--color-text-on-sky</td><td><span class="sw" style="background:#FFFFFF"></span>#FFFFFF</td><td>Titles on the sky</td></tr>
+      <tr><td class="t">--color-text-on-sky-2</td><td><span class="sw" style="background:#D9D6F5"></span>#D9D6F5</td><td>Secondary text on the sky</td></tr>
+      <tr><td class="t">--color-surface</td><td><span class="sw" style="background:#FFFFFF"></span>#FFFFFF</td><td>Cards, sheets, bottom navigation</td></tr>
+      <tr><td class="t">--color-page</td><td><span class="sw" style="background:#F7F7FA"></span>#F7F7FA</td><td>White-sheet page background</td></tr>
+      <tr><td class="t">--color-border</td><td><span class="sw" style="background:#E4E4EE"></span>#E4E4EE</td><td>Dividers, input borders, table lines</td></tr>
+      <tr><td class="t">--color-edge</td><td><span class="sw" style="background:#C8C8CC"></span>#C8C8CC</td><td>Bottom edge of standard cards</td></tr>
+      <tr><td class="t">--color-cyan</td><td><span class="sw" style="background:#3BD3EA"></span>#3BD3EA</td><td>Eyebrow titles on purple, focus ring</td></tr>
+      <tr><td class="t">--color-pink</td><td><span class="sw" style="background:#E8386A"></span>#E8386A</td><td>Round "add" button, celebration accents. Never for text.</td></tr>
+      <tr><td class="t">--color-star</td><td><span class="sw" style="background:#FFC83D"></span>#FFC83D</td><td>Star icon fill, time-indicator green→red is separate</td></tr>
+      <tr><td class="t">--color-gold-800 / -600 / -400 / -100</td><td><span class="sw" style="background:#8F5F0A"></span><span class="sw" style="background:#A8620A"></span><span class="sw" style="background:#F0C94A"></span><span class="sw" style="background:#FDF5D6"></span></td><td>800: tab text · 600: progress-card title · 400: progress-card border · 100: tab background</td></tr>
+      <tr><td class="t">--color-cream</td><td><span class="sw" style="background:#FFFBEF"></span>#FFFBEF</td><td>Tip and notice cards</td></tr>
+      <tr><td class="t">--color-blue-700 / -100</td><td><span class="sw" style="background:#1A62A0"></span><span class="sw" style="background:#D6EEFD"></span></td><td>"Class practice" tab and neutral info chips</td></tr>
+      <tr><td class="t">--color-success-700 / -100</td><td><span class="sw" style="background:#1A7347"></span><span class="sw" style="background:#DDF5E8"></span></td><td>Correct answers, "Ready" status</td></tr>
+      <tr><td class="t">--color-error-700 / -100</td><td><span class="sw" style="background:#B8222E"></span><span class="sw" style="background:#FDE4E5"></span></td><td>Parent-mode errors, "Critical" flags. Never used in kid mode.</td></tr>
+      <tr><td class="t">--color-time-ok / -near / -over</td><td><span class="sw" style="background:#2EAE6B"></span><span class="sw" style="background:#F0A63A"></span><span class="sw" style="background:#E5484D"></span></td><td>Time indicator only (bar fill, not text)</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Pairs checked for WCAG AA:</strong> heading #413C8C on white 9.3:1 · body #1D1B2E on white 16:1 · white on primary-600 6.4:1 · gold-800 on gold-100 5.0:1 · blue-700 on blue-100 5.3:1 · success-700 on success-100 5.1:1 · error-700 on error-100 5.3:1 · muted #6E6E85 on white 5.0:1 · cyan on primary-800 7.8:1. Only these text/background pairs may be used.</p>
+</section>
+
+<section id="type">
+  <h2><span class="n">4</span>Typography</h2>
+  <p>One family: <strong>Poppins</strong> (Latin + Devanagari, SIL Open Font License). Self-host weights 400, 500, 600, 700 from the official Google Fonts repository (<code>google/fonts/ofl/poppins</code>), as WOFF2, with <code>font-display: swap</code>. Fallback: <code>"Noto Sans Devanagari", system-ui, sans-serif</code>. Hindi text uses the same family and sizes, with line height +4 px.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Token</th><th>Kid mode</th><th>Parent + Studio</th><th>Weight</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td class="t">--type-display</td><td>32 / 40</td><td>28 / 36</td><td>700</td><td>Screen title in the sky header</td></tr>
+      <tr><td class="t">--type-h1</td><td>26 / 34</td><td>24 / 32</td><td>700</td><td>Banner and celebration titles</td></tr>
+      <tr><td class="t">--type-h2</td><td>22 / 30</td><td>20 / 28</td><td>600</td><td>Section headings ("My subjects", "Activity")</td></tr>
+      <tr><td class="t">--type-card-title</td><td>20 / 28</td><td>18 / 26</td><td>600</td><td>Card titles (ink-heading colour)</td></tr>
+      <tr><td class="t">--type-body</td><td>18 / 28</td><td>16 / 24</td><td>400</td><td>Body text, subtitles</td></tr>
+      <tr><td class="t">--type-label</td><td>17 / 24</td><td>15 / 22</td><td>600</td><td>Buttons, pills, tile labels</td></tr>
+      <tr><td class="t">--type-small</td><td>15 / 22</td><td>14 / 20</td><td>500</td><td>Tabs on cards, chips, helper text</td></tr>
+      <tr><td class="t">--type-caption</td><td>13 / 18</td><td>12 / 16</td><td>500</td><td>Bottom-tab labels, timestamps</td></tr>
+      <tr><td class="t">--type-quiz</td><td>24 / 32</td><td>—</td><td>600</td><td>Question text and answer buttons in kid mode</td></tr>
+    </tbody>
+  </table></div>
+  <p>Values are font-size / line-height in px. Sentence case everywhere (never ALL CAPS). Numbers use tabular figures (<code>font-variant-numeric: tabular-nums</code>) in counters, timers and tables. Maximum line length 60 characters in kid mode, 75 in parent mode.</p>
+</section>
+
+<section id="space">
+  <h2><span class="n">5</span>Spacing and layout</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Token</th><th>px</th><th>Token</th><th>px</th></tr></thead>
+    <tbody>
+      <tr><td class="t">--space-1</td><td>4</td><td class="t">--space-6</td><td>24</td></tr>
+      <tr><td class="t">--space-2</td><td>8</td><td class="t">--space-7</td><td>32</td></tr>
+      <tr><td class="t">--space-3</td><td>12</td><td class="t">--space-8</td><td>40</td></tr>
+      <tr><td class="t">--space-4</td><td>16</td><td class="t">--space-9</td><td>48</td></tr>
+      <tr><td class="t">--space-5</td><td>20</td><td class="t">--space-10</td><td>64</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>Screen side padding:</strong> 16 px on phone, 24 px on tablet, 32 px on desktop.</li>
+    <li><strong>Gap between stacked cards:</strong> 16 px. <strong>Gap in tile grids:</strong> 12 px.</li>
+    <li><strong>Card inner padding:</strong> 20 px top/bottom, 16 px left/right.</li>
+    <li><strong>Section heading:</strong> 32 px above, 12 px below.</li>
+    <li><strong>Bottom of scroll area:</strong> 24 px plus the bottom-navigation height plus the device safe area.</li>
+    <li><strong>Tap targets:</strong> at least 56 × 56 px in kid mode, 48 × 48 px elsewhere, with 8 px between targets.</li>
+  </ul>
+</section>
+
+<section id="shape">
+  <h2><span class="n">6</span>Shape, edges, shadows</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td class="t">--radius-sm</td><td>8 px</td><td>Chips, inputs, table cells</td></tr>
+      <tr><td class="t">--radius-md</td><td>12 px</td><td>Illustration backgrounds, toasts</td></tr>
+      <tr><td class="t">--radius-lg</td><td>16 px</td><td>Cards, tiles, buttons</td></tr>
+      <tr><td class="t">--radius-xl</td><td>20 px</td><td>Banner and progress cards, dialogs</td></tr>
+      <tr><td class="t">--radius-sheet</td><td>28 px</td><td>Top corners of the white sheet and bottom sheets</td></tr>
+      <tr><td class="t">--radius-pill</td><td>999 px</td><td>Pills, progress bars, round icon buttons</td></tr>
+      <tr><td class="t">--edge-card</td><td><code>0 4px 0 var(--color-edge)</code></td><td>Standard card bottom edge</td></tr>
+      <tr><td class="t">--edge-tile</td><td><code>0 4px 0 var(--color-primary-400)</code></td><td>Tiles and secondary buttons</td></tr>
+      <tr><td class="t">--edge-primary</td><td><code>0 4px 0 var(--color-primary-800)</code></td><td>Primary buttons</td></tr>
+      <tr><td class="t">--shadow-soft</td><td><code>0 2px 8px rgba(20,16,60,.08)</code></td><td>Added under every card and tile, after the edge</td></tr>
+      <tr><td class="t">--shadow-float</td><td><code>0 8px 24px rgba(20,16,60,.18)</code></td><td>Dialogs, bottom sheets, toasts, bottom navigation (upward: <code>0 -4px 16px rgba(20,16,60,.08)</code>)</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Pressed state</strong> for anything with an edge: move down 2 px (<code>translateY(2px)</code>) and halve the edge to 2 px, over 80 ms. Release returns in 120 ms.</p>
+</section>
+
+<section id="motion">
+  <h2><span class="n">7</span>Motion</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td class="t">--dur-press</td><td>80 ms</td><td>Button and card press</td></tr>
+      <tr><td class="t">--dur-fast</td><td>160 ms</td><td>Hover, colour changes, chip toggles</td></tr>
+      <tr><td class="t">--dur-base</td><td>240 ms</td><td>Screen transitions (fade + 16 px slide), sheets</td></tr>
+      <tr><td class="t">--dur-slow</td><td>400 ms</td><td>Progress bar fill, star counter increment</td></tr>
+      <tr><td class="t">--dur-celebrate</td><td>1200 ms</td><td>"Well done!" stars burst (GSAP)</td></tr>
+      <tr><td class="t">--ease-standard</td><td><code>cubic-bezier(.2,.8,.2,1)</code></td><td>All transitions</td></tr>
+      <tr><td class="t">--ease-bounce</td><td><code>cubic-bezier(.34,1.56,.64,1)</code></td><td>Stars and correct-answer pop only</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Sky stars twinkle: 3 of every 10 stars fade between 40% and 100% opacity over 3 s, staggered. Nothing else in the header moves.</li>
+    <li>With <code>prefers-reduced-motion: reduce</code>: no twinkle, no slides, no bounce; celebrations show the final frame. Sound still plays unless turned off in Settings.</li>
+    <li>Never animate layout height of lists; never auto-play anything that loops for more than 3 s outside lessons.</li>
+  </ul>
+</section>
+
+<section id="icons">
+  <h2><span class="n">8</span>Icons</h2>
+  <p><strong>Material Symbols Rounded</strong> (Apache-2.0), self-hosted variable font from <code>google/material-design-icons</code> (<code>variablefont/</code>). Settings: weight 500, grade 0, optical size 24; <code>FILL 1</code> for active tabs and filled states, <code>FILL 0</code> otherwise. Sizes: 24 px default, 28 px in kid-mode headers, 20 px inside chips.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Meaning</th><th>Symbol</th><th>Meaning</th><th>Symbol</th></tr></thead>
+    <tbody>
+      <tr><td>Back</td><td class="t">arrow_back</td><td>Read aloud</td><td class="t">volume_up</td></tr>
+      <tr><td>Learn tab</td><td class="t">school</td><td>Practice tab</td><td class="t">extension</td></tr>
+      <tr><td>Read tab</td><td class="t">record_voice_over</td><td>Parent button</td><td class="t">lock</td></tr>
+      <tr><td>Progress tab</td><td class="t">insights</td><td>Books tab</td><td class="t">menu_book</td></tr>
+      <tr><td>Worksheets tab</td><td class="t">assignment</td><td>Settings tab</td><td class="t">settings</td></tr>
+      <tr><td>Messages</td><td class="t">notifications</td><td>Add</td><td class="t">add</td></tr>
+      <tr><td>Close</td><td class="t">close</td><td>Microphone</td><td class="t">mic</td></tr>
+      <tr><td>Camera</td><td class="t">photo_camera</td><td>Upload</td><td class="t">upload_file</td></tr>
+      <tr><td>Download</td><td class="t">download</td><td>Share</td><td class="t">share</td></tr>
+      <tr><td>Play / Pause</td><td class="t">play_arrow / pause</td><td>Replay part</td><td class="t">replay_10</td></tr>
+      <tr><td>Ready</td><td class="t">check_circle</td><td>Getting ready</td><td class="t">hourglass_top</td></tr>
+      <tr><td>Needs attention</td><td class="t">error</td><td>Warning</td><td class="t">warning</td></tr>
+      <tr><td>Report a problem</td><td class="t">flag</td><td>Offline</td><td class="t">cloud_off</td></tr>
+      <tr><td>Studio: Dashboard</td><td class="t">dashboard</td><td>Studio: Uploads queue</td><td class="t">inbox</td></tr>
+      <tr><td>Studio: Library</td><td class="t">library_books</td><td>Studio: Question bank</td><td class="t">quiz</td></tr>
+      <tr><td>Studio: Content check</td><td class="t">fact_check</td><td>Studio: Reports</td><td class="t">report</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="ill">
+  <h2><span class="n">9</span>Illustrations and mascot</h2>
+  <p><strong>Source:</strong> Microsoft Fluent Emoji, <strong>3D</strong> style (MIT licence, <code>microsoft/fluentui-emoji</code>). Copy only the PNGs listed here from <code>assets/&lt;Name&gt;/3D/</code> into <code>src/assets/illustrations/&lt;key&gt;.png</code>, then convert to WebP at 256 × 256. If a listed asset is missing, stop and report. Display sizes: 56 px in cards, 64 px in tiles, 120 px in empty states, 160 px on celebration screens. Always on a <code>--color-primary-100</code> rounded square (radius 14 px, 8 px padding) inside cards; without background in tiles and empty states.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Key</th><th>Fluent Emoji name</th><th>Used for</th></tr></thead>
+    <tbody>
+      <tr><td class="t">subject-english</td><td>Open book</td><td>English</td></tr>
+      <tr><td class="t">subject-hindi</td><td>Scroll</td><td>Hindi</td></tr>
+      <tr><td class="t">subject-maths</td><td>Abacus</td><td>Maths</td></tr>
+      <tr><td class="t">subject-evs</td><td>Seedling</td><td>EVS</td></tr>
+      <tr><td class="t">act-lesson</td><td>Clapper board</td><td>Watch lesson</td></tr>
+      <tr><td class="t">act-readalong</td><td>Speaker high volume</td><td>Read along</td></tr>
+      <tr><td class="t">act-worksheet</td><td>Clipboard</td><td>Worksheet</td></tr>
+      <tr><td class="t">act-tables</td><td>Input numbers</td><td>Tables</td></tr>
+      <tr><td class="t">act-grammar</td><td>Input latin letters</td><td>English and Hindi grammar</td></tr>
+      <tr><td class="t">act-quiz</td><td>Light bulb</td><td>EVS quiz</td></tr>
+      <tr><td class="t">act-mistakes</td><td>Hammer and wrench</td><td>Fix my mistakes</td></tr>
+      <tr><td class="t">act-reading</td><td>Studio microphone</td><td>Reading test</td></tr>
+      <tr><td class="t">reward-star</td><td>Glowing star</td><td>Star counter and rewards</td></tr>
+      <tr><td class="t">celebrate</td><td>Party popper</td><td>Well done screen</td></tr>
+      <tr><td class="t">empty-books</td><td>Books</td><td>No book yet (parent)</td></tr>
+      <tr><td class="t">empty-done</td><td>Trophy</td><td>No mistakes to fix</td></tr>
+      <tr><td class="t">state-offline</td><td>Cloud</td><td>Offline items</td></tr>
+      <tr><td class="t">state-retry</td><td>Thinking face</td><td>"Let's try again"</td></tr>
+      <tr><td class="t">state-wait</td><td>Hourglass not done</td><td>"Coming soon" lessons</td></tr>
+      <tr><td class="t">avatar-*</td><td>Cat face, Dog face, Lion, Panda, Rabbit face, Tiger face, Fox, Koala, Monkey face, Penguin, Frog, Unicorn</td><td>Child profile pictures (12 choices)</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Mascot: "the owl"</h3>
+  <ul>
+    <li><strong>Prototype:</strong> Fluent Emoji <em>Owl</em> (3D) as a placeholder, key <code>mascot-owl</code>. A designed owl will replace it later at the same file names and sizes.</li>
+    <li><strong>Where it appears:</strong> Who is learning? screen, empty states in kid mode, the reading-test intro, Well done screens, and the loading animation. Never in parent mode tables or the Content Studio.</li>
+    <li><strong>Sizes:</strong> 96 px beside a speech bubble, 160 px on full-screen moments.</li>
+    <li><strong>Speech bubble:</strong> white, 2 px <code>--color-primary-400</code> border, radius 18 px, padding 10 × 16 px, <code>--type-body</code> weight 500, max width 240 px, tail 12 px pointing at the owl. Maximum 2 lines.</li>
+    <li><strong>Loading:</strong> owl bobs 6 px up and down over 1.2 s; reduced motion shows it still.</li>
+  </ul>
+  <div class="stage light" style="grid-template-columns:auto 1fr;align-items:center;max-width:420px"><span style="font-size:72px;line-height:1">🦉</span><div class="bubble">Welcome back, Asha! Ready to learn?</div></div>
+</section>
+
+<section id="shell">
+  <h2><span class="n">10</span>Screen shells</h2>
+  <p>Every screen uses exactly one shell. All shells start with the <strong>sky header</strong>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Shell</th><th>Structure</th><th>Used by (App Flow IDs)</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">A · Sky list</td><td>Sky fills the whole screen. Header row, optional star pill, then cards placed directly on the sky. Bottom navigation.</td><td>K1, K2, K8, K12 (kid lists)</td></tr>
+      <tr><td class="hi">B · Sky + sheet</td><td>Sky header 200 px tall (phone) with title and pill; a white sheet (<code>--color-page</code>, top radius 28 px) overlaps the header by 28 px and scrolls. Bottom navigation.</td><td>K3, P1–P19, settings, help</td></tr>
+      <tr><td class="hi">C · Focus</td><td>Sky header 64 px with close/back and progress only; white full-height body; no bottom navigation.</td><td>K4–K7, K9–K11, K13–K14, A1–A4, B1–B5, P0</td></tr>
+      <tr><td class="hi">D · Celebration</td><td>Full sky, owl 160 px, title, stars earned, two buttons stacked at the bottom.</td><td>K7, B5, K14 result</td></tr>
+      <tr><td class="hi">E · Studio desktop</td><td>Sky top bar 64 px with the name "FullStar Studio" and user menu; left side navigation 256 px (<code>--color-primary-900</code>, white text); content on <code>--color-page</code>, max width 1200 px.</td><td>S1–S11</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Sky header (all shells)</h3>
+  <ul>
+    <li><strong>Background:</strong> <code>linear-gradient(180deg, --color-sky-top, --color-sky-bottom)</code> with a static star layer: 40 dots, 1–2 px, white at 60–100% opacity, positioned by a fixed seed (same on every screen).</li>
+    <li><strong>Header row:</strong> 72 px tall, below the safe area. Left: round icon button (back or parent). Centre: screen title, <code>--type-display</code>, white. Right: round icon button or nothing (keep 48 px space so the title stays centred).</li>
+    <li><strong>Round icon button on sky:</strong> 48 px circle, transparent fill, 1.5 px border <code>rgba(255,255,255,.5)</code>, white icon 28 px.</li>
+    <li><strong>Star pill:</strong> under the title, centred, 12 px gap (kid mode only).</li>
+    <li><strong>Time indicator (kid mode):</strong> 4 px bar along the very bottom of the header row, full width, fill colour by state.</li>
+  </ul>
+  <h3>Bottom navigation (phone)</h3>
+  <ul>
+    <li>White, height 72 px plus safe area, top shadow <code>0 -4px 16px rgba(20,16,60,.08)</code>.</li>
+    <li>Equal-width items: icon 28 px above label <code>--type-caption</code>. Active: <code>--color-primary-600</code>, filled icon, 3 px bar at the top of the item (width 48 px, radius 0 0 3 px 3 px). Inactive: <code>--color-text-muted</code>, outlined icon.</li>
+    <li>Kid mode: Learn, Practice, Read. Parent mode: Progress, Books, Worksheets, Settings.</li>
+  </ul>
+</section>
+
+<section id="comp">
+  <h2><span class="n">11</span>Components</h2>
+  <p>Selector names are fixed. Each component lives in its own standalone Angular component with <code>ChangeDetectionStrategy.OnPush</code> and typed signal inputs.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Component</th><th>Exact specification</th></tr></thead>
+    <tbody>
+      <tr><td class="t">app-button</td><td>Variants: <strong>primary</strong> (fill primary-600, white label, edge-primary), <strong>secondary</strong> (white fill, 2 px inner border primary-600, primary-600 label, edge-tile), <strong>ghost</strong> (no fill, primary-600 label, no edge), <strong>danger</strong> (parent/studio only: fill error-700, white label, edge <code>0 4px 0 #7E1720</code>). Height 56 px kid / 48 px elsewhere; radius-lg; padding 0 24 px; label <code>--type-label</code>; optional leading icon 24 px with 8 px gap. Full width on phone in Focus and Celebration shells. Disabled: 40% opacity, no edge, no press. Loading: label replaced by a 20 px spinner, width unchanged.</td></tr>
+      <tr><td class="t">app-icon-button</td><td>Round 48 px (kid 56 px). On sky: see shell. On white: fill primary-100, icon primary-600. "Add" variant: fill pink, white <code>add</code> icon, 40 px, used only inside the star/count pill pattern.</td></tr>
+      <tr><td class="t">app-star-pill</td><td>Fill sky-pill, radius-pill, padding 6 × 16 px, height 40 px. Star image 24 px + count <code>--type-label</code> white, tabular numbers. When stars increase: number counts up over dur-slow; star scales 1 → 1.25 → 1 with ease-bounce.</td></tr>
+      <tr><td class="t">app-list-card</td><td>White, radius-lg, edge-card + shadow-soft, padding 20 × 16 px, min height 96 px. Row: illustration 56 px on primary-100 square, 16 px gap, then title (<code>--type-card-title</code>, ink-heading) and subtitle (<code>--type-body</code> small variant 15 px kid / 14 px parent, text-2). Optional corner tab top-right. Whole card is one button. Optional trailing chevron <code>chevron_right</code> in parent mode only.</td></tr>
+      <tr><td class="t">app-corner-tab</td><td>Attached to the card's top-right corner: padding 3 × 14 px, radius <code>0 16px 0 14px</code>, <code>--type-small</code> weight 600. Tones: <strong>gold</strong> (gold-100 / gold-800) for "Chapter n" and "New", <strong>blue</strong> (blue-100 / blue-700) for "Class 3 practice", <strong>green</strong> (success-100 / success-700) for "Done".</td></tr>
+      <tr><td class="t">app-tile</td><td>Grid of 3 on phone (2 if labels exceed 12 characters). White, radius-lg, edge-tile + shadow-soft, padding 16 × 8 px, min height 132 px. Illustration 64 px centred, 8 px gap, label <code>--type-label</code> centred, max 2 lines.</td></tr>
+      <tr><td class="t">app-banner-card</td><td>Gradient <code>135deg, primary-800 → #3A1E9E</code>, radius-xl, padding 20 px, min height 140 px. Eyebrow line cyan <code>--type-label</code>; body white <code>--type-body</code>; illustration 96 px on the right. Used once per screen at most, for the most important message.</td></tr>
+      <tr><td class="t">app-progress-card</td><td>White, 2 px gold-400 border, radius-xl, padding 16 px. Illustration 72 px left; title gold-600 <code>--type-card-title</code> weight 700; subtitle text-2; app-progress-bar; count at right <code>--type-small</code> text-2 ("6/20").</td></tr>
+      <tr><td class="t">app-progress-bar</td><td>Height 10 px, radius-pill, track #E6E7EB, fill primary-600, animates width over dur-slow. Optional milestone dots: 20 px circles #D9DAE0, filled primary-600 when reached.</td></tr>
+      <tr><td class="t">app-notice-card</td><td>Cream background, 1 px gold-400 border, radius-xl, padding 16 px. Illustration 64 px, title <code>--type-card-title</code> text, body text-2. Used for tips ("Upload your books…") and reminders.</td></tr>
+      <tr><td class="t">app-action-card</td><td>2-column grid, gap 16 px. White, radius-lg, shadow-soft (no edge), padding 16 px, min height 88 px. Outlined icon 28 px primary-600 left, label <code>--type-label</code> weight 500 text, up to 2 lines. Used in parent Settings and Progress shortcuts.</td></tr>
+      <tr><td class="t">app-section-header</td><td><code>--type-h2</code> (white on sky, text on white). Optional right element: link (primary-600 on white, cyan on sky, <code>--type-label</code>) or a count pill. 32 px above, 12 px below.</td></tr>
+      <tr><td class="t">app-speech-bubble</td><td>See section 9.</td></tr>
+      <tr><td class="t">app-read-aloud</td><td>Round 56 px, fill sky-pill on sky or primary-100 on white, icon <code>volume_up</code>. Always top-right of the content area in kid mode. While speaking: icon filled, 2 px cyan ring pulsing (off with reduced motion).</td></tr>
+      <tr><td class="t">app-time-indicator</td><td>4 px bar. Fill width = time used / limit (max 100%). Colour: time-ok under 80%, time-near 80–99%, time-over at 100% and beyond (bar stays full). No text; screen-reader label "Time today: 24 of 30 minutes".</td></tr>
+      <tr><td class="t">app-answer-button</td><td>Kid quiz answers. Full width, min height 72 px, white, radius-lg, edge-tile, <code>--type-quiz</code>, left letter bubble 40 px (primary-100, primary-600 text "A"/"B"/"C"/"D"). Correct: fill success-100, 2 px success-700 border, <code>check_circle</code> icon, pop with ease-bounce. Not correct: shakes 6 px left-right twice (240 ms), returns to normal, owl bubble says "Let's try again". Never red in kid mode.</td></tr>
+      <tr><td class="t">app-question-card</td><td>White, radius-xl, padding 24 px, question <code>--type-quiz</code>, optional picture max 240 px tall, progress dots above ("3 of 10").</td></tr>
+      <tr><td class="t">app-lesson-player</td><td>Full screen landscape-preferred. Controls bar 72 px at the bottom on a 60% sky-bottom overlay: play/pause 56 px, replay part, progress bar, read-aloud toggle. Controls hide after 3 s of no touch, reappear on tap.</td></tr>
+      <tr><td class="t">app-readalong-page</td><td>Book page image fit to width, max 900 px. Current word highlight: background #FFE58A, radius 4 px, transition dur-fast. Next/previous round buttons 56 px fixed at screen edges, vertically centred.</td></tr>
+      <tr><td class="t">app-avatar</td><td>Circle; sizes 40 / 64 / 96 / 128 px. Background primary-100, 3 px white border, animal illustration at 80% size. Selected (picker): 4 px primary-600 ring + check badge 24 px.</td></tr>
+      <tr><td class="t">app-profile-picker</td><td>Who is learning? 2 avatars 128 px with names <code>--type-h2</code> white under them, centred on sky, 32 px gap. "Parent" round button top-right.</td></tr>
+      <tr><td class="t">app-text-field</td><td>Label above (<code>--type-small</code>, text), field height 52 px, white, 1.5 px border <code>--color-border</code>, radius-sm 12 px, padding 0 16 px, text <code>--type-body</code>. Focus: 2 px primary-600 border + focus ring. Error: 2 px error-700 border, message below in error-700 with <code>error</code> icon 18 px. Helper text text-2.</td></tr>
+      <tr><td class="t">app-code-input</td><td>6 boxes 48 × 56 px, gap 8 px, radius 12 px, <code>--type-h1</code> centred, auto-advance, paste fills all, numeric keyboard.</td></tr>
+      <tr><td class="t">app-pin-pad</td><td>4 dots 16 px (filled primary-600 when entered) above a 3 × 4 keypad of round 72 px keys (white, edge-card), digits <code>--type-h1</code>, last row: empty · 0 · backspace. Wrong PIN: dots shake, then clear.</td></tr>
+      <tr><td class="t">app-status-chip</td><td>Height 28 px, radius-pill, padding 0 12 px, icon 18 px + <code>--type-small</code>. No book: blue tone. Getting ready / Lessons being prepared: gold tone + <code>hourglass_top</code>. Needs attention: error tone + <code>error</code>. Read-along ready: blue + <code>volume_up</code>. Lessons ready: green + <code>check_circle</code>.</td></tr>
+      <tr><td class="t">app-flag-item</td><td>Studio content-check row: left 4 px bar (error-700 critical, gold-600 warning), severity chip, category, location link, reason text, actions "Go to item" and (warnings only) "Accept with note".</td></tr>
+      <tr><td class="t">app-upload-zone</td><td>Dashed 2 px primary-400 border, radius-xl, primary-100 background, padding 24 px, illustration 64 px, title "Add pages", two buttons: "Take photos" (primary) and "Choose file" (secondary). Shows the limits line in <code>--type-small</code> text-2.</td></tr>
+      <tr><td class="t">app-page-thumb</td><td>96 × 128 px, radius-sm, 1 px border; unclear page: 2 px error-700 border + "Retake" chip below.</td></tr>
+      <tr><td class="t">app-toast</td><td>Bottom, above navigation, 16 px side margin, max width 480 px, fill <code>--color-text</code>, white <code>--type-body</code>, radius-md, shadow-float, optional action in cyan. Auto-hide after 4 s; errors stay until dismissed.</td></tr>
+      <tr><td class="t">app-dialog</td><td>Centred, max width 400 px, radius-xl, padding 24 px, title <code>--type-h2</code>, body, buttons stacked on phone (primary on top). Scrim rgba(10,8,56,.6). Destructive dialogs use danger button and require typing nothing extra.</td></tr>
+      <tr><td class="t">app-bottom-sheet</td><td>Top radius 28 px, handle 40 × 4 px #D9DAE0, padding 24 px, max height 85% of screen.</td></tr>
+      <tr><td class="t">app-empty-state</td><td>Centred column: illustration 120 px (owl in kid mode), title <code>--type-h2</code>, body text-2 max 2 lines, optional one button. 48 px top padding.</td></tr>
+      <tr><td class="t">app-skeleton</td><td>Parent/studio loading: blocks #ECECF3 at the real component sizes, radius same as component, shimmer 1.2 s (none with reduced motion). Kid loading: owl loader centred.</td></tr>
+      <tr><td class="t">app-message-item</td><td>Bell list row: icon 24 px in a 40 px primary-100 circle, title <code>--type-label</code>, body text-2, time <code>--type-caption</code> muted. Unread: 8 px pink dot right and primary-100 row background.</td></tr>
+      <tr><td class="t">app-data-table</td><td>Parent and Studio only. Angular Material table restyled: header <code>--type-small</code> muted uppercase off (sentence case), row height 52 px, 1 px border lines, hover primary-100, no zebra stripes.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="states">
+  <h2><span class="n">12</span>States</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>State</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Hover (pointer devices)</td><td>Cards and tiles lift 1 px and shadow-soft doubles in opacity, dur-fast.</td></tr>
+      <tr><td class="hi">Focus</td><td>3 px <code>--color-cyan</code> outline, 2 px offset, on every focusable element; never removed.</td></tr>
+      <tr><td class="hi">Pressed</td><td>See section 6.</td></tr>
+      <tr><td class="hi">Disabled</td><td>40% opacity, no edge, <code>aria-disabled</code>, not focusable for buttons that can never be enabled on that screen.</td></tr>
+      <tr><td class="hi">Locked / not ready</td><td>Card keeps colours, illustration replaced by state-wait, corner tab "Coming soon" (gold). Tapping shows a toast; never hidden silently.</td></tr>
+      <tr><td class="hi">Offline</td><td>Unavailable cards at 50% opacity with <code>cloud_off</code> 20 px in the corner. Parent mode banner: gold notice bar 40 px under the header.</td></tr>
+      <tr><td class="hi">Error (kid)</td><td>Never red. Owl + "Let's try again" + one primary button "Try again".</td></tr>
+      <tr><td class="hi">Error (parent/studio)</td><td>Field errors under fields; screen errors as an error-100 bar with error-700 text and a "Try again" ghost button.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="resp">
+  <h2><span class="n">13</span>Responsive rules</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Breakpoint</th><th>Width</th><th>Navigation</th><th>Content</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Phone (design base)</td><td>&lt; 600 px</td><td>Bottom navigation</td><td>Single column, 16 px padding, tiles 3 across.</td></tr>
+      <tr><td class="hi">Tablet</td><td>600–1023 px</td><td>Left rail 96 px on primary-900, icons 28 px with labels under them</td><td>Content max 720 px centred; list cards in 2 columns; tiles 4 across; 24 px padding.</td></tr>
+      <tr><td class="hi">Desktop</td><td>≥ 1024 px</td><td>Side navigation 256 px (shell E for Studio; family app uses the rail)</td><td>Content max 960 px (family) / 1200 px (Studio); 32 px padding.</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Sky header height: 200 px phone, 180 px tablet and desktop (shell B).</li>
+    <li>Lesson player and read-along: full screen in any orientation; landscape suggested with a one-time rotate hint.</li>
+    <li>Text never scales below the token sizes; supports browser zoom to 200% without horizontal scrolling.</li>
+  </ul>
+</section>
+
+<section id="a11y">
+  <h2><span class="n">14</span>Accessibility</h2>
+  <ul>
+    <li>Target: WCAG 2.1 AA. Only the colour pairs listed in section 3.</li>
+    <li>Never use colour alone: status chips always have an icon and text; correct answers have a check icon.</li>
+    <li>Every image has <code>alt</code> text from the strings file; decorative stars and edges are <code>aria-hidden</code>.</li>
+    <li>Every kid-mode screen has app-read-aloud; it reads the screen title and instructions using the narrator voice.</li>
+    <li>Logical focus order, visible focus ring, all actions reachable by keyboard; dialogs trap focus and return it on close.</li>
+    <li>Screen-reader live region announces stars earned, upload status changes and toasts.</li>
+    <li><code>lang="hi"</code> on every Hindi text element so screen readers pronounce it correctly.</li>
+  </ul>
+</section>
+
+<section id="voice">
+  <h2><span class="n">15</span>Writing rules</h2>
+  <div class="tbl"><table>
+    <thead><tr><th></th><th>Kid mode</th><th>Parent mode</th><th>Content Studio</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Voice</td><td>Warm, encouraging friend</td><td>Clear, respectful, helpful</td><td>Precise and neutral</td></tr>
+      <tr><td class="hi">Sentence length</td><td>8 words or fewer</td><td>20 words or fewer</td><td>Any, one idea per sentence</td></tr>
+      <tr><td class="hi">Person</td><td>"You" / owl says "Let's"</td><td>"You" / "your child" or the child's name</td><td>Impersonal ("3 flags found")</td></tr>
+      <tr><td class="hi">Never</td><td>"Wrong", "Fail", "Error", scores out of 100, comparisons with others</td><td>Jargon (OCR, sync, server), blame</td><td>Vague labels ("Process")</td></tr>
+      <tr><td class="hi">Praise</td><td>Praise effort: "Great trying!", "You did it!"</td><td>Factual: "Asha finished 3 chapters this week."</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Sentence case for everything. No exclamation marks in parent mode or Studio; at most one per message in kid mode.</li>
+    <li>Buttons start with a verb and name the result: "Start lesson", "Upload book", "Print worksheet". Never "OK", "Submit" or "Click here".</li>
+    <li>Use numerals ("3 chapters"), 12-hour time ("4:30 pm"), dates as "19 Oct".</li>
+    <li>Subject names exactly: English, Hindi, Maths, EVS. "Class 3", never "Grade 3".</li>
+    <li>Children refer to the parent as "Mummy or Papa".</li>
+    <li>App language is English; Hindi appears only inside Hindi lesson content, in Devanagari.</li>
+  </ul>
+</section>
+
+<section id="copy">
+  <h2><span class="n">16</span>Message patterns</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Situation</th><th>Kid mode</th><th>Parent mode</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Correct answer</td><td>"Yes! That's right."</td><td>—</td></tr>
+      <tr><td class="hi">Not correct</td><td>"Let's try again."</td><td>—</td></tr>
+      <tr><td class="hi">Finished activity</td><td>"Well done! You got 3 stars."</td><td>—</td></tr>
+      <tr><td class="hi">Something failed</td><td>"Let's try again." + "Try again"</td><td>"Something went wrong on our side. Please try again in a few minutes." + "Try again"</td></tr>
+      <tr><td class="hi">No book for a subject</td><td>Shows Class 3 practice (no message)</td><td>"No book yet. Upload it so we can prepare lessons. Practice is ready meanwhile." + "Upload book"</td></tr>
+      <tr><td class="hi">Lesson not ready</td><td>"Coming soon! Read along for now."</td><td>"Lessons being prepared. We'll message you when they're ready."</td></tr>
+      <tr><td class="hi">Offline</td><td>"This needs the internet."</td><td>"You're offline. Some features are paused."</td></tr>
+      <tr><td class="hi">Needs a parent</td><td>"Ask Mummy or Papa to help."</td><td>—</td></tr>
+      <tr><td class="hi">Time limit reached</td><td>(indicator turns red; no text)</td><td>—</td></tr>
+      <tr><td class="hi">Destructive confirm</td><td>—</td><td>Title states the result: "Erase Class 3 progress?" Body: what is lost. Buttons: "Erase progress" (danger) / "Keep progress".</td></tr>
+      <tr><td class="hi">Ready notification</td><td>—</td><td>"Lessons for Hindi Ch 4 are ready. We recommend a quick preview."</td></tr>
+      <tr><td class="hi">Upload problem</td><td>—</td><td>"3 pages of your EVS book were unclear. Retake just those pages." + "Fix pages"</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="tokens">
+  <h2><span class="n">17</span>Token file</h2>
+  <p>Create <code>libs/design-tokens/tokens.css</code> with exactly this content and import it once in each app's <code>styles.css</code>.</p>
+<pre class="code">:root {
+  /* Colour */
+  --color-sky-top: #2A0C5E;        --color-sky-bottom: #0A0838;     --color-sky-pill: #2E1D7D;
+  --color-primary-900: #1E0E5C;    --color-primary-800: #2D137E;    --color-primary-600: #4F52BD;
+  --color-primary-400: #7677D1;    --color-primary-100: #EAEAF6;
+  --color-ink-heading: #413C8C;    --color-text: #1D1B2E;           --color-text-2: #5B5B6E;
+  --color-text-muted: #6E6E85;     --color-text-on-sky: #FFFFFF;    --color-text-on-sky-2: #D9D6F5;
+  --color-surface: #FFFFFF;        --color-page: #F7F7FA;           --color-border: #E4E4EE;
+  --color-edge: #C8C8CC;           --color-track: #E6E7EB;          --color-skeleton: #ECECF3;
+  --color-cyan: #3BD3EA;           --color-pink: #E8386A;           --color-star: #FFC83D;
+  --color-gold-800: #8F5F0A;       --color-gold-600: #A8620A;       --color-gold-400: #F0C94A;
+  --color-gold-100: #FDF5D6;       --color-cream: #FFFBEF;          --color-highlight: #FFE58A;
+  --color-blue-700: #1A62A0;       --color-blue-100: #D6EEFD;
+  --color-success-700: #1A7347;    --color-success-100: #DDF5E8;
+  --color-error-700: #B8222E;      --color-error-100: #FDE4E5;      --color-danger-edge: #7E1720;
+  --color-time-ok: #2EAE6B;        --color-time-near: #F0A63A;      --color-time-over: #E5484D;
+  --color-scrim: rgba(10, 8, 56, .6);
+  --gradient-sky: linear-gradient(180deg, var(--color-sky-top), var(--color-sky-bottom));
+  --gradient-banner: linear-gradient(135deg, var(--color-primary-800), #3A1E9E);
+
+  /* Typography */
+  --font-family: "Poppins", "Noto Sans Devanagari", system-ui, sans-serif;
+
+  /* Spacing */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px; --space-5: 20px;
+  --space-6: 24px; --space-7: 32px; --space-8: 40px; --space-9: 48px; --space-10: 64px;
+
+  /* Shape */
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 20px;
+  --radius-sheet: 28px; --radius-pill: 999px;
+  --edge-card: 0 4px 0 var(--color-edge);
+  --edge-tile: 0 4px 0 var(--color-primary-400);
+  --edge-primary: 0 4px 0 var(--color-primary-800);
+  --shadow-soft: 0 2px 8px rgba(20, 16, 60, .08);
+  --shadow-float: 0 8px 24px rgba(20, 16, 60, .18);
+  --shadow-nav: 0 -4px 16px rgba(20, 16, 60, .08);
+  --focus-ring: 0 0 0 2px var(--color-surface), 0 0 0 5px var(--color-cyan);
+
+  /* Motion */
+  --dur-press: 80ms; --dur-fast: 160ms; --dur-base: 240ms; --dur-slow: 400ms; --dur-celebrate: 1200ms;
+  --ease-standard: cubic-bezier(.2, .8, .2, 1);
+  --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
+
+  /* Layout */
+  --header-row: 72px; --sky-header-b: 200px; --nav-height: 72px;
+  --rail-width: 96px; --sidenav-width: 256px;
+  --content-max-family: 960px; --content-max-studio: 1200px;
+  --tap-kid: 56px; --tap-default: 48px;
+}
+
+/* Type scale: kid mode is the default; parent mode and Studio set data-mode */
+:root, [data-mode="kid"] {
+  --type-display: 700 32px/40px var(--font-family);
+  --type-h1: 700 26px/34px var(--font-family);
+  --type-h2: 600 22px/30px var(--font-family);
+  --type-card-title: 600 20px/28px var(--font-family);
+  --type-body: 400 18px/28px var(--font-family);
+  --type-label: 600 17px/24px var(--font-family);
+  --type-small: 500 15px/22px var(--font-family);
+  --type-caption: 500 13px/18px var(--font-family);
+  --type-quiz: 600 24px/32px var(--font-family);
+}
+[data-mode="parent"], [data-mode="studio"] {
+  --type-display: 700 28px/36px var(--font-family);
+  --type-h1: 700 24px/32px var(--font-family);
+  --type-h2: 600 20px/28px var(--font-family);
+  --type-card-title: 600 18px/26px var(--font-family);
+  --type-body: 400 16px/24px var(--font-family);
+  --type-label: 600 15px/22px var(--font-family);
+  --type-small: 500 14px/20px var(--font-family);
+  --type-caption: 500 12px/16px var(--font-family);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-celebrate: 0ms; }
+}</pre>
+</section>
+
+<section id="impl">
+  <h2><span class="n">18</span>Angular implementation</h2>
+  <ul>
+    <li><strong>Shared library:</strong> <code>libs/ui/</code> holds the tokens, fonts, icons, illustrations and every <code>app-*</code> component. Both apps import from it; no app defines its own visual components.</li>
+    <li><strong>Mode switch:</strong> the root element gets <code>data-mode="kid" | "parent" | "studio"</code>; the type scale follows automatically.</li>
+    <li><strong>Angular Material 22:</strong> used only for behaviour-heavy parts (dialog, bottom sheet, menu, table, snack bar, form-field logic). Map its system tokens to ours in <code>styles.css</code>: <code>--mat-sys-primary: var(--color-primary-600)</code>, <code>--mat-sys-on-primary: #FFFFFF</code>, <code>--mat-sys-surface: var(--color-surface)</code>, <code>--mat-sys-on-surface: var(--color-text)</code>, <code>--mat-sys-outline: var(--color-border)</code>, <code>--mat-sys-error: var(--color-error-700)</code>, <code>--mat-sys-corner-medium: var(--radius-md)</code>, <code>--mat-sys-corner-large: var(--radius-xl)</code>, <code>--mat-sys-body-large: var(--type-body)</code>, <code>--mat-sys-label-large: var(--type-label)</code>. Do not use Material buttons, cards or chips; use ours.</li>
+    <li><strong>Fonts and icons:</strong> files in <code>libs/ui/assets/fonts/</code>; declared with <code>@font-face</code>; precached by the service worker so they work offline.</li>
+    <li><strong>Sky star layer:</strong> one shared SVG (<code>libs/ui/assets/sky-stars.svg</code>, 40 circles at fixed positions) used as a background image on every sky header.</li>
+    <li><strong>Strings:</strong> <code>libs/ui/strings/en.ts</code>, typed constant object; components read text only from there.</li>
+    <li><strong>Verification:</strong> a Storybook-free "UI gallery" route (<code>/dev/ui</code>, dev builds only) shows every component in every state, used for review.</li>
+  </ul>
+  <div class="callout"><p><strong>Assets to add to the Tech Stack document</strong> (vendored files, not npm packages): Poppins font files (google/fonts, OFL), Material Symbols Rounded variable font (google/material-design-icons, Apache-2.0, 50k+ stars), Fluent Emoji 3D PNGs (microsoft/fluentui-emoji, MIT, ~9k stars — exception: official Microsoft set, no comparable free 3D set).</p></div>
+</section>
+
+<footer>Visual direction inspired by the reference screenshots supplied; all names, characters and artwork are our own or from the licensed sets listed. Companion documents: PRD v1.2, App Flow v1, Tech Stack v2.0.</footer>
+</div>

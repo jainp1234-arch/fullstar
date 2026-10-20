@@ -1,0 +1,429 @@
+<title>FullStar App Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Hind:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: same notebook column as the PRD and Tech Stack; screens are grouped tables, journeys are numbered steps. */
+:root{
+  --bg:#f7f9fc; --surface:#ffffff; --fg:#1d2433; --muted:#5a6478; --line:#dfe4ee;
+  --ink:#24489c; --marigold:#e8a317; --marigold-soft:#fff4dc; --ok:#1f7a4d; --ok-soft:#e5f4ec; --bad:#b3261e; --bad-soft:#fbe9e7;
+  --display:"Baloo 2","Hind",system-ui,sans-serif;
+  --body:"Hind","Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121722; --surface:#1a2130; --fg:#e7ebf3; --muted:#a2acc0; --line:#2c3547;
+  --ink:#8fb0ff; --marigold:#f2b84b; --marigold-soft:#33291a; --ok:#6fd4a0; --ok-soft:#18302a; --bad:#ff8a80; --bad-soft:#3a1f1f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121722; --surface:#1a2130; --fg:#e7ebf3; --muted:#a2acc0; --line:#2c3547;
+  --ink:#8fb0ff; --marigold:#f2b84b; --marigold-soft:#33291a; --ok:#6fd4a0; --ok-soft:#18302a; --bad:#ff8a80; --bad-soft:#3a1f1f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding-inline:16px;padding-block:32px 64px;display:grid;gap:40px}
+header{display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-size:clamp(30px,5vw,42px);line-height:1.1;margin:0;color:var(--ink);text-wrap:balance}
+.lede{font-size:18px;margin:0;max-width:65ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:var(--muted)}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+nav.toc ol{margin:0;padding-left:20px;columns:2 220px;column-gap:24px}
+nav.toc a{color:var(--ink);text-decoration:none}
+nav.toc a:hover{text-decoration:underline}
+section{display:grid;gap:14px}
+h2{font-family:var(--display);font-size:24px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--line);display:flex;gap:10px;align-items:baseline;text-wrap:balance}
+h2 .n{color:var(--marigold);font-size:18px}
+h3{font-size:18px;margin:8px 0 0;font-weight:600;color:var(--ink)}
+p{margin:0;max-width:70ch}
+ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.callout{background:var(--marigold-soft);border-left:4px solid var(--marigold);padding:14px 16px;border-radius:4px}
+.callout p{max-width:none}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:8px;align-content:start;min-width:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.id{font-family:var(--mono);font-size:12.5px;color:var(--ink);white-space:nowrap}
+td.hi{font-weight:600}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--ok-soft);color:var(--ok);white-space:nowrap}
+.tag.no{background:var(--bad-soft);color:var(--bad)}
+.tag.later{background:var(--marigold-soft);color:var(--fg)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:10px}
+.steps li::before{content:counter(s);width:24px;height:24px;border-radius:50%;background:var(--ink);color:var(--surface);font-size:13px;font-weight:600;display:grid;place-items:center;margin-top:2px}
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto}
+.diagram pre{margin:0}
+footer{font-size:13px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">App Flow · Draft v1</div>
+  <h1>FullStar App Flow</h1>
+  <p class="lede">Every screen, how people move between them, and what each screen shows when it is empty, loading or something goes wrong. Companion to the PRD and the Tech Stack document.</p>
+  <div class="meta"><span>Owner: Atul Singh</span><span>Status: For review</span><span>Scope: first version, Class 3</span></div>
+</header>
+
+<nav class="toc" aria-label="Contents"><ol>
+  <li><a href="#decisions">Decisions for this version</a></li>
+  <li><a href="#map">App map</a></li>
+  <li><a href="#nav">Navigation rules</a></li>
+  <li><a href="#entry">Sign-up, sign-in and setup</a></li>
+  <li><a href="#kid">Kid mode screens</a></li>
+  <li><a href="#parent">Parent mode screens</a></li>
+  <li><a href="#studio">Content Studio screens</a></li>
+  <li><a href="#journeys">User journeys</a></li>
+  <li><a href="#empty">Empty and loading states</a></li>
+  <li><a href="#errors">Error states</a></li>
+  <li><a href="#offline">What works offline</a></li>
+  <li><a href="#later">Not in this version</a></li>
+  <li><a href="#prd">Changes needed in the PRD</a></li>
+</ol></nav>
+
+<section id="decisions">
+  <h2><span class="n">1</span>Decisions for this version</h2>
+  <div class="grid2">
+    <div class="card"><h3>Account</h3><ul>
+      <li>Sign-up is required. The first screen offers <strong>Sign in</strong> or <strong>Sign up</strong>.</li>
+      <li>Email + one-time code (sent by email). One parent login per family.</li>
+      <li>App language: English only (the Hindi <em>subject</em> stays).</li>
+      <li>No payments, trial or subscription screens.</li>
+    </ul></div>
+    <div class="card"><h3>Children</h3><ul>
+      <li>Up to 2 child profiles. No child PIN: the child taps their picture.</li>
+      <li>Subjects come from the class: English, Hindi, Maths, EVS. Computer is left out for now.</li>
+      <li>One book per subject, uploaded by the parent. No book list to pick from.</li>
+      <li>No daily plan, no streaks, no bonus activities. Stars are for fun only.</li>
+    </ul></div>
+    <div class="card"><h3>When there is no book</h3><ul>
+      <li>English, Hindi, Maths: grade-level grammar and practice.</li>
+      <li>EVS: grade-level general concepts.</li>
+      <li>The child always has something to do.</li>
+    </ul></div>
+    <div class="card"><h3>Messages and limits</h3><ul>
+      <li>All messages stay inside the app (no SMS, WhatsApp or email).</li>
+      <li>Daily time limit shows as an indicator that turns from green to red. The app never locks the child out.</li>
+      <li>Every kid-mode screen has a 🔊 button that reads the instructions aloud.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="map">
+  <h2><span class="n">2</span>App map</h2>
+  <div class="diagram"><pre class="mermaid">
+flowchart TD
+  L[Open app] --> A{Signed in?}
+  A -- No --> W[Sign in / Sign up]
+  W --> OTP[Email + one-time code]
+  OTP -- New family --> SET[Setup: parent PIN, child, books, time limit]
+  OTP -- Returning --> WHO
+  SET --> WHO
+  A -- Yes --> WHO[Who is learning?]
+  WHO -- Child taps picture --> KID
+  WHO -- Parent button + PIN --> PAR
+  subgraph KID[Kid mode]
+    K1[Learn] --- K2[Practice] --- K3[Read]
+  end
+  subgraph PAR[Parent mode]
+    P1[Progress] --- P2[Books] --- P3[Worksheets] --- P4[Settings]
+  end
+  KID -- Parent button + PIN --> PAR
+  PAR -- Back to kids --> WHO
+  CS[Content Studio: separate staff app]
+  </pre></div>
+  <p>The family app has two modes on the same device. Children see only kid mode. Parent mode is always behind the parent PIN. The Content Studio is a separate site used only by our teachers.</p>
+</section>
+
+<section id="nav">
+  <h2><span class="n">3</span>Navigation rules</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Topic</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Tabs</td><td>Phone: tabs at the bottom. Tablet and laptop: a side menu. Kid mode has 3 tabs (Learn, Practice, Read). Parent mode has 4 (Progress, Books, Worksheets, Settings).</td></tr>
+      <tr><td class="hi">Screen direction</td><td>Works upright and sideways. Lessons suggest turning the tablet sideways.</td></tr>
+      <tr><td class="hi">Opening the app</td><td>Signed-in families always land on <em>Who is learning?</em>. Children never land directly in parent mode.</td></tr>
+      <tr><td class="hi">Kid → Parent</td><td>A small <em>Parent</em> button (top corner) asks for the 4-digit parent PIN.</td></tr>
+      <tr><td class="hi">Parent → Kid</td><td><em>Back to kids</em> in parent mode returns to <em>Who is learning?</em>. Parent mode does not switch back by itself.</td></tr>
+      <tr><td class="hi">Back button</td><td>Goes one step back inside the current tab. On the first screen of a tab, it does nothing in kid mode (so children do not leave the app by accident).</td></tr>
+      <tr><td class="hi">Leaving midway</td><td>A lesson, practice set or worksheet left halfway shows <em>Continue where you left off</em> the next time.</td></tr>
+      <tr><td class="hi">Switching child</td><td>A picture in the kid-mode header goes back to <em>Who is learning?</em>. No PIN needed.</td></tr>
+      <tr><td class="hi">Time indicator</td><td>A small bar in the kid-mode header. Green while under the limit, turning amber near it and red when over. No pop-ups, no lock.</td></tr>
+      <tr><td class="hi">Read aloud</td><td>Every kid-mode screen has a 🔊 button. Kid-mode buttons use pictures and short words.</td></tr>
+      <tr><td class="hi">Messages</td><td>A bell in parent mode shows in-app messages (book ready, upload needs attention, problem report fixed).</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="entry">
+  <h2><span class="n">4</span>Sign-up, sign-in and setup</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>ID</th><th>Screen</th><th>What it shows and does</th><th>Goes to</th></tr></thead>
+    <tbody>
+      <tr><td class="id">A1</td><td class="hi">Welcome</td><td>App name, one line on what it does, two buttons: <strong>Sign in</strong> and <strong>Sign up</strong>.</td><td>A2</td></tr>
+      <tr><td class="id">A2</td><td class="hi">Email address</td><td>Enter the parent's email. Sign up also shows the consent checkbox for the child's data (DPDP) and a link to the privacy notice.</td><td>A3</td></tr>
+      <tr><td class="id">A3</td><td class="hi">Enter code</td><td>6-digit code sent by email, valid 10 minutes. Resend after 30 seconds, "Check your spam folder" hint, change email link.</td><td>New: B1 · Returning: C1</td></tr>
+      <tr><td class="id">B1</td><td class="hi">Create parent PIN</td><td>Choose and confirm a 4-digit PIN that protects parent mode.</td><td>B2</td></tr>
+      <tr><td class="id">B2</td><td class="hi">Add a child</td><td>First name, age, class, a picture to choose (animals or characters, no photos). Subjects for the class are shown automatically. Option to add a second child.</td><td>B3</td></tr>
+      <tr><td class="id">B3</td><td class="hi">Add books (optional)</td><td>"Upload your child's books now so our team can prepare lessons." One row per subject with <em>Upload book</em>, <em>Add first chapter</em> or <em>Later</em>. A note explains that grade-level practice is ready even without a book. If skipped, parent mode shows an "Upload books" reminder card until each subject has a book.</td><td>B4</td></tr>
+      <tr><td class="id">B4</td><td class="hi">Daily time limit</td><td>Choose 20, 30, 45 or 60 minutes. Explains that the child is reminded, not locked out.</td><td>B5</td></tr>
+      <tr><td class="id">B5</td><td class="hi">All set</td><td>"Hand the tablet to your child." Button to start.</td><td>C1</td></tr>
+      <tr><td class="id">A4</td><td class="hi">Forgot parent PIN</td><td>From the PIN screen: a code to the registered email, then set a new PIN.</td><td>Parent mode</td></tr>
+    </tbody>
+  </table></div>
+  <p>A parent can skip B3 and add books later. At least one child profile is required before finishing setup.</p>
+</section>
+
+<section id="kid">
+  <h2><span class="n">5</span>Kid mode screens</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>ID</th><th>Screen</th><th>What it shows and does</th></tr></thead>
+    <tbody>
+      <tr><td class="id">C1</td><td class="hi">Who is learning?</td><td>Large pictures and names of each child. A small <em>Parent</em> button in the corner.</td></tr>
+      <tr><td colspan="3"><strong>Learn tab</strong></td></tr>
+      <tr><td class="id">K1</td><td class="hi">My subjects</td><td>One big tile per subject (English, Hindi, Maths, EVS) with a colour and picture. A tile shows "My book" if a book is uploaded, or "Class 3 practice" if not. A <em>Continue</em> card on top if something was left halfway.</td></tr>
+      <tr><td class="id">K2</td><td class="hi">Subject</td><td>With a book: list of chapters with a tick for finished ones. Without a book: grade-level topics (e.g. Nouns, Pronouns, Tables; EVS: Plants, Water, Our Body).</td></tr>
+      <tr><td class="id">K3</td><td class="hi">Chapter / topic</td><td>Every chapter and every grade-level topic has an animated lesson. Cards: <em>Watch lesson</em>, <em>Read along</em> (uploaded chapters only), <em>Worksheet</em>. While our team is preparing a new chapter's lesson, its card shows "Coming soon" and read-along is available.</td></tr>
+      <tr><td class="id">K4</td><td class="hi">Lesson player</td><td>Animated lesson with narrator, pause, replay a part, and short quiz questions along the way. "Report a problem" is only available from parent mode, not here.</td></tr>
+      <tr><td class="id">K5</td><td class="hi">Read-along</td><td>Book page with each word highlighted as it is read aloud. Tap a word to hear it again. Next and previous page.</td></tr>
+      <tr><td class="id">K6</td><td class="hi">Worksheet (on screen)</td><td>A worksheet to do in the app, built by shuffling questions from the chapter's question bank. One question at a time with big answer buttons.</td></tr>
+      <tr><td class="id">K7</td><td class="hi">Well done!</td><td>Stars earned, a short celebration (sound can be turned off by the parent), buttons for <em>Next</em> and <em>Back to subject</em>.</td></tr>
+      <tr><td colspan="3"><strong>Practice tab</strong></td></tr>
+      <tr><td class="id">K8</td><td class="hi">Practice home</td><td>Tiles: English grammar, Hindi grammar (अपठित गद्यांश, संज्ञा, सर्वनाम, विशेषण), Maths tables, EVS quiz, <em>Fix my mistakes</em>.</td></tr>
+      <tr><td class="id">K9</td><td class="hi">Practice set</td><td>10 questions, one per screen, with instant right / try-again feedback.</td></tr>
+      <tr><td class="id">K10</td><td class="hi">Tables</td><td>Pick a table (2–20), practise, or take the 60-second challenge.</td></tr>
+      <tr><td class="id">K11</td><td class="hi">Fix my mistakes</td><td>Questions the child got wrong earlier, brought back for another try.</td></tr>
+      <tr><td colspan="3"><strong>Read tab</strong></td></tr>
+      <tr><td class="id">K12</td><td class="hi">Reading home</td><td>Today's passage, "Words to practise" list, and the child's reading level as a simple picture (e.g. a growing tree).</td></tr>
+      <tr><td class="id">K13</td><td class="hi">Reading test</td><td>Picture instructions, a big microphone button, the passage on screen, a 2-minute timer.</td></tr>
+      <tr><td class="id">K14</td><td class="hi">Reading result</td><td>Stars, words read well, words to practise. One retry allowed per day. If the app could not understand the recording, it shows "Let's try again" and gives no score.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="parent">
+  <h2><span class="n">6</span>Parent mode screens</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>ID</th><th>Screen</th><th>What it shows and does</th></tr></thead>
+    <tbody>
+      <tr><td class="id">P0</td><td class="hi">Parent PIN</td><td>4-digit PIN pad, <em>Forgot PIN</em> link (A4).</td></tr>
+      <tr><td colspan="3"><strong>Progress tab</strong></td></tr>
+      <tr><td class="id">P1</td><td class="hi">Progress</td><td>Child switcher at the top (one child at a time, no comparison). <strong>This week</strong> card: time spent, chapters done, worksheets done, and <strong>areas to work on</strong>. Below: progress by subject and reading trend.</td></tr>
+      <tr><td class="id">P2</td><td class="hi">Subject detail</td><td>Chapters done, practice accuracy by topic, weak spots ticked by the parent from worksheets.</td></tr>
+      <tr><td class="id">P3</td><td class="hi">Reading history</td><td>Reading speed and accuracy over time. Each test can be played back until the recording is deleted after 7 days.</td></tr>
+      <tr><td colspan="3"><strong>Books tab</strong></td></tr>
+      <tr><td class="id">P4</td><td class="hi">Books</td><td>One row per subject for the selected child. Each row shows the book status: <em>No book</em>, <em>Getting ready</em>, <em>Needs attention</em>, <em>Read-along ready</em>, <em>Lessons being prepared</em>, <em>Lessons ready</em>. Each chapter also shows its own lesson status.</td></tr>
+      <tr><td class="id">P5</td><td class="hi">Upload whole book</td><td>Pick a PDF or take photos of the pages. Limits: PDF up to 50 MB and 300 pages; photos (JPG/PNG) up to 10 MB each and 50 per upload. Then leave the screen; a message arrives when it is ready.</td></tr>
+      <tr><td class="id">P6</td><td class="hi">Check chapters</td><td>The app's suggested chapter split. Parent can rename, merge or move a chapter start, then save.</td></tr>
+      <tr><td class="id">P7</td><td class="hi">Add a chapter</td><td>Chapter number and name, then PDF or photos for that chapter only. Chapters can be reordered, replaced or deleted.</td></tr>
+      <tr><td class="id">P8</td><td class="hi">Fix unclear pages</td><td>Shows only the pages the app could not read, each with <em>Retake photo</em>.</td></tr>
+      <tr><td class="id">P8a</td><td class="hi">Preview new lessons (recommended)</td><td>New lessons for the family's uploaded chapters are marked <em>New · preview recommended</em>. The parent can watch the lesson and browse its questions, then tap <em>Looks good</em> or <em>Report a problem</em>. Previewing is advised but not required: the child can use the lesson once it is published.</td></tr>
+      <tr><td class="id">P9</td><td class="hi">Replace book</td><td>Confirm before replacing: progress on the old book's chapters is removed.</td></tr>
+      <tr><td colspan="3"><strong>Worksheets tab</strong></td></tr>
+      <tr><td class="id">P10</td><td class="hi">Worksheets</td><td>List of created worksheets by subject and chapter, with <em>Create worksheet</em> button.</td></tr>
+      <tr><td class="id">P11</td><td class="hi">Create worksheet</td><td>Pick child, subject, then a chapter or a practice topic, and the number of questions. The app picks and shuffles questions from that chapter's or topic's question bank, so every worksheet is different. Preview, then <em>Shuffle again</em> if wanted.</td></tr>
+      <tr><td class="id">P12</td><td class="hi">Print / share</td><td>Download the A4 PDF or share it (e.g. to WhatsApp) to print elsewhere. Saved for offline use.</td></tr>
+      <tr><td class="id">P13</td><td class="hi">Solutions and weak spots</td><td>Solutions for every question so the parent can check the child's paper. Optional checklist to tick topics the child found hard. No marks entry required.</td></tr>
+      <tr><td colspan="3"><strong>Settings tab</strong></td></tr>
+      <tr><td class="id">P14</td><td class="hi">Settings</td><td>Children, parent PIN, daily time limit, sound and celebrations, help, privacy, sign out.</td></tr>
+      <tr><td class="id">P15</td><td class="hi">Edit child</td><td>Name, age, picture. <em>Move to next class</em> with a warning: "This will erase all progress for Class 3. Continue?" Add or remove a child.</td></tr>
+      <tr><td class="id">P16</td><td class="hi">Help</td><td>FAQs and a <em>Contact us</em> form. Replies appear in the in-app messages.</td></tr>
+      <tr><td class="id">P17</td><td class="hi">Privacy</td><td>Privacy notice and a <em>Request data deletion</em> button that sends a request to our team.</td></tr>
+      <tr><td class="id">P18</td><td class="hi">Report a problem</td><td>From any lesson or worksheet in parent mode: pick a reason, add an optional note. The parent gets an in-app "Fixed" message later.</td></tr>
+      <tr><td class="id">P19</td><td class="hi">Messages (bell)</td><td>Book ready, pages need retaking, problem fixed, replies from support.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="studio">
+  <h2><span class="n">7</span>Content Studio screens (teachers)</h2>
+  <p>A separate site for our content team. Staff sign in with email + code plus an authenticator-app code (two-step). For now the same teacher can write and publish.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>ID</th><th>Screen</th><th>What it shows and does</th></tr></thead>
+    <tbody>
+      <tr><td class="id">S1</td><td class="hi">Staff sign-in</td><td>Email + code, then authenticator-app code.</td></tr>
+      <tr><td class="id">S2</td><td class="hi">Dashboard</td><td>New book uploads from families (with a notification badge), drafts in progress, recently published, and open problem reports.</td></tr>
+      <tr><td class="id">S8</td><td class="hi">Uploaded books queue</td><td>Every book or chapter a family uploads arrives here as a notification: family, child's class, subject, chapters, waiting time. Open one to start preparing it.</td></tr>
+      <tr><td class="id">S9</td><td class="hi">Prepare chapter</td><td>Chapter text side by side with Claude. The admin uses Claude to draft the animated lesson and a <strong>question bank</strong> (20+ questions with answers and the topic each one tests). Admin edits and previews, then sends it to the content check (S11). After the check passes, the admin publishes to that family only. The family gets "Lessons ready".</td></tr>
+      <tr><td class="id">S11</td><td class="hi">Content check report</td><td>A content-check agent reviews every lesson, question and answer before it can be published, and lists red flags by severity:
+        <ul>
+          <li>Not suitable for the child's age (violence, fear, adult topics, brand names, links).</li>
+          <li>Facts that don't match the chapter text, or wrong answers and solutions.</li>
+          <li>Spelling, grammar or Hindi script errors (e.g. broken conjunct letters).</li>
+          <li>Too hard or too easy for the class.</li>
+          <li>Bias or stereotypes (gender, caste, religion, region).</li>
+          <li>Any personal information.</li>
+        </ul>
+        <strong>Critical</strong> flags block publishing until fixed. <strong>Warnings</strong> can be accepted by the admin with a note. Each flag links to the exact part of the lesson.</td></tr>
+      <tr><td class="id">S10</td><td class="hi">Question bank</td><td>All questions by class, subject, chapter and topic, with answers and solutions. Worksheets and practice sets are built by shuffling from here.</td></tr>
+      <tr><td class="id">S3</td><td class="hi">Library</td><td>Class → subject → topic tree of grade-level content (lessons, practice questions, worksheets, reading passages).</td></tr>
+      <tr><td class="id">S4</td><td class="hi">Draft with AI</td><td>Choose class, subject, topic and content type. The AI drafts; the teacher edits.</td></tr>
+      <tr><td class="id">S5</td><td class="hi">Edit and preview</td><td>Edit text, questions, answers, narration. Preview exactly as a child will see it.</td></tr>
+      <tr><td class="id">S6</td><td class="hi">Publish</td><td>Available only after the content check (S11) has no critical flags. Unpublish if something is wrong.</td></tr>
+      <tr><td class="id">S12</td><td class="hi">Support inbox</td><td>"Contact us" tickets from parents, newest first, with status (open, answered, closed). Open a ticket to read the conversation and reply; the reply appears in the parent's messages.</td></tr>
+      <tr><td class="id">S7</td><td class="hi">Problem reports</td><td>Reports from parents with the item, reason and note. Open the item, fix it, mark <em>Fixed</em> (sends the parent a message).</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="journeys">
+  <h2><span class="n">8</span>User journeys</h2>
+  <div class="grid2">
+    <div class="card"><h3>New parent signs up</h3><ol class="steps">
+      <li>A1 → taps <em>Sign up</em>.</li>
+      <li>A2 enters email, ticks consent → A3 enters the emailed code.</li>
+      <li>B1 sets parent PIN → B2 adds child (Class 3).</li>
+      <li>B3 uploads the English book, skips the rest → B4 picks 30 minutes.</li>
+      <li>B5 → C1, hands the tablet over.</li>
+    </ol></div>
+    <div class="card"><h3>Returning parent on a new phone</h3><ol class="steps">
+      <li>A1 → <em>Sign in</em> → A2 → A3.</li>
+      <li>Lands on C1 with existing children.</li>
+    </ol></div>
+    <div class="card"><h3>Child's session</h3><ol class="steps">
+      <li>C1 taps own picture → K1.</li>
+      <li>Taps English → K2 → a chapter → K3 → watches a lesson (K4) → K7.</li>
+      <li>Practice tab → Tables (K10) → 60-second challenge.</li>
+      <li>Read tab → K13 → K14 gets stars.</li>
+      <li>Time bar turns red; the child finishes and stops.</li>
+    </ol></div>
+    <div class="card"><h3>Parent adds a chapter</h3><ol class="steps">
+      <li>Parent button → P0 PIN → Books (P4).</li>
+      <li>Hindi → <em>Add chapter</em> (P7), takes 6 photos, saves.</li>
+      <li>Status shows <em>Getting ready</em>; parent leaves.</li>
+      <li>Bell message: "Hindi Ch 4 is ready to read along." Chapter appears for the child.</li>
+      <li>Our admin gets a notification (S8) and prepares the lesson and questions (S9).</li>
+      <li>Parent gets "Lessons for Hindi Ch 4 are ready. We recommend a quick preview." <em>Watch lesson</em> and worksheets unlock for the child.</li>
+      <li>Parent opens the preview (P8a) and taps <em>Looks good</em>.</li>
+    </ol></div>
+    <div class="card"><h3>Parent prints and checks a worksheet</h3><ol class="steps">
+      <li>Worksheets (P10) → <em>Create</em> (P11) → Maths, Chapter 3.</li>
+      <li>P12 shares the PDF to print.</li>
+      <li>After the child finishes, P13 opens solutions and ticks "carrying in addition" as a weak spot.</li>
+      <li>It shows up in <em>Areas to work on</em> in Progress (P1).</li>
+    </ol></div>
+    <div class="card"><h3>Upload needs attention</h3><ol class="steps">
+      <li>Bell message: "3 pages of your EVS book were unclear."</li>
+      <li>P8 shows only those 3 pages → <em>Retake photo</em> for each.</li>
+      <li>Status returns to <em>Getting ready</em>, then <em>Ready</em>.</li>
+    </ol></div>
+    <div class="card"><h3>New school year</h3><ol class="steps">
+      <li>Settings → child (P15) → <em>Move to next class</em>.</li>
+      <li>Warning that Class 3 progress will be erased → confirm.</li>
+      <li>Subjects reset to Class 4; parent uploads new books.</li>
+    </ol></div>
+    <div class="card"><h3>Parent reports a problem</h3><ol class="steps">
+      <li>In parent mode, opens a lesson → <em>Report a problem</em> (P18).</li>
+      <li>Teacher sees it in S7, fixes it, marks <em>Fixed</em>.</li>
+      <li>Parent gets "The lesson you reported has been fixed."</li>
+    </ol></div>
+    <div class="card"><h3>Admin prepares an uploaded book</h3><ol class="steps">
+      <li>Notification: "New upload: Class 3 English, 12 chapters" → S8.</li>
+      <li>Opens Chapter 1 in S9; Claude drafts the lesson and 25 questions.</li>
+      <li>Admin edits and previews, then runs the content check (S11).</li>
+      <li>Fixes the 1 critical flag (a wrong answer), accepts 1 warning with a note, publishes.</li>
+      <li>Repeats per chapter; the family is told as each chapter is ready.</li>
+    </ol></div>
+    <div class="card"><h3>Teacher publishes content</h3><ol class="steps">
+      <li>S1 sign in → S3 Class 3 → EVS → Water.</li>
+      <li>S4 drafts a lesson and 10 questions with AI.</li>
+      <li>S5 edits and previews → S11 content check → S6 publishes.</li>
+    </ol></div>
+  </div>
+</section>
+
+<section id="empty">
+  <h2><span class="n">9</span>Empty and loading states</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Where</th><th>Situation</th><th>What the user sees</th></tr></thead>
+    <tbody>
+      <tr><td class="id">K1/K2</td><td>No book uploaded for a subject</td><td>Grade-level content instead: grammar for English and Hindi, practice for Maths, general concepts for EVS. Labelled "Class 3 practice". Never an empty shelf.</td></tr>
+      <tr><td class="id">K1</td><td>Book still being processed</td><td>Not shown to the child until ready. The child keeps seeing grade-level content.</td></tr>
+      <tr><td class="id">K3</td><td>Lesson for an uploaded chapter not ready yet</td><td><em>Watch lesson</em> card shows "Coming soon" with a picture; <em>Read along</em> works meanwhile.</td></tr>
+      <tr><td class="id">K11</td><td>No mistakes yet</td><td>"No mistakes to fix. Great job!" with a picture.</td></tr>
+      <tr><td class="id">K12</td><td>No reading test taken yet</td><td>"Let's read your first story!" with a big start button.</td></tr>
+      <tr><td class="id">P1</td><td>No activity yet</td><td>Checklist: add books, watch the first lesson, take the first reading test.</td></tr>
+      <tr><td class="id">P3</td><td>No reading history</td><td>"Reading results will appear after the first test."</td></tr>
+      <tr><td class="id">P4</td><td>No books</td><td>Each subject shows <em>Upload book</em> and <em>Add chapter</em>, with a note that practice is already available.</td></tr>
+      <tr><td class="id">P10</td><td>No worksheets</td><td>"Create your first worksheet" button.</td></tr>
+      <tr><td class="id">P19</td><td>No messages</td><td>"You're all caught up."</td></tr>
+      <tr><td class="id">Any</td><td>Loading</td><td>Kid mode: a friendly animated character. Parent mode: grey placeholder blocks. Never a blank screen.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="errors">
+  <h2><span class="n">10</span>Error states</h2>
+  <p>Children never see technical messages. They see a friendly "Let's try again" with a picture. Parents see a clear explanation and what to do next.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Situation</th><th>Child sees</th><th>Parent sees</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Wrong or expired code</td><td>—</td><td>"That code didn't match" or "Code expired" with <em>Resend</em>. After 5 wrong tries, request a new code.</td></tr>
+      <tr><td class="hi">Code email not arriving</td><td>—</td><td>"Check your spam folder", <em>Resend</em> after 30 seconds, <em>Change email</em>.</td></tr>
+      <tr><td class="hi">Wrong parent PIN</td><td>The PIN pad shakes.</td><td>After 5 wrong tries: wait 1 minute or use <em>Forgot PIN</em>.</td></tr>
+      <tr><td class="hi">No internet</td><td>Only offline items are shown; others show a cloud picture.</td><td>A banner: "You're offline. Some features are paused."</td></tr>
+      <tr><td class="hi">Internet lost during an activity</td><td>Nothing; the child keeps going.</td><td>Nothing; progress syncs when back online.</td></tr>
+      <tr><td class="hi">Microphone not allowed</td><td>"Ask Mummy/Papa to turn on the microphone."</td><td>Steps to allow the microphone.</td></tr>
+      <tr><td class="hi">Recording not understood (noise, too quiet)</td><td>"Let's try again." No score is given.</td><td>Nothing recorded as a result.</td></tr>
+      <tr><td class="hi">Camera not allowed</td><td>—</td><td>Steps to allow the camera, plus <em>Choose from gallery</em>.</td></tr>
+      <tr><td class="hi">Wrong file type or file too large</td><td>—</td><td>"Please use a PDF (up to 50 MB, 300 pages) or JPG/PNG photos (up to 10 MB each, 50 per upload)."</td></tr>
+      <tr><td class="hi">Unclear pages</td><td>—</td><td>Status <em>Needs attention</em>, bell message, P8 to retake only those pages.</td></tr>
+      <tr><td class="hi">Our team can't use an upload (pages missing, wrong book)</td><td>Read-along keeps working; lesson card stays "Coming soon".</td><td>Message from our team explaining what to fix, with a link to <em>Fix unclear pages</em> or <em>Replace book</em>.</td></tr>
+      <tr><td class="hi">File failed the virus check</td><td>—</td><td>"This file couldn't be used. Please try a different copy."</td></tr>
+      <tr><td class="hi">Lesson fails to load</td><td>"Let's try again" with a retry button.</td><td>—</td></tr>
+      <tr><td class="hi">Server problem</td><td>"Let's try again."</td><td>"Something went wrong on our side. Please try again in a few minutes."</td></tr>
+      <tr><td class="hi">Signed out (session expired)</td><td>Returns to C1 (kid mode keeps working offline).</td><td>Sign in again with an email code when opening parent mode.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="offline">
+  <h2><span class="n">11</span>What works offline</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Feature</th><th>Offline?</th></tr></thead>
+    <tbody>
+      <tr><td>Saved and already-downloaded animated lessons</td><td><span class="tag">Yes</span></td></tr>
+      <tr><td>Generated worksheets (on screen and saved PDFs)</td><td><span class="tag">Yes</span></td></tr>
+      <tr><td>Tables practice and 60-second challenge</td><td><span class="tag">Yes</span></td></tr>
+      <tr><td>Reading test</td><td><span class="tag no">No</span></td></tr>
+      <tr><td>Uploading books or chapters</td><td><span class="tag no">No</span></td></tr>
+      <tr><td>Progress dashboard</td><td><span class="tag later">Last saved view</span></td></tr>
+      <tr><td>Sign-in, email code, PIN reset</td><td><span class="tag no">No</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="later">
+  <h2><span class="n">12</span>Not in this version</h2>
+  <ul>
+    <li>Payments, free trial and subscriptions.</li>
+    <li>Hindi app language (English only; the Hindi subject stays).</li>
+    <li>Book list to pick from; more than one book per subject.</li>
+    <li>Computer subject.</li>
+    <li>Daily plan / Today tab, bonus activities, streaks, parent assigning lessons.</li>
+    <li>Child PIN.</li>
+    <li>Second parent login, sibling comparison.</li>
+    <li>SMS, WhatsApp or email messages.</li>
+    <li>Self-service account deletion (a deletion request is sent to the team instead).</li>
+    <li>Separate writer and approver roles in the Content Studio.</li>
+  </ul>
+  <div class="callout"><p><strong>Lessons from uploaded chapters:</strong> each upload notifies our admin, who uses Claude in the Content Studio to prepare the lesson and question bank. Every item then passes three checks: the admin, a content-check agent that flags red flags (critical flags block publishing), and an optional but recommended parent preview. Children never see content that has not passed the first two. Worksheets are made by shuffling questions from the bank for the chapter or topic the parent picks.</p></div>
+</section>
+
+<section id="prd">
+  <h2><span class="n">13</span>Changes made to the PRD</h2>
+  <p>These decisions are now in PRD v1.2 and Tech Stack v1.2.</p>
+  <ul>
+    <li>Kid mode: 3 tabs (Learn, Practice, Read); remove the Today tab and daily plan.</li>
+    <li>My books: no book list; one uploaded book per subject; grade-level content when no book.</li>
+    <li>Subjects: English, Hindi, Maths, EVS; Computer later.</li>
+    <li>Remove subscriptions, the trial conversion target and child PINs.</li>
+    <li>App language English only; worksheet marks entry replaced by solutions and weak-spot ticks.</li>
+    <li>Moving to the next class erases old progress.</li>
+    <li>Animated lessons for every grade-level topic <em>and</em> every uploaded chapter (the PRD currently lists lessons from uploaded books as "not in the first version"). Uploaded books notify our admin, who prepares lessons and a question bank with Claude and publishes them per family. Worksheets are shuffled from the question bank.</li>
+    <li>A content-check agent reviews all content before publishing; parents are advised (not required) to preview new lessons.</li>
+    <li>Upload limits: PDF up to 50 MB and 300 pages; photos up to 10 MB each, 50 per upload.</li>
+  </ul>
+</section>
+
+<footer>Companion documents: FullStar PRD and FullStar Tech Stack.</footer>
+</div>

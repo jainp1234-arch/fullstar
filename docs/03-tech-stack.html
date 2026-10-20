@@ -1,0 +1,381 @@
+<title>FullStar Tech Stack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Hind:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: same notebook column as the PRD; every layer is a locked-version table Claude Code can copy from. */
+:root{
+  --bg:#f7f9fc; --surface:#ffffff; --fg:#1d2433; --muted:#5a6478; --line:#dfe4ee;
+  --ink:#24489c; --marigold:#e8a317; --marigold-soft:#fff4dc; --ok:#1f7a4d; --ok-soft:#e5f4ec; --bad:#b3261e; --bad-soft:#fbe9e7;
+  --display:"Baloo 2","Hind",system-ui,sans-serif;
+  --body:"Hind","Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121722; --surface:#1a2130; --fg:#e7ebf3; --muted:#a2acc0; --line:#2c3547;
+  --ink:#8fb0ff; --marigold:#f2b84b; --marigold-soft:#33291a; --ok:#6fd4a0; --ok-soft:#18302a; --bad:#ff8a80; --bad-soft:#3a1f1f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121722; --surface:#1a2130; --fg:#e7ebf3; --muted:#a2acc0; --line:#2c3547;
+  --ink:#8fb0ff; --marigold:#f2b84b; --marigold-soft:#33291a; --ok:#6fd4a0; --ok-soft:#18302a; --bad:#ff8a80; --bad-soft:#3a1f1f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:32px 64px;display:grid;gap:40px}
+header{display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-size:clamp(30px,5vw,42px);line-height:1.1;margin:0;color:var(--ink);text-wrap:balance}
+.lede{font-size:18px;margin:0;max-width:68ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:var(--muted)}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px}
+nav.toc ol{margin:0;padding-left:20px;columns:2 240px;column-gap:24px}
+nav.toc a{color:var(--ink);text-decoration:none}
+nav.toc a:hover{text-decoration:underline}
+section{display:grid;gap:14px}
+h2{font-family:var(--display);font-size:24px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--line);display:flex;gap:10px;align-items:baseline;text-wrap:balance}
+h2 .n{color:var(--marigold);font-size:18px}
+h3{font-size:18px;margin:6px 0 0;font-weight:600;color:var(--ink)}
+p{margin:0;max-width:72ch}
+ul,ol{margin:0;padding-left:20px;display:grid;gap:4px}
+code{font-family:var(--mono);font-size:13px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:0 4px;overflow-wrap:anywhere}
+pre.code{font-family:var(--mono);font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0;overflow-x:auto;line-height:1.5}
+.callout{background:var(--marigold-soft);border-left:4px solid var(--marigold);padding:14px 16px;border-radius:4px}
+.callout p{max-width:none}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.tool{font-family:var(--mono);font-size:13px;color:var(--ink)}
+td.v{font-family:var(--mono);font-size:13px;font-weight:600;white-space:nowrap}
+td.hi{font-weight:600}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--ok-soft);color:var(--ok);white-space:nowrap}
+.tag.warn{background:var(--marigold-soft);color:var(--fg)}
+.tag.no{background:var(--bad-soft);color:var(--bad)}
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto}
+.diagram pre{margin:0}
+footer{font-size:13px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Technology · v2.0 · Locked versions</div>
+  <h1>FullStar Tech Stack</h1>
+  <p class="lede">The build input for Claude Code. Every dependency is pinned to an exact version. Covers the free prototype; the AWS launch stack is listed at the end and is not locked yet.</p>
+  <div class="meta"><span>Owner: Atul Singh</span><span>Versions locked: 19 Oct 2026</span><span>Companions: PRD v1.2, App Flow v1</span></div>
+</header>
+
+<nav class="toc" aria-label="Contents"><ol>
+  <li><a href="#rules">Rules for Claude Code</a></li>
+  <li><a href="#policy">Selection policy and exceptions</a></li>
+  <li><a href="#arch">Architecture</a></li>
+  <li><a href="#repo">Repository layout</a></li>
+  <li><a href="#fe">Frontend versions</a></li>
+  <li><a href="#be">Backend versions</a></li>
+  <li><a href="#workers">Workers and services</a></li>
+  <li><a href="#cloud">Free cloud services</a></li>
+  <li><a href="#trial">Trial mode (current)</a></li>
+  <li><a href="#ai">AI usage</a></li>
+  <li><a href="#conv">Engineering conventions</a></li>
+  <li><a href="#watch">Upgrade watch list</a></li>
+  <li><a href="#rejected">Rejected and replaced</a></li>
+  <li><a href="#launch">Launch stack (AWS)</a></li>
+</ol></nav>
+
+<section id="rules">
+  <h2><span class="n">1</span>Rules for Claude Code</h2>
+  <ol>
+    <li><strong>Use exactly the versions in this document.</strong> No <code>^</code>, <code>~</code>, <code>latest</code>, <code>LATEST</code> or version ranges in <code>package.json</code>, <code>pom.xml</code>, <code>requirements.txt</code>, Dockerfiles or GitHub Actions.</li>
+    <li>Commit <code>package-lock.json</code> and use <code>npm ci</code> in CI. Python <code>requirements.txt</code> files list every package with an exact <code>==</code> pin from this document.</li>
+    <li>Spring-managed libraries take their version from the Spring Boot 4.1.1 BOM. Do not override a Boot-managed version unless this document says so.</li>
+    <li>Pin every Docker image to an exact tag (never <code>latest</code> or a major-only tag). Before first use, confirm the tag exists with <code>docker pull</code>; if it does not, stop and report rather than picking another version.</li>
+    <li>All images must build for <strong>linux/amd64 and linux/arm64</strong> (the demo server is ARM).</li>
+    <li>Do not add a dependency that is not in this document. If one is needed, stop and propose it with its version, GitHub stars, age and licence.</li>
+    <li>Never commit secrets. Read them from environment variables; provide a <code>.env.example</code> with names only.</li>
+  </ol>
+</section>
+
+<section id="policy">
+  <h2><span class="n">2</span>Selection policy and exceptions</h2>
+  <p>Default rule: a library must be at least 2 years old and have at least 10,000 GitHub stars. The items below break the rule because they are the official client or there is no well-established alternative.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Exception</th><th>Stars</th><th>Why it is allowed</th></tr></thead>
+    <tbody>
+      <tr><td class="tool">Indic Parler-TTS (AI4Bharat)</td><td>5.6k (parler-tts)</td><td>Your choice. AI4Bharat's current Hindi voice model, Apache-2.0 weights, commercial use allowed. No Hindi TTS meets the rule.</td></tr>
+      <tr><td class="tool">keycloak-js</td><td>93 (split repo)</td><td>Official Keycloak browser client, maintained by the Keycloak team (server repo 37k).</td></tr>
+      <tr><td class="tool">AWS SDK for Java v2</td><td>2.6k</td><td>Official AWS client, used for SQS and for R2 through the S3 API.</td></tr>
+      <tr><td class="tool">anthropic-java</td><td>383</td><td>Official Anthropic SDK (since Dec 2024). Needed for the content-check agent and lesson drafting.</td></tr>
+      <tr><td class="tool">PostgreSQL JDBC, PDFBox, Maven, Temurin</td><td>1.2k–5.4k</td><td>Long-established Apache / PostgreSQL / Eclipse projects; GitHub is a mirror, not their main home.</td></tr>
+      <tr><td class="tool">Flyway</td><td>~10k</td><td>Standard database migration tool; managed by Spring Boot.</td></tr>
+      <tr><td class="tool">springdoc-openapi</td><td>3.7k</td><td>The standard OpenAPI generator for Spring Boot.</td></tr>
+      <tr><td class="tool">Testcontainers</td><td>8.7k</td><td>The standard for integration tests with a real PostgreSQL; managed by Spring Boot.</td></tr>
+      <tr><td class="tool">angular-eslint</td><td>1.8k</td><td>Official Angular lint rules.</td></tr>
+      <tr><td class="tool">ClamAV</td><td>7.4k</td><td>The standard open-source virus scanner (Cisco Talos).</td></tr>
+      <tr><td class="tool">Fluent Emoji 3D (microsoft/fluentui-emoji)</td><td>~9k</td><td>Vendored PNG illustrations, MIT. Official Microsoft set; no comparable free 3D set. Exact files listed in the Content Guidelines.</td></tr>
+      <tr><td class="tool">Grafana Alloy</td><td>3.5k</td><td>Grafana's official log collector; Promtail reached end of life on 2 Mar 2026.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="arch">
+  <h2><span class="n">3</span>Architecture</h2>
+  <div class="diagram"><pre class="mermaid">
+flowchart LR
+  K[Family app<br/>Angular PWA] --> API[Main server<br/>Spring Boot]
+  S[Content Studio<br/>Angular] --> API
+  K & S -. login .-> KC[Keycloak]
+  API --> DB[(Neon PostgreSQL)]
+  API --> R2[Cloudflare R2<br/>books, audio, PDFs]
+  API --> Q[AWS SQS + DLQs]
+  Q --> W1[Book reader<br/>PDFBox + Tesseract]
+  Q --> W2[Reading checker<br/>faster-whisper]
+  Q --> W3[Voice maker<br/>Indic Parler-TTS]
+  Q --> W4[Virus scan<br/>ClamAV]
+  API --> G[Gotenberg<br/>worksheet PDFs]
+  API -- drafts + content check --> AI[Claude API]
+  </pre></div>
+  <p>Children's devices never call the Claude API. Only the main server calls it, and only for Content Studio actions.</p>
+</section>
+
+<section id="repo">
+  <h2><span class="n">4</span>Repository layout</h2>
+  <p>One Git repository (monorepo). Build tools: <strong>npm</strong> for the frontend, <strong>Maven</strong> for Java, <strong>pip</strong> for Python workers.</p>
+<pre class="code">fullstar/
+├── apps/
+│   ├── family-app/          Angular 22 – kid mode + parent mode (PWA)
+│   └── content-studio/      Angular 22 – admin / teachers
+├── services/
+│   ├── api/                 Spring Boot 4.1.1 – main server (Java 21)
+│   └── book-reader/         Spring Boot 4.1.1 – SQS worker: PDFBox + Tesseract
+├── workers/
+│   ├── reading-checker/     Python 3.12 – faster-whisper, SQS worker
+│   └── voice-maker/         Python 3.12 – Indic Parler-TTS, SQS worker
+├── infra/
+│   ├── docker-compose.yml   Keycloak, Gotenberg, ClamAV, Grafana, Loki, Prometheus, Alloy
+│   └── keycloak/
+│       ├── realm/           realm export (no secrets)
+│       └── email-otp/       Java 21 – email one-time-code authenticator (Keycloak SPI)
+├── .github/workflows/
+└── .env.example</pre>
+</section>
+
+<section id="fe">
+  <h2><span class="n">5</span>Frontend versions</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Package</th><th>Version</th><th>Use</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="tool">Node.js</td><td class="v">24.21.0</td><td>Runtime and build</td><td>LTS; moves to Maintenance on 20 Oct 2026, still supported to Apr 2028.</td></tr>
+      <tr><td class="tool">npm</td><td class="v">11.19.0</td><td>Package manager</td><td>Bundled with Node 24.21.0.</td></tr>
+      <tr><td class="tool">@angular/core, common, router, forms, platform-browser, animations</td><td class="v">22.2.1</td><td>Framework</td><td>Standalone components, reactive forms, signals.</td></tr>
+      <tr><td class="tool">@angular/cli, @angular/build</td><td class="v">22.2.1</td><td>Build</td><td></td></tr>
+      <tr><td class="tool">@angular/service-worker</td><td class="v">22.2.1</td><td>PWA and offline</td><td>Caches saved lessons, worksheets and tables practice.</td></tr>
+      <tr><td class="tool">@angular/material, @angular/cdk</td><td class="v">22.2.1</td><td>UI components (parent mode, Content Studio)</td><td>Kid mode uses custom large-button components on top of CDK.</td></tr>
+      <tr><td class="tool">typescript</td><td class="v">6.0.3</td><td>Language</td><td><strong>Do not use TypeScript 7</strong>; Angular 22 supports only 6.0.x.</td></tr>
+      <tr><td class="tool">rxjs</td><td class="v">7.8.2</td><td>Async streams</td><td></td></tr>
+      <tr><td class="tool">gsap</td><td class="v">3.15.0</td><td>Lesson animations</td><td>Free "standard no-charge" licence, not open source; review terms before launch.</td></tr>
+      <tr><td class="tool">lottie-web</td><td class="v">5.13.0</td><td>Character animations</td><td>Stable but no commits since Nov 2024; see watch list.</td></tr>
+      <tr><td class="tool">pdfjs-dist</td><td class="v">6.4.299</td><td>Read-along page display</td><td></td></tr>
+      <tr><td class="tool">chart.js</td><td class="v">4.5.1</td><td>Parent progress charts</td><td>Used directly, no Angular wrapper.</td></tr>
+      <tr><td class="tool">keycloak-js</td><td class="v">26.2.4</td><td>Login (OIDC + PKCE)</td><td>Wrapped in an <code>AuthService</code>; no other auth library.</td></tr>
+      <tr><td class="tool">vitest</td><td class="v">5.0.3</td><td>Unit tests</td><td>Angular 22 default test runner.</td></tr>
+      <tr><td class="tool">@playwright/test</td><td class="v">1.63.0</td><td>End-to-end tests</td><td></td></tr>
+      <tr><td class="tool">eslint</td><td class="v">10.12.0</td><td>Lint</td><td></td></tr>
+      <tr><td class="tool">typescript-eslint</td><td class="v">8.71.0</td><td>Lint</td><td></td></tr>
+      <tr><td class="tool">angular-eslint</td><td class="v">22.5.0</td><td>Lint</td><td></td></tr>
+      <tr><td class="tool">prettier</td><td class="v">3.9.9</td><td>Formatting</td><td></td></tr>
+      <tr><td class="tool">Poppins (vendored files)</td><td class="v">google/fonts ofl/poppins</td><td>App font, Latin + Devanagari</td><td>WOFF2, weights 400–700, OFL. Record the commit hash used.</td></tr>
+      <tr><td class="tool">Material Symbols Rounded (vendored font)</td><td class="v">google/material-design-icons</td><td>UI icons</td><td>Variable font, Apache-2.0. Record the commit hash used.</td></tr>
+      <tr><td class="tool">Fluent Emoji 3D (vendored PNGs)</td><td class="v">microsoft/fluentui-emoji</td><td>Illustrations, avatars, owl placeholder</td><td>MIT. Record the commit hash used.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><p>Angular 22 is used instead of the org standard Angular 20, because Angular 20 support ends on 28 Nov 2026. Angular 22 is supported to June 2028.</p></div>
+</section>
+
+<section id="be">
+  <h2><span class="n">6</span>Backend versions</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Dependency</th><th>Version</th><th>Use</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="tool">Eclipse Temurin JDK 21</td><td class="v">21.0.12.1+1</td><td>Runtime</td><td>Docker: <code>eclipse-temurin:21.0.12.1_1-jre</code>. Java 21 LTS.</td></tr>
+      <tr><td class="tool">Apache Maven</td><td class="v">3.9.16</td><td>Build</td><td>Use the Maven Wrapper pinned to this version. Not Maven 4 (not GA).</td></tr>
+      <tr><td class="tool">org.springframework.boot:spring-boot-starter-parent</td><td class="v">4.1.1</td><td>Framework</td><td>Spring Framework 7.0.9. Generate starters with Spring Initializr for 4.1.1: Web MVC, Security, OAuth2 Resource Server, Validation, Data JPA, Actuator, Flyway.</td></tr>
+      <tr><td class="tool">io.github.resilience4j:resilience4j-spring-boot4</td><td class="v">2.4.0</td><td>Retry with backoff, circuit breaker, time limiter</td><td>Use the <code>-spring-boot4</code> artifact, not <code>-spring-boot3</code>.</td></tr>
+      <tr><td class="tool">org.postgresql:postgresql</td><td class="v">42.7.13</td><td>Database driver</td><td>Boot-managed.</td></tr>
+      <tr><td class="tool">org.flywaydb:flyway-core + flyway-database-postgresql</td><td class="v">12.4.0</td><td>Database migrations</td><td>Boot-managed. Do not override to 13.x.</td></tr>
+      <tr><td class="tool">software.amazon.awssdk:bom</td><td class="v">2.55.11</td><td>SQS client; S3 client for Cloudflare R2</td><td>Not Boot-managed; import the BOM.</td></tr>
+      <tr><td class="tool">org.apache.pdfbox:pdfbox</td><td class="v">3.0.8</td><td>Read text and pages from PDFs</td><td>book-reader service.</td></tr>
+      <tr><td class="tool">org.springdoc:springdoc-openapi-starter-webmvc-ui</td><td class="v">3.1.1</td><td>API docs</td><td>Run a startup smoke test; 4.1 support is assumed from the 3.x line.</td></tr>
+      <tr><td class="tool">com.anthropic:anthropic-java</td><td class="v">2.68.0</td><td>Claude API</td><td>Content Studio drafting and content-check agent.</td></tr>
+      <tr><td class="tool">org.testcontainers:testcontainers-postgresql</td><td class="v">2.0.5</td><td>Integration tests</td><td>Boot-managed. Note the 2.x module names.</td></tr>
+      <tr><td class="tool">org.keycloak:keycloak-server-spi, keycloak-server-spi-private, keycloak-services</td><td class="v">26.8.0</td><td>Email OTP authenticator</td><td>Scope <code>provided</code>; must match the Keycloak server version exactly.</td></tr>
+      <tr><td class="tool">JUnit, Mockito, AssertJ</td><td class="v">Boot 4.1.1 BOM</td><td>Unit tests</td><td>Via <code>spring-boot-starter-test</code>.</td></tr>
+      <tr><td class="tool">SLF4J + Logback</td><td class="v">Boot 4.1.1 BOM</td><td>Logging</td><td>Use Boot's built-in structured logging (<code>logging.structured.format.console=ecs</code>); no extra encoder library.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="workers">
+  <h2><span class="n">7</span>Workers and services</h2>
+  <h3>Docker images</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Service</th><th>Image</th><th>Use</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Keycloak</td><td class="tool">quay.io/keycloak/keycloak:26.8.0</td><td>Parent and staff login</td><td>Parents: email + one-time code. Keycloak has no built-in email OTP, so we write a small authenticator in <code>infra/keycloak/email-otp/</code> using Keycloak's own SPI (no community plugin). 6-digit code, 10-minute expiry, 5 tries. Staff: email code + TOTP two-step login.</td></tr>
+      <tr><td class="hi">Gotenberg</td><td class="tool">gotenberg/gotenberg:8.37.0</td><td>A4 worksheets and answer keys</td><td>Bundle Noto Sans Devanagari for Hindi.</td></tr>
+      <tr><td class="hi">ClamAV</td><td class="tool">clamav/clamav:1.4.6</td><td>Scan every upload</td><td>1.4 LTS, supported to Aug 2027.</td></tr>
+      <tr><td class="hi">Tesseract OCR</td><td class="tool">built in book-reader image, 5.5.3</td><td>Text from page photos</td><td>Compile tag 5.5.3 in a build stage; add <code>eng</code> and <code>hin</code> from tessdata_best.</td></tr>
+      <tr><td class="hi">Python base</td><td class="tool">python:3.12.15-slim</td><td>Python workers</td><td>3.12, not 3.13: TTS dependencies need it.</td></tr>
+      <tr><td class="hi">Grafana</td><td class="tool">grafana/grafana:13.2.3</td><td>Dashboards</td><td>AGPL-3.0; internal use only.</td></tr>
+      <tr><td class="hi">Loki</td><td class="tool">grafana/loki:3.7.8</td><td>Log storage</td><td>AGPL-3.0; internal use only.</td></tr>
+      <tr><td class="hi">Prometheus</td><td class="tool">prom/prometheus:v3.13.4</td><td>Metrics</td><td>LTS line.</td></tr>
+      <tr><td class="hi">Grafana Alloy</td><td class="tool">grafana/alloy:v1.20.0</td><td>Ship logs to Loki</td><td>Replaces Promtail.</td></tr>
+      <tr><td class="hi">Caddy</td><td class="tool">caddy:2.11.4</td><td>HTTPS reverse proxy on the demo server</td><td>Automatic certificates for <code>api.</code> and <code>auth.</code>; ~60k stars, since 2015.</td></tr>
+      <tr><td class="hi">Docker Engine / Compose</td><td class="tool">29.8.2 / v5.6.0</td><td>Local and demo runtime</td><td>Compose is now v5.</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Python packages</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Worker</th><th>Package</th><th>Version</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="hi" rowspan="3">reading-checker</td><td class="tool">faster-whisper</td><td class="v">1.2.1</td><td>CPU, int8. Model: <code>small</code> for the prototype.</td></tr>
+      <tr><td class="tool">ctranslate2</td><td class="v">4.8.2</td><td>Required by faster-whisper.</td></tr>
+      <tr><td class="tool">boto3</td><td class="v">1.43.108</td><td>SQS.</td></tr>
+      <tr><td class="hi" rowspan="3">voice-maker</td><td class="tool">parler-tts</td><td class="v">git commit (pin at setup)</td><td>Install from <code>github.com/huggingface/parler-tts</code> pinned to a full commit hash; record it here. Model: <code>ai4bharat/indic-parler-tts</code> (accept terms on Hugging Face).</td></tr>
+      <tr><td class="tool">transformers</td><td class="v">4.46.1</td><td>Exact version required by parler-tts. Keep this worker in its own environment.</td></tr>
+      <tr><td class="tool">boto3</td><td class="v">1.43.108</td><td>SQS and R2.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The voice-maker also needs PyTorch (CPU build). Its version is not verified yet: during setup, choose the newest 2.x CPU wheel that works with transformers 4.46.1, then record it here before committing.</p>
+</section>
+
+<section id="cloud">
+  <h2><span class="n">8</span>Free cloud services</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Service</th><th>Use</th><th>Free limits (checked 19 Oct 2026)</th><th>Setup notes</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Neon</td><td>PostgreSQL 18</td><td>0.5 GB per project, 100 compute-hours/month, scales to zero after 5 minutes</td><td>Use the pooled connection string. Allow for a slow first request after idle (Hikari <code>connectionTimeout</code> 30 s).</td></tr>
+      <tr><td class="hi">Cloudflare R2</td><td>Books, audio, PDFs</td><td>10 GB storage, 1M writes and 10M reads per month, free downloads</td><td>AWS SDK S3 client: endpoint <code>https://&lt;account&gt;.r2.cloudflarestorage.com</code>, region <code>auto</code>, path-style on, chunked encoding off. Private bucket; signed URLs only.</td></tr>
+      <tr><td class="hi">AWS SQS</td><td>Task queues</td><td>1M requests/month</td><td>New AWS free-plan accounts last 6 months, then must be upgraded. One queue + DLQ per job type.</td></tr>
+      <tr><td class="hi">Oracle Cloud Always Free</td><td>Demo server (API, workers, Keycloak, Gotenberg, ClamAV)</td><td>4 ARM cores, 24 GB RAM, 200 GB disk</td><td>ARM64: images must be multi-arch. Idle machines can be reclaimed after 7 days under 20% use.</td></tr>
+      <tr><td class="hi">Cloudflare Pages</td><td>Family app and Content Studio</td><td>500 builds/month, unlimited static requests</td><td>Git-connected build. Cloudflare now suggests Workers static assets for new projects; Pages is fine for the prototype.</td></tr>
+      <tr><td class="hi">Brevo</td><td>Sending sign-in codes (SMTP)</td><td>300 emails/day, adds a "Sent with Brevo" footer</td><td>Configured as Keycloak's SMTP server. Set up SPF and DKIM on the sending domain so codes don't land in spam.</td></tr>
+      <tr><td class="hi">GitHub Actions</td><td>CI</td><td>Free plan minutes</td><td><code>actions/checkout@v7.0.1</code>, <code>actions/setup-java@v6.0.1</code>, <code>actions/setup-node@v7.0.0</code>, <code>actions/cache@v6.1.0</code>, <code>docker/build-push-action@v7.4.0</code>.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="trial">
+  <h2><span class="n">8a</span>Trial mode (current) — no paid accounts, no card</h2>
+  <p>Until FullStar goes live, everything runs on the developer's laptop with free, no-card accounts only. Each trial tool speaks the same interface as the full-stack tool, so going live is a configuration switch (<code>FULLSTAR_MODE=trial</code> → <code>full</code>), not a rewrite.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Need</th><th>Trial (now)</th><th>Full stack (before go-live)</th><th>Switch</th></tr></thead>
+    <tbody>
+      <tr><td>Accounts</td><td class="tool">GitHub, Neon, Brevo (all free, no card)</td><td class="was">+ Cloudflare, AWS, Anthropic API, Hugging Face, Oracle or paid server, domain</td><td>Create at go-live</td></tr>
+      <tr><td>Where it runs</td><td class="tool">Laptop: docker compose behind a local Caddy 2.11.4 that serves app, Studio, <code>/api</code> and <code>/auth</code> on one address</td><td class="was">Oracle Always Free (or paid server) + Cloudflare Pages</td><td>Deploy pipeline (Plan phase 10)</td></tr>
+      <tr><td>Phone testing (https)</td><td class="tool">cloudflared quick tunnel (no account): <code>cloudflared tunnel --url http://localhost:8080</code> gives a temporary <code>https://….trycloudflare.com</code> address</td><td class="was">Own domain with HTTPS via Caddy</td><td>Domain + DNS</td></tr>
+      <tr><td>File storage</td><td class="tool">SeaweedFS (S3 API) in docker, same AWS SDK S3 client</td><td class="was">Cloudflare R2</td><td>Endpoint + keys in env</td></tr>
+      <tr><td>Task queues</td><td class="tool">ElasticMQ (SQS API) in docker, same AWS SDK SQS client</td><td class="was">AWS SQS + DLQs</td><td>Endpoint + keys in env</td></tr>
+      <tr><td>Lesson drafting</td><td class="tool">Admin drafts in a Claude chat and pastes the JSON into the Studio ("Paste draft" on S4/S9)</td><td class="was">In-app Claude API drafts</td><td><code>FEATURE_AI_DRAFTS=true</code> + API key</td></tr>
+      <tr><td>Content check</td><td class="tool">Manual check: admin completes the same checklist as the agent and records flags (S11 "Manual check")</td><td class="was">Automatic content-check agent (Claude API)</td><td><code>FEATURE_AI_CHECK=true</code> + API key</td></tr>
+      <tr><td>Sign-in emails</td><td class="tool">Brevo free, sender = project Gmail address (verified single sender); testers check spam</td><td class="was">Brevo with own domain (SPF, DKIM, DMARC)</td><td>Domain + DNS records</td></tr>
+      <tr><td>Narration, reading test</td><td class="tool">Run locally on the laptop CPU (Indic Parler-TTS, faster-whisper) — slower, free</td><td class="was">Same, on the server</td><td>None</td></tr>
+      <tr><td>Monitoring</td><td class="tool">Grafana stack locally; alerts off</td><td class="was">Alerts by email</td><td>Turn on alert rules</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Trial-only versions (verify the tag at setup)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Tool</th><th>Pin</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="tool">SeaweedFS</td><td class="v">chrislusf/seaweedfs:4.23</td><td>~34k stars, since 2014, Apache-2.0. If the tag does not exist, stop and report.</td></tr>
+      <tr><td class="tool">ElasticMQ</td><td class="v">softwaremill/elasticmq:1.7.1</td><td>Released Apr 2026, Apache-2.0. <strong>Exception</strong> to the 10k-stars rule (trial only; the full stack uses real SQS). Use the JVM image, not <code>-native</code> (stale).</td></tr>
+      <tr><td class="tool">cloudflared</td><td class="v">newest release ≥ 14 days old at setup</td><td>Official Cloudflare client. Avoid any release its notes mark "do not use". Record the exact version here.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><p>The quick-tunnel address changes every time the tunnel restarts, so it suits the developer's own phone testing. For the test week with other families, the full stack (fixed address, always-on server) is needed.</p></div>
+</section>
+
+<section id="ai">
+  <h2><span class="n">9</span>AI usage</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Feature</th><th>Model</th><th>Where it runs</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Draft lessons and question banks</td><td class="tool">claude-sonnet-5-5</td><td>Main server, called from Content Studio screen S9.</td></tr>
+      <tr><td class="hi">Content-check agent</td><td class="tool">claude-sonnet-5-5</td><td>Main server, before every publish (screen S11). Returns structured JSON flags: severity, category, location, reason.</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>Model IDs are configuration values, not hard-coded.</li>
+    <li>Only book text and our own content are sent. No child names, recordings or progress.</li>
+    <li>The API key comes from an environment variable. Calls use Resilience4j retry, timeout and circuit breaker.</li>
+    <li>This is the only paid item in the prototype; usage is small and per chapter.</li>
+  </ul>
+</section>
+
+<section id="conv">
+  <h2><span class="n">10</span>Engineering conventions</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Area</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">REST API</td><td>Versioned under <code>/api/v1</code>. Every response uses <code>{ "status", "data", "error" }</code>. Correct HTTP status codes. Validation with Bean Validation on every request body.</td></tr>
+      <tr><td class="hi">Errors</td><td>Custom exceptions mapped in one <code>@RestControllerAdvice</code>. No stack traces in responses.</td></tr>
+      <tr><td class="hi">Security</td><td>Keycloak JWTs checked by Spring Security resource server. Deny by default. Every query checks the family ID (stops one family seeing another's data). OWASP Top 10 checklist in code review.</td></tr>
+      <tr><td class="hi">Resilience</td><td>Resilience4j on every outside call (Claude, R2, SQS, Gotenberg): retry with exponential backoff, circuit breaker, timeout.</td></tr>
+      <tr><td class="hi">Queues</td><td>Each job carries an idempotency key; workers skip jobs already done. Max 3 receives, then the dead-letter queue. DLQ depth raises an alert.</td></tr>
+      <tr><td class="hi">Logging</td><td>Structured JSON logs through SLF4J. Never log names, phone numbers, recordings or book text.</td></tr>
+      <tr><td class="hi">Frontend</td><td>Standalone components, reactive forms, strong typing (no <code>any</code>). UI components separate from services holding business logic.</td></tr>
+      <tr><td class="hi">Uploads</td><td>PDF up to 50 MB and 300 pages; JPG/PNG up to 10 MB, 50 per upload. Check file type by content, not by name. ClamAV scan before any processing.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="watch">
+  <h2><span class="n">11</span>Upgrade watch list</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Item</th><th>Date</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Node.js 26 becomes Active LTS</td><td>28 Oct 2026</td><td>Plan the move from Node 24 after the first build is stable.</td></tr>
+      <tr><td>AWS free-plan account</td><td>6 months after sign-up</td><td>Upgrade the account or switch queues before it is suspended.</td></tr>
+      <tr><td>Spring Boot 4.1 support ends</td><td>about Jul 2027</td><td>Move to the next 4.x line.</td></tr>
+      <tr><td>lottie-web inactive since Nov 2024</td><td>Ongoing</td><td>If a bug blocks us, review @lottiefiles/dotlottie-web (currently pre-1.0, under 1k stars).</td></tr>
+      <tr><td>Angular 22 support ends</td><td>Jun 2028</td><td>Upgrade one major at a time.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="rejected">
+  <h2><span class="n">12</span>Rejected and replaced</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Option</th><th>Decision</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td>Angular 20</td><td><span class="tag warn">Replaced</span></td><td>Support ends 28 Nov 2026 → Angular 22.</td></tr>
+      <tr><td>Spring Boot 3.5</td><td><span class="tag warn">Replaced</span></td><td>Free support ended 30 Jun 2026 → 4.1.1.</td></tr>
+      <tr><td>MinIO</td><td><span class="tag no">No</span></td><td>No longer maintained; no official images → Cloudflare R2.</td></tr>
+      <tr><td>LocalStack / ElasticMQ</td><td><span class="tag no">No</span></td><td>LocalStack needs a token and is non-commercial only; ElasticMQ under 10k stars → real SQS.</td></tr>
+      <tr><td>Promtail</td><td><span class="tag no">No</span></td><td>End of life → Grafana Alloy.</td></tr>
+      <tr><td>Piper, Coqui TTS, original Indic-TTS</td><td><span class="tag no">No</span></td><td>Archived, GPL, shut down or unmaintained → Indic Parler-TTS.</td></tr>
+      <tr><td>TypeScript 7</td><td><span class="tag no">No</span></td><td>Not supported by Angular 22.</td></tr>
+      <tr><td>Mobile OTP by SMS</td><td><span class="tag warn">Later</span></td><td>No free SMS sending → email codes for the prototype.</td></tr>
+      <tr><td>Community Keycloak email-OTP plugins</td><td><span class="tag no">No</span></td><td>Small, third-party, tied to specific Keycloak versions → our own small authenticator.</td></tr>
+      <tr><td>Vercel, Clerk</td><td><span class="tag no">No</span></td><td>Non-commercial free plan, no Java hosting; no official Angular SDK, paid MFA.</td></tr>
+      <tr><td>Native apps, video lessons, live AI for children</td><td><span class="tag no">No</span></td><td>As in v1: cost, size and child safety.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="launch">
+  <h2><span class="n">13</span>Launch stack (AWS, Mumbai) — not locked yet</h2>
+  <p>Versions will be locked in a later revision. The code uses standard interfaces, so the move is mainly configuration.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Prototype</th><th>Launch</th></tr></thead>
+    <tbody>
+      <tr><td>Cloudflare Pages</td><td>S3 + CloudFront</td></tr>
+      <tr><td>Oracle Cloud VM</td><td>ECS on Fargate / EC2</td></tr>
+      <tr><td>Neon</td><td>Amazon RDS for PostgreSQL</td></tr>
+      <tr><td>Cloudflare R2</td><td>Amazon S3</td></tr>
+      <tr><td>Keycloak</td><td>Keycloak on ECS or Amazon Cognito</td></tr>
+      <tr><td>Claude API</td><td>Claude on AWS Bedrock</td></tr>
+      <tr><td>Grafana stack</td><td>CloudWatch</td></tr>
+      <tr><td>—</td><td>Razorpay (when payments are added), Terraform</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer>Versions verified against npm, Maven Central, PyPI, GitHub releases and vendor docs on 19 Oct 2026. Each pinned version was released at least 14 days before that date.</footer>
+</div>

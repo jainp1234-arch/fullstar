@@ -1,0 +1,1273 @@
+<title>FullStar Backend Schema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: same family as the Content Guidelines; SQL blocks are the source of truth, tables summarise. */
+:root{
+  --bg:#F7F7FA; --surface:#FFFFFF; --fg:#1D1B2E; --muted:#5B5B6E; --line:#E4E4EE;
+  --ink:#413C8C; --accent:#4F52BD; --pink:#E8386A; --cyan:#3BD3EA; --cream:#FFFBEF; --gold:#F0C94A;
+  --sky1:#2A0C5E; --sky2:#0A0838;
+  --font:"Poppins","Noto Sans Devanagari",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121722; --surface:#1A2130; --fg:#E7EBF3; --muted:#A2ACC0; --line:#2C3547; --ink:#B3B5FF; --accent:#8F93FF; --cream:#2A2618; --gold:#B8963A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121722; --surface:#1A2130; --fg:#E7EBF3; --muted:#A2ACC0; --line:#2C3547; --ink:#B3B5FF; --accent:#8F93FF; --cream:#2A2618; --gold:#B8963A; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15.5px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:0 64px;display:grid;gap:40px}
+.hero{background:radial-gradient(1.5px 1.5px at 12% 30%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 38% 70%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 72% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 88% 64%,#fff 50%,transparent 51%),linear-gradient(180deg,var(--sky1),var(--sky2));color:#fff;padding:40px 16px 48px;margin-inline:-16px;border-radius:0 0 28px 28px}
+.hero .inner{max-width:1040px;margin:0 auto;display:grid;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--cyan)}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0;font-weight:700;text-wrap:balance}
+.lede{font-size:17px;margin:0;max-width:70ch;color:#D9D6F5}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13.5px;color:#D9D6F5}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 18px}
+nav.toc ol{margin:0;padding-left:20px;columns:3 200px;column-gap:24px}
+nav.toc a{color:var(--ink);text-decoration:none}
+nav.toc a:hover{text-decoration:underline}
+section{display:grid;gap:14px;min-width:0}
+h2{font-size:23px;margin:0;padding-bottom:6px;border-bottom:2px solid var(--line);display:flex;gap:10px;align-items:baseline;color:var(--ink);font-weight:700;text-wrap:balance}
+h2 .n{color:var(--pink);font-size:17px}
+h3{font-size:17px;margin:8px 0 0;font-weight:600;color:var(--ink)}
+p{margin:0;max-width:76ch}
+ul,ol{margin:0;padding-left:20px;display:grid;gap:4px}
+code{font-family:var(--mono);font-size:12.5px;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0 4px;overflow-wrap:anywhere}
+pre.code{font-family:var(--mono);font-size:12.3px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0;overflow-x:auto;line-height:1.5;max-height:720px}
+.callout{background:var(--cream);border:1px solid var(--gold);padding:14px 16px;border-radius:12px}
+.callout p{max-width:none}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.8px}
+th,td{text-align:left;padding:7px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.m{font-family:var(--mono);font-size:12.3px;white-space:nowrap;color:var(--accent);font-weight:600}
+td.p{font-family:var(--mono);font-size:12.3px;color:var(--ink)}
+td.hi{font-weight:600}
+tr.grp td{background:var(--bg);font-weight:600;color:var(--ink)}
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;overflow-x:auto}
+.diagram pre{margin:0}
+footer{font-size:13px;color:var(--muted)}
+</style>
+
+<div class="wrap">
+<header class="hero"><div class="inner">
+  <div class="eyebrow">Backend · v1.0</div>
+  <h1>FullStar Backend Schema</h1>
+  <p class="lede">Every table, relationship, database function, trigger and security policy, plus the login flows, API endpoints and background jobs. Written for Claude Code to implement as-is with Flyway migrations on PostgreSQL 18 (Neon).</p>
+  <div class="meta"><span>Owner: Atul Singh</span><span>Date: 19 Oct 2026</span><span>Companions: PRD v1.2 · App Flow v1 · Tech Stack v2.0 · Content Guidelines v1.0</span></div>
+</div></header>
+
+<nav class="toc" aria-label="Contents"><ol>
+  <li><a href="#rules">Rules for Claude Code</a></li>
+  <li><a href="#model">Data model overview</a></li>
+  <li><a href="#er">Relationships</a></li>
+  <li><a href="#ddl">Tables (SQL)</a></li>
+  <li><a href="#json">JSON content formats</a></li>
+  <li><a href="#fn">Functions and triggers</a></li>
+  <li><a href="#rls">Row-level security</a></li>
+  <li><a href="#auth">Login flows</a></li>
+  <li><a href="#authz">Who can do what</a></li>
+  <li><a href="#api">API conventions</a></li>
+  <li><a href="#endpoints">API endpoints</a></li>
+  <li><a href="#jobs">Background jobs (SQS)</a></li>
+  <li><a href="#retention">Retention and deletion</a></li>
+  <li><a href="#migr">Migration order</a></li>
+</ol></nav>
+
+<section id="rules">
+  <h2><span class="n">1</span>Rules for Claude Code</h2>
+  <ol>
+    <li>Create the database exactly from the SQL in this document, split into the Flyway files listed in <a href="#migr">section 14</a>. Do not rename tables, columns, constraints or error codes.</li>
+    <li>Only the Spring Boot API service connects to the database. Workers never do: they send results back through the <code>job-results</code> queue.</li>
+    <li>Every request runs inside one transaction that first sets the session values used by row-level security (<a href="#rls">section 7</a>). This works with Neon's pooled connection because <code>SET LOCAL</code> lasts only for the transaction.</li>
+    <li>Value lists are <code>text</code> columns with <code>CHECK</code> constraints, not PostgreSQL enums, so they can change with a simple migration. Java enums must match them exactly.</li>
+    <li>All times are <code>timestamptz</code> in UTC. "Today" and "this week" are calculated in <code>Asia/Kolkata</code>.</li>
+    <li>IDs are random UUIDs (<code>gen_random_uuid()</code>). Records created offline by the app (attempts, answers, reading tests) use a UUID generated on the device, which also makes repeated uploads harmless.</li>
+    <li>Files live in Cloudflare R2. Tables store only the object key. All file access uses signed URLs valid for 10 minutes.</li>
+  </ol>
+</section>
+
+<section id="model">
+  <h2><span class="n">2</span>Data model overview</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Area</th><th>Tables</th><th>Serves</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Reference</td><td class="p">subjects, class_subjects</td><td>Subjects per class (English, Hindi, Maths, EVS; Computer inactive)</td></tr>
+      <tr><td class="hi">People</td><td class="p">families, children, staff_users</td><td>Sign-up, parent PIN, settings, profiles, staff roles</td></tr>
+      <tr><td class="hi">Content library</td><td class="p">topics, catalog_books, catalog_chapters, content_items, content_versions</td><td>Grade-level topics, prepared books shared between families, lessons, questions, reading passages, version history</td></tr>
+      <tr><td class="hi">Content check</td><td class="p">content_checks, content_check_flags</td><td>Content-check agent results; publishing gate</td></tr>
+      <tr><td class="hi">Family books</td><td class="p">family_books, child_books, family_chapters, uploads, upload_files, pages, prep_tasks, lesson_previews</td><td>Whole-book and chapter-wise upload, virus scan, page text, read-along, admin queue, parent preview</td></tr>
+      <tr><td class="hi">Progress</td><td class="p">activity_attempts, answer_events, mistakes, usage_minutes, reading_tests</td><td>Lessons, practice, tables, stars, fix my mistakes, time limit, reading test</td></tr>
+      <tr><td class="hi">Worksheets</td><td class="p">worksheets, worksheet_questions, worksheet_weak_spots</td><td>Shuffled worksheets, solutions, weak-spot ticks</td></tr>
+      <tr><td class="hi">Messages and support</td><td class="p">messages, problem_reports, support_tickets, support_messages</td><td>In-app messages, report a problem, Contact us + Support inbox</td></tr>
+      <tr><td class="hi">Privacy and operations</td><td class="p">deletion_requests, anonymous_totals, audit_log, usage_events, processed_jobs</td><td>Deletion within 30 days, staff audit trail, success metrics, job de-duplication</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><p><strong>How shared lessons work:</strong> a parent's upload creates <code>family_chapters</code> (private). The admin links each one to a <code>catalog_chapter</code> (a prepared chapter, either new or already made for another family with the same book). Lessons and questions belong to the catalog chapter, so a second family with the same book gets them at once. Families never see each other's files.</p></div>
+</section>
+
+<section id="er">
+  <h2><span class="n">3</span>Relationships</h2>
+  <div class="diagram"><pre class="mermaid">
+erDiagram
+  families ||--o{ children : has
+  families ||--o{ family_books : uploads
+  family_books ||--o{ family_chapters : contains
+  family_books ||--o{ child_books : "shared with"
+  children ||--o{ child_books : uses
+  family_books ||--o{ uploads : receives
+  uploads ||--o{ upload_files : holds
+  family_chapters ||--o{ pages : has
+  family_chapters }o--o| catalog_chapters : "linked to"
+  family_chapters ||--o{ prep_tasks : creates
+  catalog_books ||--o{ catalog_chapters : contains
+  catalog_chapters ||--o{ content_items : owns
+  topics ||--o{ content_items : tags
+  content_items ||--o{ content_versions : versions
+  content_versions ||--o{ content_checks : checked
+  content_checks ||--o{ content_check_flags : raises
+  children ||--o{ activity_attempts : makes
+  activity_attempts ||--o{ answer_events : records
+  children ||--o{ mistakes : keeps
+  children ||--o{ usage_minutes : logs
+  activity_attempts ||--o| reading_tests : "is a"
+  children ||--o{ worksheets : gets
+  worksheets ||--o{ worksheet_questions : lists
+  worksheets ||--o{ worksheet_weak_spots : marks
+  families ||--o{ messages : receives
+  families ||--o{ problem_reports : sends
+  families ||--o{ support_tickets : opens
+  support_tickets ||--o{ support_messages : contains
+  </pre></div>
+</section>
+
+<section id="ddl">
+  <h2><span class="n">4</span>Tables (SQL)</h2>
+  <p>All objects live in schema <code>app</code>. Every table with <code>updated_at</code> gets the <code>set_updated_at</code> trigger (section 6).</p>
+
+  <h3>4.1 Reference and people</h3>
+<pre class="code">CREATE SCHEMA app;
+
+CREATE TABLE app.subjects (
+  id         smallint PRIMARY KEY,
+  code       text NOT NULL UNIQUE CHECK (code IN ('english','hindi','maths','evs','computer')),
+  name       text NOT NULL,
+  active     boolean NOT NULL DEFAULT true
+);
+
+CREATE TABLE app.class_subjects (
+  class_level smallint NOT NULL CHECK (class_level BETWEEN 1 AND 5),
+  subject_id  smallint NOT NULL REFERENCES app.subjects(id),
+  PRIMARY KEY (class_level, subject_id)
+);
+
+CREATE TABLE app.families (
+  id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  keycloak_user_id      text NOT NULL UNIQUE,
+  consent_version       text NOT NULL,
+  consent_at            timestamptz NOT NULL,
+  pin_hash              text,                                   -- BCrypt (strength 12); NULL until set
+  pin_failed_count      smallint NOT NULL DEFAULT 0,
+  pin_locked_until      timestamptz,
+  daily_limit_minutes   smallint NOT NULL DEFAULT 30 CHECK (daily_limit_minutes IN (20,30,45,60)),
+  sound_enabled         boolean NOT NULL DEFAULT true,
+  celebrations_enabled  boolean NOT NULL DEFAULT true,
+  deletion_requested_at timestamptz,
+  created_at            timestamptz NOT NULL DEFAULT now(),
+  updated_at            timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE app.children (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id   uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  first_name  varchar(40) NOT NULL CHECK (length(btrim(first_name)) &gt; 0),
+  age         smallint NOT NULL CHECK (age BETWEEN 4 AND 12),
+  class_level smallint NOT NULL CHECK (class_level BETWEEN 1 AND 5),
+  avatar_key  text NOT NULL CHECK (avatar_key IN ('cat','dog','lion','panda','rabbit','tiger',
+                                                  'fox','koala','monkey','penguin','frog','unicorn')),
+  stars_total integer NOT NULL DEFAULT 0 CHECK (stars_total &gt;= 0),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX children_family_idx ON app.children(family_id);
+
+CREATE TABLE app.staff_users (
+  id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  keycloak_user_id text NOT NULL UNIQUE,
+  display_name     varchar(80) NOT NULL,
+  role             text NOT NULL CHECK (role IN ('content_admin','super_admin')),
+  active           boolean NOT NULL DEFAULT true,
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  updated_at       timestamptz NOT NULL DEFAULT now()
+);</pre>
+
+  <h3>4.2 Content library and content check</h3>
+<pre class="code">CREATE TABLE app.topics (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_level smallint NOT NULL CHECK (class_level BETWEEN 1 AND 5),
+  subject_id  smallint NOT NULL REFERENCES app.subjects(id),
+  parent_id   uuid REFERENCES app.topics(id) ON DELETE RESTRICT,
+  name        varchar(120) NOT NULL,
+  sort_order  integer NOT NULL DEFAULT 0,
+  archived_at timestamptz,
+  created_by  uuid REFERENCES app.staff_users(id),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE NULLS NOT DISTINCT (class_level, subject_id, parent_id, name)
+);
+
+CREATE TABLE app.catalog_books (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_level smallint NOT NULL CHECK (class_level BETWEEN 1 AND 5),
+  subject_id  smallint NOT NULL REFERENCES app.subjects(id),
+  title       varchar(200) NOT NULL,
+  board       text NOT NULL DEFAULT 'CBSE' CHECK (board IN ('CBSE','ICSE','STATE','OTHER')),
+  publisher   varchar(120),
+  edition     varchar(40),
+  created_by  uuid REFERENCES app.staff_users(id),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE app.catalog_chapters (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  catalog_book_id uuid NOT NULL REFERENCES app.catalog_books(id) ON DELETE RESTRICT,
+  number          smallint NOT NULL CHECK (number &gt; 0),
+  title           varchar(200) NOT NULL,
+  status          text NOT NULL DEFAULT 'not_started' CHECK (status IN ('not_started','in_progress','ready')),
+  ready_at        timestamptz,
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (catalog_book_id, number)
+);
+
+CREATE TABLE app.content_items (
+  id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  kind                 text NOT NULL CHECK (kind IN ('lesson','question','passage')),
+  scope                text NOT NULL CHECK (scope IN ('library','catalog_chapter')),
+  class_level          smallint NOT NULL CHECK (class_level BETWEEN 1 AND 5),
+  subject_id           smallint NOT NULL REFERENCES app.subjects(id),
+  topic_id             uuid REFERENCES app.topics(id),
+  catalog_chapter_id   uuid REFERENCES app.catalog_chapters(id) ON DELETE RESTRICT,
+  question_type        text CHECK (question_type IN ('mcq','true_false','fill_blank','match')),
+  difficulty           smallint NOT NULL DEFAULT 2 CHECK (difficulty BETWEEN 1 AND 3),
+  lang                 text NOT NULL CHECK (lang IN ('en','hi')),
+  status               text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','in_check','published','archived')),
+  current_version_id   uuid,
+  published_version_id uuid,
+  published_at         timestamptz,
+  created_by           uuid NOT NULL REFERENCES app.staff_users(id),
+  created_at           timestamptz NOT NULL DEFAULT now(),
+  updated_at           timestamptz NOT NULL DEFAULT now(),
+  archived_at          timestamptz,
+  CONSTRAINT content_scope_ck CHECK (
+    (scope = 'library' AND catalog_chapter_id IS NULL AND topic_id IS NOT NULL) OR
+    (scope = 'catalog_chapter' AND catalog_chapter_id IS NOT NULL)),
+  CONSTRAINT content_qtype_ck CHECK ((kind = 'question') = (question_type IS NOT NULL)),
+  CONSTRAINT content_passage_ck CHECK (kind &lt;&gt; 'passage' OR scope = 'library')
+);
+CREATE INDEX content_items_lookup_idx  ON app.content_items(kind, status, class_level, subject_id, topic_id);
+CREATE INDEX content_items_chapter_idx ON app.content_items(catalog_chapter_id, kind, status);
+
+CREATE TABLE app.content_versions (
+  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  item_id             uuid NOT NULL REFERENCES app.content_items(id) ON DELETE CASCADE,
+  version_no          integer NOT NULL,
+  title               varchar(200) NOT NULL,
+  body                jsonb NOT NULL,                 -- format per kind: section 5
+  solution            jsonb,                          -- questions only
+  asset_keys          text[] NOT NULL DEFAULT '{}',   -- R2 keys of images used
+  narration_audio_key text,                           -- lessons: generated narration
+  duration_seconds    integer CHECK (duration_seconds &gt;= 0),
+  created_by          uuid NOT NULL REFERENCES app.staff_users(id),
+  created_at          timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (item_id, version_no)
+);
+ALTER TABLE app.content_items
+  ADD CONSTRAINT content_current_fk   FOREIGN KEY (current_version_id)   REFERENCES app.content_versions(id) DEFERRABLE INITIALLY DEFERRED,
+  ADD CONSTRAINT content_published_fk FOREIGN KEY (published_version_id) REFERENCES app.content_versions(id) DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TABLE app.content_checks (
+  id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  version_id     uuid NOT NULL REFERENCES app.content_versions(id) ON DELETE CASCADE,
+  status         text NOT NULL DEFAULT 'running' CHECK (status IN ('running','passed','failed','error')),
+  model          text NOT NULL,
+  critical_count integer NOT NULL DEFAULT 0,
+  warning_count  integer NOT NULL DEFAULT 0,
+  error_message  text,
+  started_at     timestamptz NOT NULL DEFAULT now(),
+  finished_at    timestamptz
+);
+CREATE INDEX content_checks_version_idx ON app.content_checks(version_id, started_at DESC);
+
+CREATE TABLE app.content_check_flags (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  check_id        uuid NOT NULL REFERENCES app.content_checks(id) ON DELETE CASCADE,
+  severity        text NOT NULL CHECK (severity IN ('critical','warning')),
+  category        text NOT NULL CHECK (category IN ('age_suitability','fact_mismatch','wrong_answer',
+                                                   'language','difficulty','bias','personal_info','other')),
+  location        jsonb NOT NULL,                 -- {"path": "scenes[2].text"} or {"field": "solution"}
+  reason          text NOT NULL,
+  resolution      text NOT NULL DEFAULT 'open' CHECK (resolution IN ('open','fixed','accepted')),
+  resolution_note varchar(500),
+  resolved_by     uuid REFERENCES app.staff_users(id),
+  resolved_at     timestamptz,
+  CONSTRAINT flag_accept_warning_only CHECK (resolution &lt;&gt; 'accepted' OR severity = 'warning'),
+  CONSTRAINT flag_accept_needs_note   CHECK (resolution &lt;&gt; 'accepted' OR resolution_note IS NOT NULL)
+);</pre>
+
+  <h3>4.3 Family books and uploads</h3>
+<pre class="code">CREATE TABLE app.family_books (
+  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id          uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  subject_id         smallint NOT NULL REFERENCES app.subjects(id),
+  class_level        smallint NOT NULL CHECK (class_level BETWEEN 1 AND 5),
+  catalog_book_id    uuid REFERENCES app.catalog_books(id),
+  upload_mode        text NOT NULL CHECK (upload_mode IN ('whole','chapterwise')),
+  status             text NOT NULL DEFAULT 'getting_ready' CHECK (status IN
+                       ('getting_ready','needs_attention','readalong_ready','lessons_being_prepared','lessons_ready')),
+  split_confirmed_at timestamptz,
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX family_books_family_idx ON app.family_books(family_id);
+
+-- One book per subject per child; a book can be shared with a sibling
+CREATE TABLE app.child_books (
+  child_id       uuid NOT NULL REFERENCES app.children(id) ON DELETE CASCADE,
+  subject_id     smallint NOT NULL REFERENCES app.subjects(id),
+  family_book_id uuid NOT NULL REFERENCES app.family_books(id) ON DELETE CASCADE,
+  family_id      uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (child_id, subject_id)
+);
+
+CREATE TABLE app.family_chapters (
+  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_book_id     uuid NOT NULL REFERENCES app.family_books(id) ON DELETE CASCADE,
+  family_id          uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  number             smallint NOT NULL CHECK (number &gt; 0),
+  title              varchar(200) NOT NULL,
+  catalog_chapter_id uuid REFERENCES app.catalog_chapters(id),
+  status             text NOT NULL DEFAULT 'processing' CHECK (status IN
+                       ('suggested','processing','needs_attention','readalong_ready','lessons_being_prepared','lessons_ready')),
+  page_count         smallint NOT NULL DEFAULT 0 CHECK (page_count BETWEEN 0 AND 300),
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT family_chapter_number_uq UNIQUE (family_book_id, number) DEFERRABLE INITIALLY DEFERRED
+);
+CREATE INDEX family_chapters_catalog_idx ON app.family_chapters(catalog_chapter_id);
+
+CREATE TABLE app.uploads (
+  id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id         uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  family_book_id    uuid NOT NULL REFERENCES app.family_books(id) ON DELETE CASCADE,
+  family_chapter_id uuid REFERENCES app.family_chapters(id) ON DELETE CASCADE,  -- NULL for a whole book
+  source            text NOT NULL CHECK (source IN ('pdf','photos')),
+  status            text NOT NULL DEFAULT 'awaiting_files' CHECK (status IN
+                      ('awaiting_files','scanning','rejected','processing','processed','failed')),
+  file_count        smallint NOT NULL CHECK (file_count BETWEEN 1 AND 50),
+  reject_reason     text CHECK (reject_reason IN ('infected','wrong_type','too_large','too_many_pages','unreadable')),
+  created_at        timestamptz NOT NULL DEFAULT now(),
+  updated_at        timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT upload_pdf_single CHECK (source &lt;&gt; 'pdf' OR file_count = 1)
+);
+
+CREATE TABLE app.upload_files (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  upload_id    uuid NOT NULL REFERENCES app.uploads(id) ON DELETE CASCADE,
+  family_id    uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  object_key   text NOT NULL UNIQUE,
+  content_type text NOT NULL CHECK (content_type IN ('application/pdf','image/jpeg','image/png')),
+  byte_size    bigint NOT NULL CHECK (
+                 (content_type = 'application/pdf' AND byte_size BETWEEN 1 AND 52428800) OR
+                 (content_type &lt;&gt; 'application/pdf' AND byte_size BETWEEN 1 AND 10485760)),
+  scan_status  text NOT NULL DEFAULT 'pending' CHECK (scan_status IN ('pending','clean','infected')),
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE app.pages (
+  id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_chapter_id   uuid NOT NULL REFERENCES app.family_chapters(id) ON DELETE CASCADE,
+  family_id           uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  upload_file_id      uuid NOT NULL REFERENCES app.upload_files(id) ON DELETE CASCADE,
+  page_no             smallint NOT NULL CHECK (page_no &gt; 0),
+  image_key           text NOT NULL,
+  ocr_text            text,
+  ocr_confidence      numeric(5,2) CHECK (ocr_confidence BETWEEN 0 AND 100),
+  quality             text NOT NULL DEFAULT 'ok' CHECK (quality IN ('ok','unclear','retaken')),
+  narration_audio_key text,
+  word_timings        jsonb,          -- [{"w":"bird","start_ms":1200,"end_ms":1480}, ...]
+  created_at          timestamptz NOT NULL DEFAULT now(),
+  updated_at          timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (family_chapter_id, page_no)
+);
+
+CREATE TABLE app.prep_tasks (
+  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_chapter_id  uuid NOT NULL REFERENCES app.family_chapters(id) ON DELETE CASCADE,
+  catalog_chapter_id uuid REFERENCES app.catalog_chapters(id),
+  status             text NOT NULL DEFAULT 'open' CHECK (status IN ('open','in_progress','done','cancelled')),
+  assigned_to        uuid REFERENCES app.staff_users(id),
+  opened_at          timestamptz NOT NULL DEFAULT now(),
+  started_at         timestamptz,
+  completed_at       timestamptz
+);
+CREATE UNIQUE INDEX prep_tasks_one_active ON app.prep_tasks(family_chapter_id) WHERE status IN ('open','in_progress');
+CREATE INDEX prep_tasks_queue_idx ON app.prep_tasks(status, opened_at);
+
+CREATE TABLE app.lesson_previews (
+  family_id       uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  content_item_id uuid NOT NULL REFERENCES app.content_items(id) ON DELETE CASCADE,
+  result          text NOT NULL CHECK (result IN ('looks_good','reported')),
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (family_id, content_item_id)
+);</pre>
+
+  <h3>4.4 Progress</h3>
+<pre class="code">CREATE TABLE app.activity_attempts (
+  id                 uuid PRIMARY KEY,                -- generated on the device
+  family_id          uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  child_id           uuid NOT NULL REFERENCES app.children(id) ON DELETE CASCADE,
+  kind               text NOT NULL CHECK (kind IN ('lesson','practice','worksheet','tables',
+                                                   'tables_challenge','reading_test','readalong')),
+  subject_id         smallint NOT NULL REFERENCES app.subjects(id),
+  content_item_id    uuid REFERENCES app.content_items(id),
+  content_version_id uuid REFERENCES app.content_versions(id),
+  family_chapter_id  uuid REFERENCES app.family_chapters(id) ON DELETE SET NULL,
+  topic_id           uuid REFERENCES app.topics(id),
+  started_at         timestamptz NOT NULL,
+  completed_at       timestamptz,
+  correct_count      smallint CHECK (correct_count &gt;= 0),
+  total_count        smallint CHECK (total_count &gt;= 0),
+  stars              smallint NOT NULL DEFAULT 0 CHECK (stars BETWEEN 0 AND 3),
+  duration_seconds   integer NOT NULL DEFAULT 0 CHECK (duration_seconds &gt;= 0),
+  resume_state       jsonb,                           -- {"position_s": 362} or {"question_index": 4}
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT attempt_counts_ck CHECK (correct_count IS NULL OR total_count IS NULL OR correct_count &lt;= total_count)
+);
+CREATE INDEX attempts_child_time_idx ON app.activity_attempts(child_id, started_at DESC);
+CREATE INDEX attempts_open_idx ON app.activity_attempts(child_id) WHERE completed_at IS NULL;
+
+CREATE TABLE app.answer_events (
+  id                  uuid PRIMARY KEY,               -- generated on the device
+  attempt_id          uuid NOT NULL REFERENCES app.activity_attempts(id) ON DELETE CASCADE,
+  family_id           uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  child_id            uuid NOT NULL REFERENCES app.children(id) ON DELETE CASCADE,
+  question_item_id    uuid NOT NULL REFERENCES app.content_items(id),
+  question_version_id uuid NOT NULL REFERENCES app.content_versions(id),
+  topic_id            uuid REFERENCES app.topics(id),
+  is_correct          boolean NOT NULL,
+  answer              jsonb NOT NULL,
+  answered_at         timestamptz NOT NULL
+);
+CREATE INDEX answers_child_topic_idx ON app.answer_events(child_id, topic_id, answered_at DESC);
+
+CREATE TABLE app.mistakes (
+  child_id         uuid NOT NULL REFERENCES app.children(id) ON DELETE CASCADE,
+  question_item_id uuid NOT NULL REFERENCES app.content_items(id) ON DELETE CASCADE,
+  family_id        uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  topic_id         uuid REFERENCES app.topics(id),
+  wrong_count      integer NOT NULL DEFAULT 1,
+  correct_streak   smallint NOT NULL DEFAULT 0,
+  last_wrong_at    timestamptz NOT NULL,
+  resolved_at      timestamptz,
+  PRIMARY KEY (child_id, question_item_id)
+);
+CREATE INDEX mistakes_open_idx ON app.mistakes(child_id) WHERE resolved_at IS NULL;
+
+CREATE TABLE app.usage_minutes (
+  child_id  uuid NOT NULL REFERENCES app.children(id) ON DELETE CASCADE,
+  minute_at timestamptz NOT NULL CHECK (date_trunc('minute', minute_at) = minute_at),
+  family_id uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  PRIMARY KEY (child_id, minute_at)
+);
+
+CREATE TABLE app.reading_tests (
+  id                   uuid PRIMARY KEY,              -- generated on the device
+  attempt_id           uuid NOT NULL UNIQUE REFERENCES app.activity_attempts(id) ON DELETE CASCADE,
+  family_id            uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  child_id             uuid NOT NULL REFERENCES app.children(id) ON DELETE CASCADE,
+  passage_item_id      uuid NOT NULL REFERENCES app.content_items(id),
+  passage_version_id   uuid NOT NULL REFERENCES app.content_versions(id),
+  test_date            date NOT NULL,                 -- India date
+  recording_key        text,
+  recording_expires_at timestamptz,
+  status               text NOT NULL DEFAULT 'awaiting_audio' CHECK (status IN
+                         ('awaiting_audio','processing','scored','not_understood','failed')),
+  transcript           text,
+  accuracy_pct         numeric(5,2) CHECK (accuracy_pct BETWEEN 0 AND 100),
+  words_per_minute     numeric(6,2) CHECK (words_per_minute &gt;= 0),
+  words_to_practise    text[] NOT NULL DEFAULT '{}',
+  created_at           timestamptz NOT NULL DEFAULT now(),
+  updated_at           timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX reading_tests_child_date_idx ON app.reading_tests(child_id, test_date);</pre>
+
+  <h3>4.5 Worksheets</h3>
+<pre class="code">CREATE TABLE app.worksheets (
+  id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id         uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  child_id          uuid NOT NULL REFERENCES app.children(id) ON DELETE CASCADE,
+  subject_id        smallint NOT NULL REFERENCES app.subjects(id),
+  source            text NOT NULL CHECK (source IN ('chapter','topic')),
+  family_chapter_id uuid REFERENCES app.family_chapters(id) ON DELETE CASCADE,
+  topic_id          uuid REFERENCES app.topics(id),
+  question_count    smallint NOT NULL CHECK (question_count BETWEEN 5 AND 30),
+  shuffle_seed      bigint NOT NULL,
+  status            text NOT NULL DEFAULT 'rendering' CHECK (status IN ('rendering','ready','failed')),
+  pdf_key           text,
+  pdf_expires_at    timestamptz,
+  created_at        timestamptz NOT NULL DEFAULT now(),
+  updated_at        timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT worksheet_source_ck CHECK (
+    (source = 'chapter' AND family_chapter_id IS NOT NULL AND topic_id IS NULL) OR
+    (source = 'topic'   AND topic_id IS NOT NULL AND family_chapter_id IS NULL))
+);
+CREATE INDEX worksheets_child_idx ON app.worksheets(child_id, created_at DESC);
+
+CREATE TABLE app.worksheet_questions (
+  worksheet_id        uuid NOT NULL REFERENCES app.worksheets(id) ON DELETE CASCADE,
+  position            smallint NOT NULL CHECK (position &gt; 0),
+  question_item_id    uuid NOT NULL REFERENCES app.content_items(id),
+  question_version_id uuid NOT NULL REFERENCES app.content_versions(id),
+  PRIMARY KEY (worksheet_id, position)
+);
+
+CREATE TABLE app.worksheet_weak_spots (
+  worksheet_id uuid NOT NULL REFERENCES app.worksheets(id) ON DELETE CASCADE,
+  topic_id     uuid NOT NULL REFERENCES app.topics(id),
+  family_id    uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  child_id     uuid NOT NULL REFERENCES app.children(id) ON DELETE CASCADE,
+  marked_at    timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (worksheet_id, topic_id)
+);</pre>
+
+  <h3>4.6 Messages and support</h3>
+<pre class="code">CREATE TABLE app.messages (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id  uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  kind       text NOT NULL CHECK (kind IN ('readalong_ready','pages_unclear','lessons_ready','upload_problem',
+                                          'report_fixed','support_reply','system')),
+  title      varchar(120) NOT NULL,
+  body       varchar(500) NOT NULL,
+  link       jsonb,                      -- {"screen":"P8","family_chapter_id":"..."}
+  read_at    timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  expires_at timestamptz NOT NULL DEFAULT now() + interval '90 days'
+);
+CREATE INDEX messages_family_idx ON app.messages(family_id, created_at DESC);
+
+CREATE TABLE app.problem_reports (
+  id                 uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id          uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  content_item_id    uuid NOT NULL REFERENCES app.content_items(id),
+  content_version_id uuid NOT NULL REFERENCES app.content_versions(id),
+  reason             text NOT NULL CHECK (reason IN ('wrong_answer','spelling','not_suitable','audio_problem','other')),
+  note               varchar(500),
+  status             text NOT NULL DEFAULT 'open' CHECK (status IN ('open','fixed','dismissed')),
+  handled_by         uuid REFERENCES app.staff_users(id),
+  handled_at         timestamptz,
+  created_at         timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX problem_reports_open_idx ON app.problem_reports(status, created_at);
+
+CREATE TABLE app.support_tickets (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id  uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  subject    varchar(120) NOT NULL,
+  status     text NOT NULL DEFAULT 'open' CHECK (status IN ('open','answered','closed')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE app.support_messages (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  ticket_id  uuid NOT NULL REFERENCES app.support_tickets(id) ON DELETE CASCADE,
+  family_id  uuid NOT NULL REFERENCES app.families(id) ON DELETE CASCADE,
+  author     text NOT NULL CHECK (author IN ('parent','staff')),
+  staff_id   uuid REFERENCES app.staff_users(id),
+  body       varchar(2000) NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT support_author_ck CHECK ((author = 'staff') = (staff_id IS NOT NULL))
+);</pre>
+
+  <h3>4.7 Privacy and operations</h3>
+<pre class="code">CREATE TABLE app.deletion_requests (
+  id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_id        uuid REFERENCES app.families(id) ON DELETE SET NULL,
+  keycloak_user_id text NOT NULL,
+  requested_at     timestamptz NOT NULL DEFAULT now(),
+  due_by           timestamptz NOT NULL DEFAULT now() + interval '30 days',
+  status           text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','in_progress','done')),
+  completed_by     uuid REFERENCES app.staff_users(id),
+  completed_at     timestamptz
+);
+
+CREATE TABLE app.anonymous_totals (
+  metric       text NOT NULL,           -- 'lessons_watched', 'worksheets_made', 'reading_tests'
+  period_month date NOT NULL CHECK (extract(day FROM period_month) = 1),
+  value        bigint NOT NULL DEFAULT 0,
+  PRIMARY KEY (metric, period_month)
+);
+
+CREATE TABLE app.audit_log (
+  id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  actor_type  text NOT NULL CHECK (actor_type IN ('staff','parent','system')),
+  actor_id    text,
+  action      text NOT NULL,            -- 'content.publish', 'upload.view', 'deletion.complete', ...
+  entity_type text NOT NULL,
+  entity_id   text,
+  metadata    jsonb NOT NULL DEFAULT '{}',
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX audit_log_time_idx ON app.audit_log(created_at);
+
+CREATE TABLE app.usage_events (
+  id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  event_type  text NOT NULL,            -- 'book_uploaded', 'lesson_completed', 'problem_reported', ...
+  class_level smallint,
+  subject_id  smallint,
+  occurred_at timestamptz NOT NULL DEFAULT now(),
+  props       jsonb NOT NULL DEFAULT '{}'   -- never names, emails, ids of people
+);
+CREATE INDEX usage_events_type_time_idx ON app.usage_events(event_type, occurred_at);
+
+CREATE TABLE app.processed_jobs (
+  idempotency_key text PRIMARY KEY,
+  job_type        text NOT NULL,
+  processed_at    timestamptz NOT NULL DEFAULT now()
+);</pre>
+</section>
+
+<section id="json">
+  <h2><span class="n">5</span>JSON content formats</h2>
+  <p>The API validates <code>content_versions.body</code> against these shapes (JSON Schema files in <code>services/api/src/main/resources/schemas/</code>) before saving.</p>
+<pre class="code">// kind = lesson
+{ "scenes": [
+    { "id": "s1", "duration_ms": 8000,
+      "text": "A bird builds a nest.",           // narration line (shown + spoken)
+      "visual": { "illustration": "subject-evs", "animation": "fade-up" },
+      "quiz": null },
+    { "id": "s2", "duration_ms": 0,
+      "quiz": { "question_item_id": "uuid" } }   // inline quiz uses a published question
+] }
+
+// kind = question, question_type = mcq
+{ "prompt": "Which word is a noun?", "image_key": null,
+  "options": [{"id":"a","text":"run"},{"id":"b","text":"bird"},{"id":"c","text":"blue"}] }
+// solution: { "correct": ["b"], "explanation": "A bird is a thing, so it is a noun." }
+
+// question_type = true_false   body: { "prompt": "..." }              solution: { "correct": true,  "explanation": "..." }
+// question_type = fill_blank   body: { "prompt": "The cat ___ on the mat.", "choices": ["sat","sit","sits"] }
+//                              solution: { "correct": "sat", "explanation": "..." }
+// question_type = match        body: { "prompt": "Match the animal to its home.",
+//                                      "left": [{"id":"l1","text":"Bird"}], "right": [{"id":"r1","text":"Nest"}] }
+//                              solution: { "pairs": [["l1","r1"]], "explanation": "..." }
+
+// kind = passage
+{ "text": "Ravi has a red kite...", "word_count": 112, "level": 2 }</pre>
+</section>
+
+<section id="fn">
+  <h2><span class="n">6</span>Functions and triggers</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Name</th><th>Type</th><th>What it does</th><th>Error code</th></tr></thead>
+    <tbody>
+      <tr><td class="p">set_updated_at</td><td>BEFORE UPDATE trigger</td><td>Sets <code>updated_at = now()</code> on every table that has it.</td><td>—</td></tr>
+      <tr><td class="p">enforce_max_children</td><td>BEFORE INSERT on children</td><td>Blocks a third child in a family.</td><td><code>MAX_CHILDREN</code></td></tr>
+      <tr><td class="p">check_child_book</td><td>BEFORE INSERT/UPDATE on child_books</td><td>Child, book and subject must belong to the same family and class.</td><td><code>BOOK_MISMATCH</code></td></tr>
+      <tr><td class="p">track_mistakes</td><td>AFTER INSERT on answer_events</td><td>Wrong answer: add or reopen the mistake. Right answer: raise the streak; resolved after 2 in a row.</td><td>—</td></tr>
+      <tr><td class="p">add_stars</td><td>AFTER INSERT/UPDATE OF stars on activity_attempts</td><td>Keeps <code>children.stars_total</code> in step.</td><td>—</td></tr>
+      <tr><td class="p">limit_reading_tests</td><td>BEFORE INSERT on reading_tests</td><td>At most 2 tests (1 test + 1 retry) per child per India day.</td><td><code>READING_LIMIT</code></td></tr>
+      <tr><td class="p">next_version_no / versions_immutable</td><td>BEFORE INSERT / UPDATE on content_versions</td><td>Numbers versions 1, 2, 3… per item; a saved version can never change.</td><td><code>VERSION_IMMUTABLE</code></td></tr>
+      <tr><td class="p">guard_publish</td><td>BEFORE UPDATE OF published_version_id on content_items</td><td>Only a version whose latest check passed (no critical flags, every warning fixed or accepted) can be published.</td><td><code>CHECK_NOT_PASSED</code></td></tr>
+      <tr><td class="p">roll_up_book_status</td><td>AFTER INSERT/UPDATE OF status on family_chapters</td><td>Sets the book's status from its chapters (worst state wins).</td><td>—</td></tr>
+      <tr><td class="p">on_catalog_chapter_ready</td><td>AFTER UPDATE OF status on catalog_chapters</td><td>When ready: linked family chapters become <code>lessons_ready</code>, open prep tasks close, each family gets a "Lessons ready" message.</td><td>—</td></tr>
+      <tr><td class="p">move_child_to_next_class(child)</td><td>Function</td><td>Erases the child's progress, worksheets and book links, then moves them up one class.</td><td><code>MAX_CLASS</code></td></tr>
+      <tr><td class="p">child_week_summary(child, week_start)</td><td>Function</td><td>Data for the "This week" card and "Areas to work on".</td><td>—</td></tr>
+      <tr><td class="p">complete_family_deletion(family, staff)</td><td>Function</td><td>Adds anonymous totals, deletes the family and everything under it, closes the request.</td><td>—</td></tr>
+      <tr><td class="p">run_retention()</td><td>Function (daily at 02:00 IST)</td><td>Deletes expired rows and returns R2 keys the API must delete.</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+<pre class="code">CREATE FUNCTION app.set_updated_at() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN NEW.updated_at := now(); RETURN NEW; END $$;
+-- Apply to: families, children, staff_users, topics, catalog_books, catalog_chapters, content_items,
+-- family_books, family_chapters, uploads, pages, activity_attempts, reading_tests, worksheets, support_tickets
+-- e.g. CREATE TRIGGER families_updated BEFORE UPDATE ON app.families FOR EACH ROW EXECUTE FUNCTION app.set_updated_at();
+
+CREATE FUNCTION app.enforce_max_children() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM 1 FROM app.families WHERE id = NEW.family_id FOR UPDATE;
+  IF (SELECT count(*) FROM app.children WHERE family_id = NEW.family_id) &gt;= 2 THEN
+    RAISE EXCEPTION 'MAX_CHILDREN' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER children_max BEFORE INSERT ON app.children FOR EACH ROW EXECUTE FUNCTION app.enforce_max_children();
+
+CREATE FUNCTION app.check_child_book() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM app.children c JOIN app.family_books b ON b.id = NEW.family_book_id
+     WHERE c.id = NEW.child_id AND c.family_id = b.family_id AND b.family_id = NEW.family_id
+       AND b.subject_id = NEW.subject_id AND b.class_level = c.class_level) THEN
+    RAISE EXCEPTION 'BOOK_MISMATCH' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER child_books_check BEFORE INSERT OR UPDATE ON app.child_books FOR EACH ROW EXECUTE FUNCTION app.check_child_book();
+
+CREATE FUNCTION app.track_mistakes() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NOT NEW.is_correct THEN
+    INSERT INTO app.mistakes (child_id, question_item_id, family_id, topic_id, last_wrong_at)
+    VALUES (NEW.child_id, NEW.question_item_id, NEW.family_id, NEW.topic_id, NEW.answered_at)
+    ON CONFLICT (child_id, question_item_id) DO UPDATE
+      SET wrong_count = app.mistakes.wrong_count + 1, correct_streak = 0,
+          last_wrong_at = EXCLUDED.last_wrong_at, resolved_at = NULL;
+  ELSE
+    UPDATE app.mistakes
+       SET correct_streak = correct_streak + 1,
+           resolved_at = CASE WHEN correct_streak + 1 &gt;= 2 THEN NEW.answered_at ELSE NULL END
+     WHERE child_id = NEW.child_id AND question_item_id = NEW.question_item_id AND resolved_at IS NULL;
+  END IF;
+  RETURN NULL;
+END $$;
+CREATE TRIGGER answers_mistakes AFTER INSERT ON app.answer_events FOR EACH ROW EXECUTE FUNCTION app.track_mistakes();
+
+CREATE FUNCTION app.add_stars() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  UPDATE app.children
+     SET stars_total = stars_total + NEW.stars - CASE WHEN TG_OP = 'UPDATE' THEN OLD.stars ELSE 0 END
+   WHERE id = NEW.child_id;
+  RETURN NULL;
+END $$;
+CREATE TRIGGER attempts_stars AFTER INSERT OR UPDATE OF stars ON app.activity_attempts
+  FOR EACH ROW EXECUTE FUNCTION app.add_stars();
+
+CREATE FUNCTION app.limit_reading_tests() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF (SELECT count(*) FROM app.reading_tests WHERE child_id = NEW.child_id AND test_date = NEW.test_date) &gt;= 2 THEN
+    RAISE EXCEPTION 'READING_LIMIT' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER reading_tests_limit BEFORE INSERT ON app.reading_tests FOR EACH ROW EXECUTE FUNCTION app.limit_reading_tests();
+
+CREATE FUNCTION app.next_version_no() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM 1 FROM app.content_items WHERE id = NEW.item_id FOR UPDATE;
+  NEW.version_no := COALESCE((SELECT max(version_no) FROM app.content_versions WHERE item_id = NEW.item_id), 0) + 1;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER versions_number BEFORE INSERT ON app.content_versions FOR EACH ROW EXECUTE FUNCTION app.next_version_no();
+
+CREATE FUNCTION app.versions_immutable() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN RAISE EXCEPTION 'VERSION_IMMUTABLE' USING ERRCODE = 'P0001'; END $$;
+CREATE TRIGGER versions_no_update BEFORE UPDATE ON app.content_versions FOR EACH ROW EXECUTE FUNCTION app.versions_immutable();
+
+CREATE FUNCTION app.version_check_passed(p_version uuid) RETURNS boolean LANGUAGE sql STABLE AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM (SELECT * FROM app.content_checks WHERE version_id = p_version
+                    ORDER BY started_at DESC LIMIT 1) c
+     WHERE c.status = 'passed'
+       AND NOT EXISTS (SELECT 1 FROM app.content_check_flags f
+                        WHERE f.check_id = c.id AND f.resolution = 'open'));
+$$;
+
+CREATE FUNCTION app.guard_publish() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.published_version_id IS NOT NULL
+     AND NEW.published_version_id IS DISTINCT FROM OLD.published_version_id
+     AND NOT app.version_check_passed(NEW.published_version_id) THEN
+    RAISE EXCEPTION 'CHECK_NOT_PASSED' USING ERRCODE = 'P0001';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER content_publish_guard BEFORE UPDATE OF published_version_id ON app.content_items
+  FOR EACH ROW EXECUTE FUNCTION app.guard_publish();
+
+CREATE FUNCTION app.roll_up_book_status() RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE s text[];
+BEGIN
+  SELECT array_agg(DISTINCT status) INTO s FROM app.family_chapters WHERE family_book_id = NEW.family_book_id;
+  UPDATE app.family_books SET status = CASE
+      WHEN 'needs_attention' = ANY(s)                         THEN 'needs_attention'
+      WHEN 'processing' = ANY(s) OR 'suggested' = ANY(s)      THEN 'getting_ready'
+      WHEN 'lessons_being_prepared' = ANY(s)                  THEN 'lessons_being_prepared'
+      WHEN 'readalong_ready' = ANY(s)                         THEN 'readalong_ready'
+      ELSE 'lessons_ready' END
+   WHERE id = NEW.family_book_id;
+  RETURN NULL;
+END $$;
+CREATE TRIGGER chapters_rollup AFTER INSERT OR UPDATE OF status ON app.family_chapters
+  FOR EACH ROW EXECUTE FUNCTION app.roll_up_book_status();
+
+CREATE FUNCTION app.on_catalog_chapter_ready() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.status = 'ready' AND OLD.status IS DISTINCT FROM 'ready' THEN
+    NEW.ready_at := now();
+    UPDATE app.family_chapters SET status = 'lessons_ready'
+     WHERE catalog_chapter_id = NEW.id AND status IN ('readalong_ready','lessons_being_prepared');
+    UPDATE app.prep_tasks SET status = 'done', completed_at = now()
+     WHERE catalog_chapter_id = NEW.id AND status IN ('open','in_progress');
+    INSERT INTO app.messages (family_id, kind, title, body, link)
+    SELECT fc.family_id, 'lessons_ready', 'Lessons ready',
+           'Lessons for ' || s.name || ' Ch ' || fc.number || ' are ready. We recommend a quick preview.',
+           jsonb_build_object('screen','P8a','family_chapter_id', fc.id)
+      FROM app.family_chapters fc
+      JOIN app.family_books fb ON fb.id = fc.family_book_id
+      JOIN app.subjects s ON s.id = fb.subject_id
+     WHERE fc.catalog_chapter_id = NEW.id;
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER catalog_chapter_ready BEFORE UPDATE OF status ON app.catalog_chapters
+  FOR EACH ROW EXECUTE FUNCTION app.on_catalog_chapter_ready();
+
+CREATE FUNCTION app.move_child_to_next_class(p_child uuid) RETURNS smallint LANGUAGE plpgsql AS $$
+DECLARE v_class smallint;
+BEGIN
+  SELECT class_level INTO v_class FROM app.children WHERE id = p_child FOR UPDATE;
+  IF v_class IS NULL THEN RAISE EXCEPTION 'NOT_FOUND' USING ERRCODE = 'P0002'; END IF;
+  IF v_class &gt;= 5 THEN RAISE EXCEPTION 'MAX_CLASS' USING ERRCODE = 'P0001'; END IF;
+  DELETE FROM app.activity_attempts WHERE child_id = p_child;   -- cascades answers, reading tests
+  DELETE FROM app.mistakes          WHERE child_id = p_child;
+  DELETE FROM app.usage_minutes     WHERE child_id = p_child;
+  DELETE FROM app.worksheets        WHERE child_id = p_child;
+  DELETE FROM app.child_books       WHERE child_id = p_child;
+  UPDATE app.children SET class_level = v_class + 1, stars_total = 0 WHERE id = p_child;
+  RETURN v_class + 1;
+END $$;
+
+CREATE FUNCTION app.child_week_summary(p_child uuid, p_week_start date)
+RETURNS TABLE (minutes integer, active_days integer, chapters_done integer, worksheets_done integer, areas jsonb)
+LANGUAGE sql STABLE AS $$
+  WITH w AS (SELECT (p_week_start::timestamp AT TIME ZONE 'Asia/Kolkata') AS f,
+                    ((p_week_start + 7)::timestamp AT TIME ZONE 'Asia/Kolkata') AS t)
+  SELECT
+    (SELECT count(*)::int FROM app.usage_minutes u, w WHERE u.child_id = p_child AND u.minute_at &gt;= w.f AND u.minute_at &lt; w.t),
+    (SELECT count(DISTINCT (u.minute_at AT TIME ZONE 'Asia/Kolkata')::date)::int FROM app.usage_minutes u, w
+      WHERE u.child_id = p_child AND u.minute_at &gt;= w.f AND u.minute_at &lt; w.t),
+    (SELECT count(DISTINCT a.family_chapter_id)::int FROM app.activity_attempts a, w
+      WHERE a.child_id = p_child AND a.kind = 'lesson' AND a.completed_at &gt;= w.f AND a.completed_at &lt; w.t),
+    (SELECT count(*)::int FROM app.worksheets ws, w WHERE ws.child_id = p_child AND ws.created_at &gt;= w.f AND ws.created_at &lt; w.t),
+    (SELECT COALESCE(jsonb_agg(x ORDER BY x.score DESC), '[]') FROM (
+        SELECT t.id AS topic_id, t.name, s.code AS subject,
+               COALESCE(m.open_mistakes,0) * 1 + COALESCE(ws.ticks,0) * 2 AS score
+          FROM app.topics t JOIN app.subjects s ON s.id = t.subject_id
+          LEFT JOIN (SELECT topic_id, count(*) AS open_mistakes FROM app.mistakes
+                      WHERE child_id = p_child AND resolved_at IS NULL GROUP BY topic_id) m ON m.topic_id = t.id
+          LEFT JOIN (SELECT topic_id, count(*) AS ticks FROM app.worksheet_weak_spots
+                      WHERE child_id = p_child AND marked_at &gt; now() - interval '30 days' GROUP BY topic_id) ws ON ws.topic_id = t.id
+         WHERE COALESCE(m.open_mistakes,0) + COALESCE(ws.ticks,0) &gt; 0
+         ORDER BY score DESC LIMIT 3) x);
+$$;
+
+CREATE FUNCTION app.complete_family_deletion(p_family uuid, p_staff uuid) RETURNS void LANGUAGE plpgsql AS $$
+DECLARE m date := date_trunc('month', now())::date;
+BEGIN
+  INSERT INTO app.anonymous_totals (metric, period_month, value)
+  SELECT v.metric, m, v.n FROM (VALUES
+    ('lessons_watched', (SELECT count(*) FROM app.activity_attempts WHERE family_id = p_family AND kind = 'lesson' AND completed_at IS NOT NULL)),
+    ('worksheets_made', (SELECT count(*) FROM app.worksheets WHERE family_id = p_family)),
+    ('reading_tests',   (SELECT count(*) FROM app.reading_tests WHERE family_id = p_family))) AS v(metric, n)
+  ON CONFLICT (metric, period_month) DO UPDATE SET value = app.anonymous_totals.value + EXCLUDED.value;
+  UPDATE app.deletion_requests SET status = 'done', completed_by = p_staff, completed_at = now()
+   WHERE family_id = p_family AND status &lt;&gt; 'done';
+  INSERT INTO app.audit_log (actor_type, actor_id, action, entity_type, entity_id)
+  VALUES ('staff', p_staff::text, 'deletion.complete', 'family', p_family::text);
+  DELETE FROM app.families WHERE id = p_family;                   -- cascades everything family-owned
+END $$;
+
+-- Daily 02:00 IST (Spring @Scheduled, role app_system). Returns R2 keys the API then deletes.
+CREATE FUNCTION app.run_retention() RETURNS TABLE (object_key text) LANGUAGE plpgsql AS $$
+BEGIN
+  RETURN QUERY
+  WITH rec AS (
+         SELECT id, recording_key FROM app.reading_tests
+          WHERE recording_key IS NOT NULL AND recording_expires_at &lt; now() FOR UPDATE),
+       rec_clear AS (
+         UPDATE app.reading_tests r SET recording_key = NULL
+           FROM rec WHERE r.id = rec.id RETURNING rec.recording_key AS k),
+       pdf AS (
+         SELECT id, pdf_key FROM app.worksheets
+          WHERE pdf_key IS NOT NULL AND pdf_expires_at &lt; now() FOR UPDATE),
+       pdf_clear AS (
+         UPDATE app.worksheets w SET pdf_key = NULL, pdf_expires_at = NULL
+           FROM pdf WHERE w.id = pdf.id RETURNING pdf.pdf_key AS k)
+  SELECT k FROM rec_clear UNION ALL SELECT k FROM pdf_clear;
+
+  DELETE FROM app.messages       WHERE expires_at   &lt; now();
+  DELETE FROM app.audit_log      WHERE created_at   &lt; now() - interval '1 year';
+  DELETE FROM app.usage_events   WHERE occurred_at  &lt; now() - interval '1 year';
+  DELETE FROM app.usage_minutes  WHERE minute_at    &lt; now() - interval '400 days';
+  DELETE FROM app.processed_jobs WHERE processed_at &lt; now() - interval '14 days';
+END $$;</pre>
+</section>
+
+<section id="rls">
+  <h2><span class="n">7</span>Row-level security</h2>
+  <p>Two database roles: <code>app_api</code> (used by the API for all user requests, RLS enforced) and <code>app_system</code> (used only by the job-results consumer, retention and deletion; <code>BYPASSRLS</code>). Neither owns the tables; Flyway runs as <code>app_owner</code>.</p>
+  <p>At the start of every request transaction the API runs:</p>
+<pre class="code">SET LOCAL app.actor     = 'parent' | 'staff';
+SET LOCAL app.family_id = '&lt;families.id&gt;';      -- parents only, empty for staff
+SET LOCAL app.staff_role = 'content_admin' | 'super_admin';   -- staff only</pre>
+<pre class="code">CREATE FUNCTION app.current_family() RETURNS uuid LANGUAGE sql STABLE AS
+  $$ SELECT nullif(current_setting('app.family_id', true), '')::uuid $$;
+CREATE FUNCTION app.is_staff() RETURNS boolean LANGUAGE sql STABLE AS
+  $$ SELECT current_setting('app.actor', true) = 'staff' $$;
+CREATE FUNCTION app.is_super_admin() RETURNS boolean LANGUAGE sql STABLE AS
+  $$ SELECT current_setting('app.staff_role', true) = 'super_admin' $$;
+
+-- 1. Family-only tables (staff have NO access): children, child_books, lesson_previews,
+--    activity_attempts, answer_events, mistakes, usage_minutes, reading_tests,
+--    worksheets, worksheet_weak_spots
+ALTER TABLE app.children ENABLE ROW LEVEL SECURITY;
+ALTER TABLE app.children FORCE ROW LEVEL SECURITY;
+CREATE POLICY family_only ON app.children
+  USING (family_id = app.current_family()) WITH CHECK (family_id = app.current_family());
+-- repeat for each table in the list; worksheet_questions uses:
+--   USING (EXISTS (SELECT 1 FROM app.worksheets w WHERE w.id = worksheet_id AND w.family_id = app.current_family()))
+
+-- 2. Family + staff read (staff need these to prepare content and answer reports):
+--    family_books, family_chapters, uploads, upload_files, pages, problem_reports,
+--    support_tickets, support_messages
+CREATE POLICY family_rw ON app.family_chapters
+  USING (family_id = app.current_family()) WITH CHECK (family_id = app.current_family());
+CREATE POLICY staff_read ON app.family_chapters FOR SELECT USING (app.is_staff());
+CREATE POLICY staff_update ON app.family_chapters FOR UPDATE USING (app.is_staff()) WITH CHECK (app.is_staff());
+-- staff_update applies to: family_chapters (link catalog chapter), problem_reports, support_tickets
+-- staff INSERT applies to: support_messages (author = 'staff')
+
+-- 3. families: a parent sees only their own row; staff see none (super admin reads via deletion_requests)
+CREATE POLICY own_family ON app.families USING (id = app.current_family()) WITH CHECK (id = app.current_family());
+
+-- 4. messages: parents read/update their own; staff may INSERT (support replies)
+CREATE POLICY family_messages ON app.messages USING (family_id = app.current_family());
+CREATE POLICY staff_insert_messages ON app.messages FOR INSERT WITH CHECK (app.is_staff());
+
+-- 5. Content tables: parents read only published content they are entitled to
+CREATE POLICY kid_read_content ON app.content_items FOR SELECT USING (
+  app.is_staff() OR (status = 'published' AND (
+    scope = 'library' OR EXISTS (SELECT 1 FROM app.family_chapters fc
+                                  WHERE fc.catalog_chapter_id = content_items.catalog_chapter_id
+                                    AND fc.family_id = app.current_family()))));
+CREATE POLICY staff_write_content ON app.content_items FOR ALL USING (app.is_staff()) WITH CHECK (app.is_staff());
+-- content_versions: parents may read only rows whose id is the published_version_id of a readable item.
+-- topics, subjects, class_subjects, catalog_books, catalog_chapters: readable by everyone; writable by staff.
+-- content_checks, content_check_flags, prep_tasks: staff only.
+
+-- 6. staff_users, deletion_requests, audit_log: super admin only (deletion_requests INSERT allowed for the
+--    requesting parent: WITH CHECK (family_id = app.current_family())).</pre>
+</section>
+
+<section id="auth">
+  <h2><span class="n">8</span>Login flows</h2>
+  <h3>8.1 Parent sign-up and sign-in (App Flow A1–A3, B1)</h3>
+  <div class="diagram"><pre class="mermaid">
+sequenceDiagram
+  participant App as Family app
+  participant KC as Keycloak
+  participant API as API
+  participant DB as Database
+  App->>KC: Authorization Code + PKCE (client family-app)
+  KC->>App: Email page, then 6-digit code by email (Brevo)
+  App->>KC: Code entered
+  KC-->>App: Access token (5 min) + refresh token (30 days)
+  App->>API: GET /api/v1/family/me (Bearer token)
+  API->>DB: find families by keycloak_user_id = sub
+  alt New family
+    API-->>App: 404 FAMILY_NOT_FOUND
+    App->>API: POST /api/v1/family/me {consent_version}
+    API->>DB: insert families
+  end
+  API-->>App: family + children
+  </pre></div>
+  <ul>
+    <li><strong>Keycloak realm</strong> <code>fullstar</code>. Clients: <code>family-app</code> and <code>content-studio</code> (public, PKCE S256), <code>family-api</code> and <code>studio-api</code> (bearer-only audiences).</li>
+    <li><strong>Email code:</strong> custom authenticator (Tech Stack): 6 digits, valid 10 minutes, 5 tries, resend after 30 seconds. Keycloak brute-force detection on: lock 15 minutes after 10 failures.</li>
+    <li><strong>Tokens:</strong> access token 5 minutes, refresh token 30 days (offline session, rotated on every use). Stored by keycloak-js in memory; refresh token in IndexedDB for the installed PWA.</li>
+    <li><strong>API check:</strong> Spring Security resource server validates issuer, signature (Keycloak JWKS), expiry and audience <code>family-api</code>. The <code>sub</code> claim maps to <code>families.keycloak_user_id</code>.</li>
+  </ul>
+
+  <h3>8.2 Kid mode and parent mode on one device</h3>
+  <ul>
+    <li><strong>Kid requests</strong> (<code>/family/kid/**</code>) need the parent's token plus header <code>X-Child-Id</code>. The API checks the child belongs to the family; otherwise <code>403 CHILD_NOT_IN_FAMILY</code>.</li>
+    <li><strong>Parent PIN:</strong> <code>POST /family/pin/verify</code> compares with BCrypt. Success returns a <em>parent grant</em>: a JWT signed by the API (HS256, secret from env), claims <code>sub</code>, <code>family_id</code>, <code>scope=parent</code>, expiry 15 minutes. It is sent as header <code>X-Parent-Grant</code> on every <code>/family/parent/**</code> call; missing or expired → <code>401 PIN_REQUIRED</code>. Grants refresh on each successful call (sliding 15 minutes).</li>
+    <li><strong>Wrong PIN:</strong> each failure increments <code>pin_failed_count</code>; at 5, <code>pin_locked_until = now() + 1 minute</code> and the count resets → <code>423 PIN_LOCKED</code>.</li>
+    <li><strong>Forgot PIN (A4):</strong> the app re-authenticates with Keycloak using <code>prompt=login</code> (new email code). <code>PUT /family/pin</code> accepts a new PIN only if the token's <code>auth_time</code> is under 5 minutes old; else <code>401 RECENT_LOGIN_REQUIRED</code>.</li>
+  </ul>
+
+  <h3>8.3 Staff (Content Studio)</h3>
+  <ul>
+    <li>Same realm, client <code>content-studio</code>; login flow = email code <strong>and</strong> TOTP (required action on first login). Realm roles <code>content_admin</code>, <code>super_admin</code>.</li>
+    <li>The API accepts audience <code>studio-api</code> only, then requires an active <code>staff_users</code> row with the same <code>keycloak_user_id</code>; the role in our table is the one enforced (Keycloak role must match, else <code>403 ROLE_MISMATCH</code>).</li>
+    <li>Staff sessions: access 5 minutes, refresh 8 hours, no offline sessions.</li>
+  </ul>
+
+  <h3>8.4 Uploads and file access</h3>
+  <div class="diagram"><pre class="mermaid">
+sequenceDiagram
+  participant App as Family app
+  participant API as API
+  participant R2 as Cloudflare R2
+  participant Q as SQS
+  participant W as Workers
+  App->>API: POST /family/parent/books/{id}/uploads {source, files[{name,type,size}]}
+  API-->>App: upload_id + signed PUT URLs (10 min)
+  App->>R2: PUT each file
+  App->>API: POST /family/parent/uploads/{id}/complete
+  API->>Q: upload.scan
+  Q->>W: ClamAV scan
+  W->>Q: job-results (clean / infected)
+  API->>Q: book.process (pages, OCR, chapter split)
+  W->>Q: job-results (pages, text, quality)
+  API->>Q: readalong.narrate per chapter
+  W->>Q: job-results (audio keys, word timings)
+  API-->>App: message "ready to read along"; prep_tasks opened for admin
+  </pre></div>
+</section>
+
+<section id="authz">
+  <h2><span class="n">9</span>Who can do what</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Action</th><th>Kid mode</th><th>Parent (PIN)</th><th>Content admin</th><th>Super admin</th></tr></thead>
+    <tbody>
+      <tr><td>Read own subjects, lessons, practice; record progress</td><td>✓</td><td>✓</td><td>—</td><td>—</td></tr>
+      <tr><td>Manage children, settings, PIN, books, uploads, worksheets</td><td>—</td><td>✓</td><td>—</td><td>—</td></tr>
+      <tr><td>See progress, reading history, recordings</td><td>—</td><td>✓</td><td>—</td><td>—</td></tr>
+      <tr><td>Report a problem, contact support, request deletion</td><td>—</td><td>✓</td><td>—</td><td>—</td></tr>
+      <tr><td>View family uploads and page text (audited)</td><td>—</td><td>own</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Manage topics, catalog books, content; run checks; publish</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Handle reports and support tickets</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Manage staff, complete deletions, read audit log</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+      <tr><td>See any child's progress or recordings</td><td>—</td><td>own</td><td>never</td><td>never</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="api">
+  <h2><span class="n">10</span>API conventions</h2>
+  <ul>
+    <li>Base paths: <code>/api/v1/family</code>, <code>/api/v1/studio</code>, <code>/api/v1/public</code>. JSON only; field names <code>snake_case</code>.</li>
+    <li>Every response:
+<pre class="code">{ "status": "success", "data": { ... }, "error": null }
+{ "status": "error",   "data": null,    "error": { "code": "VALIDATION_FAILED", "message": "first_name is required",
+                                                    "fields": { "first_name": "REQUIRED" } } }</pre></li>
+    <li>Lists: <code>?limit=20&amp;cursor=&lt;opaque&gt;</code> (max 100); response <code>data = { "items": [...], "next_cursor": "..." | null }</code>. Cursor = base64 of the last row's sort key and id.</li>
+    <li>Writes that may be retried carry header <code>Idempotency-Key: &lt;uuid&gt;</code>; the API stores it in <code>processed_jobs</code> with type <code>http</code> for 14 days and returns the first result again.</li>
+    <li>Rate limits (Resilience4j RateLimiter, per family): PIN verify 5/min, uploads 20/hour, worksheet create 30/hour, sync 60/min, support 10/day.</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>HTTP</th><th>Error code</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td>400</td><td class="p">VALIDATION_FAILED</td><td>Body or parameter invalid (field map included)</td></tr>
+      <tr><td>401</td><td class="p">UNAUTHENTICATED · PIN_REQUIRED · RECENT_LOGIN_REQUIRED</td><td>No/expired token · no parent grant · PIN reset needs fresh login</td></tr>
+      <tr><td>403</td><td class="p">FORBIDDEN · CHILD_NOT_IN_FAMILY · ROLE_MISMATCH</td><td>Not allowed</td></tr>
+      <tr><td>404</td><td class="p">NOT_FOUND · FAMILY_NOT_FOUND</td><td>Missing or not visible (never reveal other families' records)</td></tr>
+      <tr><td>409</td><td class="p">CONFLICT · MAX_CHILDREN · BOOK_EXISTS · CHECK_NOT_PASSED · MAX_CLASS · BOOK_MISMATCH</td><td>Business rule blocked</td></tr>
+      <tr><td>413</td><td class="p">UPLOAD_LIMIT</td><td>Size, count or page limit exceeded</td></tr>
+      <tr><td>423</td><td class="p">PIN_LOCKED</td><td>Too many wrong PINs; <code>retry_after_s</code> included</td></tr>
+      <tr><td>429</td><td class="p">RATE_LIMITED · READING_LIMIT</td><td>Too many requests · reading test limit for today</td></tr>
+      <tr><td>503</td><td class="p">DEPENDENCY_UNAVAILABLE</td><td>R2, SQS or Claude circuit open</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="endpoints">
+  <h2><span class="n">11</span>API endpoints</h2>
+  <p>Auth column: <strong>T</strong> = parent token, <strong>K</strong> = T + <code>X-Child-Id</code>, <strong>P</strong> = T + parent grant, <strong>CA</strong> = content admin, <strong>SA</strong> = super admin, <strong>—</strong> = none. Screen IDs are from the App Flow.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Method</th><th>Path</th><th>Auth</th><th>Purpose</th><th>Screens</th></tr></thead>
+    <tbody>
+      <tr class="grp"><td colspan="5">Public</td></tr>
+      <tr><td class="m">GET</td><td class="p">/public/health</td><td>—</td><td>Liveness and readiness</td><td>—</td></tr>
+      <tr><td class="m">GET</td><td class="p">/public/config</td><td>—</td><td>Avatars, subjects per class, upload limits, time-limit options, consent version</td><td>B2, B4</td></tr>
+
+      <tr class="grp"><td colspan="5">Family: account and children</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/me</td><td>T</td><td>Family, settings, children, whether a PIN is set</td><td>C1</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/me</td><td>T</td><td>Create family with consent</td><td>A2–A3</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/pin</td><td>T</td><td>Set first PIN (only when none set)</td><td>B1</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/pin/verify</td><td>T</td><td>Check PIN → parent grant</td><td>P0</td></tr>
+      <tr><td class="m">PUT</td><td class="p">/family/pin</td><td>T (fresh login)</td><td>Reset PIN</td><td>A4</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/children</td><td>P (setup: T)</td><td>Add child (max 2)</td><td>B2, P15</td></tr>
+      <tr><td class="m">PATCH</td><td class="p">/family/parent/children/{id}</td><td>P</td><td>Edit name, age, avatar</td><td>P15</td></tr>
+      <tr><td class="m">DELETE</td><td class="p">/family/parent/children/{id}</td><td>P</td><td>Remove child and their data</td><td>P15</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/children/{id}/move-to-next-class</td><td>P</td><td>Erase progress, class + 1</td><td>P15</td></tr>
+      <tr><td class="m">GET · PATCH</td><td class="p">/family/parent/settings</td><td>P</td><td>Time limit, sound, celebrations</td><td>B4, P14</td></tr>
+
+      <tr class="grp"><td colspan="5">Family: kid mode</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/home</td><td>K</td><td>Subjects with book/practice state, continue card, stars, minutes used today</td><td>K1</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/subjects/{subject_id}</td><td>K</td><td>Chapters (with book) or grade-level topics (without), with done ticks</td><td>K2</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/chapters/{family_chapter_id}</td><td>K</td><td>Lesson / read-along / worksheet cards and their availability</td><td>K3</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/topics/{topic_id}</td><td>K</td><td>Same for a grade-level topic</td><td>K3</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/lessons/{content_item_id}</td><td>K</td><td>Published lesson version + signed asset URLs</td><td>K4</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/chapters/{id}/pages</td><td>K</td><td>Read-along pages: image, audio URLs, word timings</td><td>K5</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/practice</td><td>K</td><td>Practice home tiles and counts</td><td>K8</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/kid/practice-sets</td><td>K</td><td>{subject_id, topic_id?, kind} → 10 shuffled published questions</td><td>K9</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/mistakes</td><td>K</td><td>Open mistakes as a practice set</td><td>K11</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/kid/worksheets/{id}/onscreen</td><td>K</td><td>Questions of a worksheet for on-screen use</td><td>K6</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/kid/sync</td><td>K</td><td>Batch of offline events: attempts (start/progress/complete), answers, usage minutes. Idempotent by device UUIDs; returns stars total and minutes today</td><td>K4–K14</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/reading</td><td>K</td><td>Today's passage, words to practise, level, tests left today</td><td>K12</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/kid/reading-tests</td><td>K</td><td>{id, attempt_id, passage_item_id} → signed audio upload URL</td><td>K13</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/kid/reading-tests/{id}/submit</td><td>K</td><td>Audio uploaded → queue scoring</td><td>K13</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/kid/reading-tests/{id}</td><td>K</td><td>Status and result (poll every 2 s, max 60 s)</td><td>K14</td></tr>
+
+      <tr class="grp"><td colspan="5">Family: parent mode — progress</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/children/{id}/week?start=YYYY-MM-DD</td><td>P</td><td>This week card and areas to work on (child_week_summary)</td><td>P1</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/children/{id}/subjects/{subject_id}</td><td>P</td><td>Chapters done, accuracy by topic, weak spots</td><td>P2</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/children/{id}/reading-tests</td><td>P</td><td>Reading history with recording URLs (if not expired)</td><td>P3</td></tr>
+
+      <tr class="grp"><td colspan="5">Family: parent mode — books and uploads</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/books?child_id=</td><td>P</td><td>One row per subject with status</td><td>P4</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/books</td><td>P</td><td>{child_id, subject_id, upload_mode} → family book (409 BOOK_EXISTS)</td><td>B3, P4</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/books/{id}/uploads</td><td>P</td><td>{source, family_chapter_id?, chapter {number,title}?, files[]} → signed PUT URLs</td><td>P5, P7</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/uploads/{id}/complete</td><td>P</td><td>Files uploaded → scan and process</td><td>P5, P7</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/books/{id}/chapters</td><td>P</td><td>Chapters with status (incl. suggested split)</td><td>P4, P6</td></tr>
+      <tr><td class="m">PUT</td><td class="p">/family/parent/books/{id}/chapters</td><td>P</td><td>Confirm split: full ordered list with titles, merges, start pages</td><td>P6</td></tr>
+      <tr><td class="m">PATCH · DELETE</td><td class="p">/family/parent/chapters/{id}</td><td>P</td><td>Rename, renumber, delete chapter</td><td>P7</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/chapters/{id}/pages?quality=unclear</td><td>P</td><td>Unclear pages with thumbnails</td><td>P8</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/pages/{id}/retake</td><td>P</td><td>Signed URL for a new photo; then reprocess that page</td><td>P8</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/books/{id}/replace</td><td>P</td><td>Remove book, chapters and their progress</td><td>P9</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/books/{id}/share</td><td>P</td><td>{child_id} share with sibling in same class</td><td>P4</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/lessons/{content_item_id}/preview</td><td>P</td><td>Lesson + its questions for preview</td><td>P8a</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/lessons/{content_item_id}/preview-result</td><td>P</td><td>{result: looks_good | reported}</td><td>P8a</td></tr>
+
+      <tr class="grp"><td colspan="5">Family: parent mode — worksheets, messages, help</td></tr>
+      <tr><td class="m">GET · POST</td><td class="p">/family/parent/worksheets</td><td>P</td><td>List · create {child_id, subject_id, source, family_chapter_id | topic_id, question_count}</td><td>P10, P11</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/worksheets/{id}/reshuffle</td><td>P</td><td>New seed, new questions (only before first print)</td><td>P11</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/worksheets/{id}/pdf</td><td>P</td><td>Signed PDF URL; re-renders if expired (202 while rendering)</td><td>P12</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/worksheets/{id}/solutions</td><td>P</td><td>Questions with solutions</td><td>P13</td></tr>
+      <tr><td class="m">PUT</td><td class="p">/family/parent/worksheets/{id}/weak-spots</td><td>P</td><td>{topic_ids[]} replaces ticks</td><td>P13</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/messages</td><td>P</td><td>Messages, newest first (cursor)</td><td>P19</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/messages/{id}/read</td><td>P</td><td>Mark read</td><td>P19</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/problem-reports</td><td>P</td><td>{content_item_id, reason, note?}</td><td>P18</td></tr>
+      <tr><td class="m">GET · POST</td><td class="p">/family/parent/support-tickets</td><td>P</td><td>List · open ticket {subject, body}</td><td>P16</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/support-tickets/{id}/messages</td><td>P</td><td>Reply</td><td>P16</td></tr>
+      <tr><td class="m">POST</td><td class="p">/family/parent/deletion-request</td><td>P</td><td>Request data deletion (once)</td><td>P17</td></tr>
+
+      <tr class="grp"><td colspan="5">Studio</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/me · /studio/dashboard</td><td>CA</td><td>Staff profile · counts: uploads waiting, drafts, open reports, open tickets</td><td>S2</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/prep-tasks?status=open</td><td>CA</td><td>Uploaded chapters queue with waiting time</td><td>S8</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/prep-tasks/{id}/claim</td><td>CA</td><td>Assign to me, status in_progress</td><td>S8</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/family-chapters/{id}/pages</td><td>CA</td><td>Page images and text (writes audit_log upload.view)</td><td>S9</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/catalog-books?class=&amp;subject=&amp;q=</td><td>CA</td><td>Find an existing prepared book</td><td>S9</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/catalog-books · /catalog-books/{id}/chapters</td><td>CA</td><td>Create prepared book and chapters</td><td>S9</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/prep-tasks/{id}/link</td><td>CA</td><td>{catalog_chapter_id} link family chapter (instant if chapter is ready)</td><td>S9</td></tr>
+      <tr><td class="m">PATCH</td><td class="p">/studio/catalog-chapters/{id}</td><td>CA</td><td>{status: ready} when all its content is published</td><td>S9</td></tr>
+      <tr><td class="m">GET · POST · PATCH</td><td class="p">/studio/topics</td><td>CA</td><td>Topic tree per class and subject</td><td>S3</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/content-items?kind=&amp;topic_id=&amp;catalog_chapter_id=&amp;status=&amp;q=</td><td>CA</td><td>Library and question bank search</td><td>S3, S10</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/content-items</td><td>CA</td><td>Create item + first version</td><td>S4, S5</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/content-items/{id}/versions</td><td>CA</td><td>Save a new version (edits never overwrite)</td><td>S5</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/ai/drafts</td><td>CA</td><td>{type: lesson | question_bank | passage, class, subject, topic_id | family_chapter_id, count?} → Claude draft (not saved until the admin saves it)</td><td>S4, S9</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/content-versions/{id}/checks</td><td>CA</td><td>Run content-check agent (async; returns check id)</td><td>S11</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/content-checks/{id}</td><td>CA</td><td>Status, counts, flags</td><td>S11</td></tr>
+      <tr><td class="m">PATCH</td><td class="p">/studio/content-check-flags/{id}</td><td>CA</td><td>{resolution: accepted, note} (warnings only)</td><td>S11</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/content-items/{id}/publish · /unpublish</td><td>CA</td><td>Publish current version (409 CHECK_NOT_PASSED) · archive</td><td>S6</td></tr>
+      <tr><td class="m">GET · PATCH</td><td class="p">/studio/problem-reports</td><td>CA</td><td>Queue · {status: fixed | dismissed} (fixed sends parent message)</td><td>S7</td></tr>
+      <tr><td class="m">GET · POST</td><td class="p">/studio/support-tickets · /{id}/messages</td><td>CA</td><td>Support inbox · reply (sends parent message)</td><td>S12</td></tr>
+      <tr><td class="m">GET · POST · PATCH</td><td class="p">/studio/staff</td><td>SA</td><td>Manage staff users and roles</td><td>—</td></tr>
+      <tr><td class="m">GET · POST</td><td class="p">/studio/deletion-requests · /{id}/complete</td><td>SA</td><td>List by due date · delete R2 objects then call complete_family_deletion</td><td>—</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/audit-log</td><td>SA</td><td>Filter by actor, action, date</td><td>—</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/metrics</td><td>SA</td><td>PRD success measures from usage_events and prep_tasks</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Sync request (offline events)</h3>
+<pre class="code">POST /api/v1/family/kid/sync        X-Child-Id: …     Idempotency-Key: …
+{ "attempts": [ { "id": "uuid", "kind": "lesson", "subject_id": 1, "content_item_id": "uuid",
+                  "content_version_id": "uuid", "family_chapter_id": "uuid", "started_at": "…",
+                  "completed_at": "…" | null, "correct_count": 4, "total_count": 5,
+                  "duration_seconds": 540, "resume_state": { "position_s": 362 } } ],
+  "answers":  [ { "id": "uuid", "attempt_id": "uuid", "question_item_id": "uuid",
+                  "question_version_id": "uuid", "is_correct": true, "answer": {"selected":["b"]},
+                  "answered_at": "…" } ],
+  "minutes":  [ "2026-10-19T10:41:00Z", "2026-10-19T10:42:00Z" ] }
+→ data: { "stars_total": 131, "minutes_today": 19, "accepted": {"attempts":1,"answers":5,"minutes":2} }</pre>
+  <p>The server computes <code>stars</code> from the counts (0 of anything = 1 star for trying; over 50% = 2; over 80% = 3) and ignores any stars sent by the device. Attempts upsert by id (later <code>completed_at</code> wins); answers and minutes insert with <code>ON CONFLICT DO NOTHING</code>.</p>
+</section>
+
+<section id="jobs">
+  <h2><span class="n">12</span>Background jobs (SQS)</h2>
+  <p>Envelope for every message: <code>{ "job_id": uuid, "idempotency_key": text, "type": text, "version": 1, "created_at": timestamp, "payload": {...} }</code>. Each queue has a dead-letter queue (<code>&lt;name&gt;-dlq</code>), max receives 3, visibility timeout as listed. Workers report to <code>job-results</code>; the API consumer (role <code>app_system</code>) skips any <code>idempotency_key</code> already in <code>processed_jobs</code>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Queue</th><th>Worker</th><th>Payload</th><th>Result</th><th>Visibility</th></tr></thead>
+    <tbody>
+      <tr><td class="p">upload-scan</td><td>ClamAV (book-reader)</td><td>upload_id, object_keys[]</td><td>per file clean / infected</td><td>5 min</td></tr>
+      <tr><td class="p">book-process</td><td>book-reader (PDFBox + Tesseract)</td><td>upload_id, family_book_id, family_chapter_id?, mode</td><td>pages[{page_no, image_key, text, confidence, quality}], suggested_chapters[]</td><td>15 min</td></tr>
+      <tr><td class="p">readalong-narrate</td><td>voice-maker</td><td>family_chapter_id, pages[{page_id, text}]</td><td>pages[{page_id, audio_key, word_timings}]</td><td>30 min</td></tr>
+      <tr><td class="p">lesson-narrate</td><td>voice-maker</td><td>content_version_id, scenes[{id, text, lang}]</td><td>audio_key, scene timings</td><td>30 min</td></tr>
+      <tr><td class="p">reading-score</td><td>reading-checker</td><td>reading_test_id, recording_key, passage_text, lang</td><td>transcript, accuracy, wpm, words_to_practise | not_understood</td><td>5 min</td></tr>
+      <tr><td class="p">worksheet-render</td><td>API → Gotenberg</td><td>worksheet_id</td><td>pdf_key</td><td>2 min</td></tr>
+      <tr><td class="p">content-check</td><td>API → Claude</td><td>content_check_id</td><td>flags[] written to content_check_flags</td><td>5 min</td></tr>
+      <tr><td class="p">job-results</td><td>API consumer</td><td>{job_id, idempotency_key, type, outcome: success | failure, result | error}</td><td>DB updates, messages, next jobs</td><td>2 min</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li>A message in a DLQ marks the related row <code>failed</code> (or <code>needs_attention</code> for uploads) and sends the parent a plain message; CloudWatch/Grafana alerts when any DLQ depth is above 0.</li>
+    <li>Book pipeline status changes: upload <code>awaiting_files → scanning → processing → processed</code>; chapter <code>processing → (suggested) → readalong_ready</code> → admin linked → <code>lessons_being_prepared</code> → <code>lessons_ready</code>. Any unclear page → chapter <code>needs_attention</code>, message <code>pages_unclear</code>.</li>
+    <li>When a chapter reaches <code>readalong_ready</code> and has no ready catalog chapter linked, the consumer opens a <code>prep_task</code> (notifies the Studio dashboard).</li>
+  </ul>
+</section>
+
+<section id="trial">
+  <h2><span class="n">12a</span>Trial mode differences</h2>
+  <p>While <code>FULLSTAR_MODE=trial</code> (Tech Stack §8a), the schema is unchanged. Only these behaviours differ:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Area</th><th>Trial behaviour</th></tr></thead>
+    <tbody>
+      <tr><td class="hi">Files</td><td>R2 calls go to SeaweedFS (S3 API) at <code>S3_ENDPOINT</code>; same key layout, same signed URLs.</td></tr>
+      <tr><td class="hi">Queues</td><td>SQS calls go to ElasticMQ at <code>SQS_ENDPOINT</code>; queues and DLQs created from <code>infra/elasticmq.conf</code> with the same names, max receives 3.</td></tr>
+      <tr><td class="hi">AI drafts</td><td><code>POST /studio/ai/drafts</code> returns <code>503 FEATURE_DISABLED</code>. The Studio shows "Paste draft": the admin pastes JSON produced in a Claude chat; it is validated against §5 before saving.</td></tr>
+      <tr><td class="hi">Content check</td><td>New endpoint <code>POST /studio/content-versions/{id}/manual-check</code> (CA) with body <code>{ "checklist": {"age_suitability": true, "facts_match": true, "answers_correct": true, "language": true, "difficulty": true, "no_bias": true, "no_personal_info": true}, "flags": [ {severity, category, location, reason} ] }</code>. It creates a <code>content_checks</code> row with <code>model = 'manual'</code>; status <code>passed</code> only if every checklist item is true and no critical flag is given. The publish rule (<code>guard_publish</code>) is unchanged.</td></tr>
+      <tr><td class="hi">Hostnames</td><td>Everything is served from one address through the local Caddy: app at <code>/</code>, Studio at <code>/studio/</code>, API at <code>/api/</code>, Keycloak at <code>/auth/</code>. Keycloak runs with <code>KC_HOSTNAME</code> unset and <code>KC_HOSTNAME_STRICT=false</code> so the temporary tunnel address works; redirect URIs allow <code>https://*.trycloudflare.com/*</code> and <code>http://localhost:8080/*</code> in the trial realm only.</td></tr>
+      <tr><td class="hi">Email</td><td>Keycloak SMTP via Brevo with <code>MAIL_FROM</code> = the verified project Gmail address.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="retention">
+  <h2><span class="n">13</span>Retention and deletion</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Data</th><th>Kept for</th><th>How it is removed</th></tr></thead>
+    <tbody>
+      <tr><td>Reading test recordings</td><td>7 days</td><td><code>recording_expires_at</code>; run_retention + R2 delete</td></tr>
+      <tr><td>Worksheet PDFs</td><td>30 days</td><td><code>pdf_expires_at</code>; re-rendered on request</td></tr>
+      <tr><td>In-app messages</td><td>90 days</td><td><code>expires_at</code></td></tr>
+      <tr><td>Audit log, usage events</td><td>1 year</td><td>run_retention</td></tr>
+      <tr><td>Usage minutes</td><td>400 days</td><td>run_retention</td></tr>
+      <tr><td>Processed job keys</td><td>14 days</td><td>run_retention</td></tr>
+      <tr><td>Uploaded books and pages</td><td>While the book exists</td><td>Replace book, remove child, account deletion</td></tr>
+      <tr><td>Whole family</td><td>Until deletion request + up to 30 days</td><td>Super admin: delete R2 prefix <code>families/&lt;id&gt;/</code>, then <code>complete_family_deletion</code>; Keycloak user deleted via admin API</td></tr>
+      <tr><td>Content (lessons, questions)</td><td>Forever (archived, never deleted)</td><td>—</td></tr>
+    </tbody>
+  </table></div>
+  <p>R2 key layout: <code>families/&lt;family_id&gt;/uploads/&lt;upload_id&gt;/&lt;file_id&gt;</code>, <code>families/&lt;family_id&gt;/pages/&lt;page_id&gt;.webp</code>, <code>families/&lt;family_id&gt;/audio/&lt;page_id&gt;.mp3</code>, <code>families/&lt;family_id&gt;/recordings/&lt;reading_test_id&gt;.webm</code>, <code>families/&lt;family_id&gt;/worksheets/&lt;worksheet_id&gt;.pdf</code>, <code>content/&lt;item_id&gt;/&lt;version_no&gt;/…</code>.</p>
+</section>
+
+<section id="migr">
+  <h2><span class="n">14</span>Migration order</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Flyway file</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td class="p">V1__schema_and_roles.sql</td><td>Schema <code>app</code>, roles <code>app_api</code>, <code>app_system</code> (BYPASSRLS), grants</td></tr>
+      <tr><td class="p">V2__reference_and_people.sql</td><td>4.1</td></tr>
+      <tr><td class="p">V3__content.sql</td><td>4.2</td></tr>
+      <tr><td class="p">V4__family_books.sql</td><td>4.3</td></tr>
+      <tr><td class="p">V5__progress.sql</td><td>4.4</td></tr>
+      <tr><td class="p">V6__worksheets.sql</td><td>4.5</td></tr>
+      <tr><td class="p">V7__messages_support.sql</td><td>4.6</td></tr>
+      <tr><td class="p">V8__privacy_ops.sql</td><td>4.7</td></tr>
+      <tr><td class="p">V9__functions_triggers.sql</td><td>Section 6 (run_retention fully implemented)</td></tr>
+      <tr><td class="p">V10__row_level_security.sql</td><td>Section 7, every table listed</td></tr>
+      <tr><td class="p">V11__seed_reference.sql</td><td>subjects (1 english, 2 hindi, 3 maths, 4 evs, 5 computer inactive); class_subjects for classes 1–5 with subjects 1–4</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout"><p><strong>Tests required before merge:</strong> Testcontainers PostgreSQL 18 tests for every trigger and function (including the error codes), an RLS test proving family A cannot read family B's rows through <code>app_api</code>, and a test proving staff cannot read <code>activity_attempts</code> or <code>reading_tests</code>.</p></div>
+</section>
+
+<footer>Companion documents: PRD v1.2, App Flow v1, Tech Stack v2.0, Content Guidelines v1.0. The App Flow gains screen S12 (Support inbox).</footer>
+</div>
