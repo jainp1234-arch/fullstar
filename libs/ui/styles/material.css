@@ -58,3 +58,10 @@
 .app-toast-panel .mat-mdc-snack-bar-label {
   padding: 0;
 }
+
+/* Phone with bottom navigation: toasts sit above it (Guidelines §11). */
+@media (max-width: 599px) {
+  :root:has(.shell--nav) {
+    --toast-offset: calc(var(--nav-height) + env(safe-area-inset-bottom) + var(--space-4));
+  }
+}
