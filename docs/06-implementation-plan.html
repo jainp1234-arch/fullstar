@@ -106,7 +106,7 @@ footer{font-size:13px;color:var(--muted)}
   <div class="tbl"><table>
     <thead><tr><th>Step</th><th>Trial override</th></tr></thead>
     <tbody>
-      <tr><td class="id">0.1</td><td>No domain, no Cloudflare. GitHub repo only (already have an account).</td></tr>
+      <tr><td class="id">0.1</td><td>No domain, no Cloudflare. GitHub repo only (already have an account). Branch protection and rulesets need GitHub Pro on a private repo: skip them; work through PRs to <code>main</code> by habit (squash merge only is set in repo settings). Protection is switched on in phase G.</td></tr>
       <tr><td class="id">0.5</td><td>Local compose also runs SeaweedFS, ElasticMQ and a Caddy that serves app, Studio, <code>/api</code> and <code>/auth</code> on <code>http://localhost:8080</code>.</td></tr>
       <tr><td class="id">1.1</td><td>Only Neon (already have) and Brevo (sender = project Gmail). Skip R2, AWS, Anthropic. Neon: only the default owner role's connection string is provided (<code>NEON_OWNER_URL</code> in <code>.env</code>).</td></tr>
       <tr><td class="id">1.2</td><td>Before V1, a one-time bootstrap script (<code>infra/db/bootstrap-roles.sql</code>, run with <code>NEON_OWNER_URL</code>) creates roles <code>app_owner</code>, <code>app_api</code>, <code>app_system</code> with generated strong passwords and writes the resulting connection strings into the local <code>.env</code> (never printed, never committed). Flyway then runs as <code>app_owner</code>.</td></tr>
@@ -124,6 +124,7 @@ footer{font-size:13px;color:var(--muted)}
   <ol>
     <li><span class="who">YOU</span> Buy the domain; create Cloudflare (Pages, R2), AWS (SQS), Anthropic API ($10 cap), and a server (Oracle Always Free or paid).</li>
     <li>Set <code>FULLSTAR_MODE=full</code>, <code>FEATURE_AI_DRAFTS=true</code>, <code>FEATURE_AI_CHECK=true</code>; point S3/SQS endpoints to R2/SQS; Brevo domain authentication.</li>
+    <li>Upgrade GitHub to Pro and protect <code>main</code> as in step 0.1 (PR required, CI checks required, linear history, no force push or deletion).</li>
     <li>Run phase 10 steps 10.1–10.5 as written (server, production compose, deploy pipeline, release checks, test week).</li>
   </ol>
 </section>
