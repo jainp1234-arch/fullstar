@@ -963,6 +963,21 @@ CREATE POLICY staff_write_content ON app.content_items FOR ALL USING (app.is_sta
 
 -- 6. staff_users, deletion_requests, audit_log: super admin only (deletion_requests INSERT allowed for the
 --    requesting parent: WITH CHECK (family_id = app.current_family())).</pre>
+  <h3>Additions agreed in Plan step 1.2</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Table</th><th>Rule</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td class="p">all tables</td><td>RLS enabled <em>and forced</em> on every table in <code>app</code></td><td>Defence in depth; <code>app_system</code> still bypasses</td></tr>
+      <tr><td class="p">family_books</td><td><code>staff_update</code> (FOR UPDATE, staff)</td><td>So <code>roll_up_book_status</code> works when staff link or ready a chapter</td></tr>
+      <tr><td class="p">support_messages</td><td>Parent WITH CHECK also requires <code>author = 'parent'</code>; staff INSERT requires <code>author = 'staff'</code></td><td>A parent cannot post a message as staff</td></tr>
+      <tr><td class="p">audit_log</td><td>INSERT by any signed-in actor (parent or staff); SELECT super admin only</td><td>Content admins and parents create audit rows</td></tr>
+      <tr><td class="p">staff_users</td><td>SELECT by any staff; writes super admin only</td><td>The staff guard (Plan 1.5) loads the current staff user</td></tr>
+      <tr><td class="p">processed_jobs</td><td>SELECT and INSERT for <code>app_api</code>, no family scope</td><td>Idempotency-Key replay; keys are random UUIDs</td></tr>
+      <tr><td class="p">usage_events</td><td>INSERT for <code>app_api</code>; SELECT super admin only</td><td>Success measures for <code>/studio/metrics</code></td></tr>
+      <tr><td class="p">anonymous_totals</td><td>SELECT super admin only; written only by <code>app_system</code></td><td>Totals kept after family deletion</td></tr>
+    </tbody>
+  </table></div>
+  <p>Trial setup (Plan 1.2): <code>make db-bootstrap</code> runs <code>infra/db/bootstrap-roles.sql</code> as the Neon owner to create <code>app_owner</code>, <code>app_api</code> and <code>app_system</code>; V1 only creates the roles when they are missing. Flyway keeps its history table in schema <code>flyway</code>.</p>
 </section>
 
 <section id="auth">
