@@ -49,10 +49,24 @@ CLAUDE.md        instructions for Claude Code
 
 `make lint` and `make test` skip parts of the repository that do not exist yet.
 
+## CI
+
+GitHub Actions in `.github/workflows/`. Path filters run only the parts a change touches:
+
+| Workflow | Runs |
+|---|---|
+| `frontend` | npm ci, lint, format check, unit tests, build, Playwright |
+| `backend` | `mvn verify` for api, book-reader, email-otp |
+| `python` | Ruff and pytest for the workers |
+| `docker` | build every image for linux/amd64 and linux/arm64 (no push) |
+| `security` | gitleaks over the full git history and `npm audit --audit-level=high` (every PR, push and weekly) |
+
+Dependabot (`.github/dependabot.yml`) proposes weekly updates, only for releases at least 14 days old.
+
 ## Working on a step
 
 Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<short-name>` and merged into `main` by squash merge through a pull request using the template.
 
 ## Next step
 
-Ask Claude Code: "Do step 0.4 of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 0.5 of docs/06-implementation-plan.html."

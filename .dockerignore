@@ -1,0 +1,10 @@
+# Build context for the Java images is the repository root; send only what they need.
+**
+!mvnw
+!.mvn/wrapper/maven-wrapper.properties
+!services/api/pom.xml
+!services/api/src/**
+!services/book-reader/pom.xml
+!services/book-reader/src/**
+!infra/keycloak/email-otp/pom.xml
+!infra/keycloak/email-otp/src/**

@@ -9,11 +9,15 @@ JAVA_PROJECTS := services/api services/book-reader infra/keycloak/email-otp
 PY_PROJECTS   := workers/reading-checker workers/voice-maker
 PY_IMAGE      := python:3.12.15-slim
 
-# Use a local Python 3.12 when there is one; otherwise run in the Tech Stack image.
+# $(call py,<dir>,<command>): run in <dir> with requirements-dev.txt available.
+# Uses a local Python 3.12 (with requirements-dev.txt installed) when there is one;
+# otherwise runs in the Tech Stack image with a cached pip volume.
 ifeq ($(shell python3 -c "import sys; print(sys.version_info[:2] == (3, 12))" 2>/dev/null),True)
-py = (cd $(1) && python3 $(2))
+py = (cd $(1) && $(2))
 else
-py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR)/$(1):/w" -w /w $(PY_IMAGE) python $(2)
+py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:/root/.cache/pip \
+	-w /w/$(1) $(PY_IMAGE) sh -c "pip install -q --root-user-action=ignore --disable-pip-version-check \
+	-r /w/requirements-dev.txt && $(2)"
 endif
 
 .PHONY: help up down test lint api family studio
@@ -39,12 +43,8 @@ lint:
 		echo "== frontend: eslint + prettier"; \
 		npm run lint --if-present && npm run format:check --if-present || exit 1; \
 	else echo "-- frontend: no package.json yet, skipped"; fi
-	@for p in $(PY_PROJECTS); do \
-		if [ -d $$p ]; then \
-			echo "== $$p: syntax check"; \
-			$(call py,$$p,-m compileall -q .) || exit 1; \
-		else echo "-- $$p: not created yet, skipped"; fi; \
-	done
+	@echo "== workers: ruff check + ruff format --check"
+	@$(call py,.,python3 -m ruff check workers && python3 -m ruff format --check workers)
 
 test:
 	@if [ -f package.json ]; then \
@@ -60,7 +60,7 @@ test:
 	@for p in $(PY_PROJECTS); do \
 		if [ -d $$p/tests ]; then \
 			echo "== $$p: tests"; \
-			$(call py,$$p,-m unittest discover -s tests -t .) || exit 1; \
+			$(call py,$$p,python3 -m pytest -q -p no:cacheprovider) || exit 1; \
 		else echo "-- $$p: no tests yet, skipped"; fi; \
 	done
 
