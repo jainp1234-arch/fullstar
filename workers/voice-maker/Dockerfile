@@ -1,5 +1,5 @@
 # Build context: workers/voice-maker
-FROM python:3.12.15-slim
+FROM python:3.14.7-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY requirements.txt .
