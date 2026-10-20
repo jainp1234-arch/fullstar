@@ -66,6 +66,10 @@ CLAUDE.md        instructions for Claude Code
 
 All ports bind to 127.0.0.1. Alloy reads container logs through the Docker socket, so run this stack only on your own laptop.
 
+## UI assets
+
+Fonts, icons and illustrations are vendored into `libs/ui/assets` at the commits in `libs/ui/assets/manifest.json`. `make vendor-assets` downloads and converts them again; `npm run check:assets` (part of `npm run lint`) fails if one is missing. Design tokens: `libs/design-tokens/tokens.css` (Guidelines §17, copied verbatim).
+
 ## Sign in locally (Keycloak)
 
 - `make up` builds Keycloak with the email-code authenticator (`infra/keycloak/email-otp`) and imports `infra/keycloak/realm/fullstar-realm.json` on first start. SMTP comes from `.env` (`SMTP_*`, `MAIL_FROM`).
@@ -102,4 +106,4 @@ Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<
 
 ## Next step
 
-Phase 1 is complete. Ask Claude Code: "Do step 2.1 of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 2.2a of docs/06-implementation-plan.html."

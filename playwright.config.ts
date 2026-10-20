@@ -6,14 +6,34 @@ export default defineConfig({
   retries: process.env['CI'] ? 2 : 0,
   reporter: process.env['CI'] ? 'github' : 'list',
   use: {
-    baseURL: 'http://localhost:4200',
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    command: 'npx ng serve family-app --port 4200',
-    url: 'http://localhost:4200',
-    reuseExistingServer: !process.env['CI'],
-    timeout: 120_000,
-  },
+  projects: [
+    {
+      name: 'chromium',
+      testIgnore: /pwa-offline\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4200' },
+    },
+    {
+      // Production build with the service worker (Plan 2.1: fonts load offline)
+      name: 'pwa',
+      testMatch: /pwa-offline\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:4300' },
+    },
+  ],
+  webServer: [
+    {
+      command: 'npx ng serve family-app --port 4200',
+      url: 'http://localhost:4200',
+      reuseExistingServer: !process.env['CI'],
+      timeout: 120_000,
+    },
+    {
+      command:
+        'npx ng build family-app && node scripts/serve-static.mjs dist/family-app/browser 4300',
+      url: 'http://127.0.0.1:4300',
+      reuseExistingServer: !process.env['CI'],
+      timeout: 240_000,
+    },
+  ],
 });

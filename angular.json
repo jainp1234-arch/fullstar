@@ -22,6 +22,11 @@
               {
                 "glob": "**/*",
                 "input": "apps/family-app/public"
+              },
+              {
+                "glob": "**/*.webp",
+                "input": "libs/ui/assets/illustrations",
+                "output": "ui/illustrations"
               }
             ],
             "styles": ["apps/family-app/src/styles.css"]
@@ -91,6 +96,11 @@
               {
                 "glob": "**/*",
                 "input": "apps/content-studio/public"
+              },
+              {
+                "glob": "**/*.webp",
+                "input": "libs/ui/assets/illustrations",
+                "output": "ui/illustrations"
               }
             ],
             "styles": ["apps/content-studio/src/styles.css"],

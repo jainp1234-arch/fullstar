@@ -12,7 +12,9 @@
           "/index.html",
           "/manifest.webmanifest",
           "/*.css",
-          "/*.js"
+          "/*.js",
+          "/media/*.woff2",
+          "/media/*.svg"
         ]
       }
     },

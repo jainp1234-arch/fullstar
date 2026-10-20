@@ -1,0 +1,53 @@
+/* Guidelines §4, §8, §18: self-hosted fonts (precached by the family-app service worker). */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/poppins-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/poppins-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/poppins-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/poppins-700.woff2') format('woff2');
+}
+/* Subset of Material Symbols Rounded: weight 500, grade 0, optical size 24 fixed; FILL variable. */
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url('../assets/fonts/material-symbols-rounded.woff2') format('woff2');
+}
+
+/* An icon glyph: <span class="ui-icon" aria-hidden="true">{{ glyph }}</span> (see libs/ui/icons). */
+.ui-icon {
+  font-family: 'Material Symbols Rounded';
+  font-weight: 500;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  display: inline-block;
+  font-variation-settings: 'FILL' 0;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+.ui-icon--filled {
+  font-variation-settings: 'FILL' 1;
+}
