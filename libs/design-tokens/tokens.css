@@ -1,0 +1,76 @@
+:root {
+  /* Colour */
+  --color-sky-top: #2A0C5E;        --color-sky-bottom: #0A0838;     --color-sky-pill: #2E1D7D;
+  --color-primary-900: #1E0E5C;    --color-primary-800: #2D137E;    --color-primary-600: #4F52BD;
+  --color-primary-400: #7677D1;    --color-primary-100: #EAEAF6;
+  --color-ink-heading: #413C8C;    --color-text: #1D1B2E;           --color-text-2: #5B5B6E;
+  --color-text-muted: #6E6E85;     --color-text-on-sky: #FFFFFF;    --color-text-on-sky-2: #D9D6F5;
+  --color-surface: #FFFFFF;        --color-page: #F7F7FA;           --color-border: #E4E4EE;
+  --color-edge: #C8C8CC;           --color-track: #E6E7EB;          --color-skeleton: #ECECF3;
+  --color-cyan: #3BD3EA;           --color-pink: #E8386A;           --color-star: #FFC83D;
+  --color-gold-800: #8F5F0A;       --color-gold-600: #A8620A;       --color-gold-400: #F0C94A;
+  --color-gold-100: #FDF5D6;       --color-cream: #FFFBEF;          --color-highlight: #FFE58A;
+  --color-blue-700: #1A62A0;       --color-blue-100: #D6EEFD;
+  --color-success-700: #1A7347;    --color-success-100: #DDF5E8;
+  --color-error-700: #B8222E;      --color-error-100: #FDE4E5;      --color-danger-edge: #7E1720;
+  --color-time-ok: #2EAE6B;        --color-time-near: #F0A63A;      --color-time-over: #E5484D;
+  --color-scrim: rgba(10, 8, 56, .6);
+  --gradient-sky: linear-gradient(180deg, var(--color-sky-top), var(--color-sky-bottom));
+  --gradient-banner: linear-gradient(135deg, var(--color-primary-800), #3A1E9E);
+
+  /* Typography */
+  --font-family: "Poppins", "Noto Sans Devanagari", system-ui, sans-serif;
+
+  /* Spacing */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px; --space-5: 20px;
+  --space-6: 24px; --space-7: 32px; --space-8: 40px; --space-9: 48px; --space-10: 64px;
+
+  /* Shape */
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 20px;
+  --radius-sheet: 28px; --radius-pill: 999px;
+  --edge-card: 0 4px 0 var(--color-edge);
+  --edge-tile: 0 4px 0 var(--color-primary-400);
+  --edge-primary: 0 4px 0 var(--color-primary-800);
+  --shadow-soft: 0 2px 8px rgba(20, 16, 60, .08);
+  --shadow-float: 0 8px 24px rgba(20, 16, 60, .18);
+  --shadow-nav: 0 -4px 16px rgba(20, 16, 60, .08);
+  --focus-ring: 0 0 0 2px var(--color-surface), 0 0 0 5px var(--color-cyan);
+
+  /* Motion */
+  --dur-press: 80ms; --dur-fast: 160ms; --dur-base: 240ms; --dur-slow: 400ms; --dur-celebrate: 1200ms;
+  --ease-standard: cubic-bezier(.2, .8, .2, 1);
+  --ease-bounce: cubic-bezier(.34, 1.56, .64, 1);
+
+  /* Layout */
+  --header-row: 72px; --sky-header-b: 200px; --nav-height: 72px;
+  --rail-width: 96px; --sidenav-width: 256px;
+  --content-max-family: 960px; --content-max-studio: 1200px;
+  --tap-kid: 56px; --tap-default: 48px;
+}
+
+/* Type scale: kid mode is the default; parent mode and Studio set data-mode */
+:root, [data-mode="kid"] {
+  --type-display: 700 32px/40px var(--font-family);
+  --type-h1: 700 26px/34px var(--font-family);
+  --type-h2: 600 22px/30px var(--font-family);
+  --type-card-title: 600 20px/28px var(--font-family);
+  --type-body: 400 18px/28px var(--font-family);
+  --type-label: 600 17px/24px var(--font-family);
+  --type-small: 500 15px/22px var(--font-family);
+  --type-caption: 500 13px/18px var(--font-family);
+  --type-quiz: 600 24px/32px var(--font-family);
+}
+[data-mode="parent"], [data-mode="studio"] {
+  --type-display: 700 28px/36px var(--font-family);
+  --type-h1: 700 24px/32px var(--font-family);
+  --type-h2: 600 20px/28px var(--font-family);
+  --type-card-title: 600 18px/26px var(--font-family);
+  --type-body: 400 16px/24px var(--font-family);
+  --type-label: 600 15px/22px var(--font-family);
+  --type-small: 500 14px/20px var(--font-family);
+  --type-caption: 500 12px/16px var(--font-family);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-celebrate: 0ms; }
+}

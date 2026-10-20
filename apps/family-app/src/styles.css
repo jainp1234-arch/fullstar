@@ -1,1 +1,29 @@
-/* You can add global styles to this file, and also import other style files */
+/* Design tokens, imported once (Guidelines §17), and the shared fonts (§4, §8). */
+@import '../../../libs/design-tokens/tokens.css';
+@import '../../../libs/ui/styles/fonts.css';
+
+/* Angular Material system tokens mapped to ours (Guidelines §18). */
+:root {
+  --mat-sys-primary: var(--color-primary-600);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-surface: var(--color-surface);
+  --mat-sys-on-surface: var(--color-text);
+  --mat-sys-outline: var(--color-border);
+  --mat-sys-error: var(--color-error-700);
+  --mat-sys-corner-medium: var(--radius-md);
+  --mat-sys-corner-large: var(--radius-xl);
+  --mat-sys-body-large: var(--type-body);
+  --mat-sys-label-large: var(--type-label);
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  font: var(--type-body);
+  color: var(--color-text);
+  background: var(--color-page);
+  -webkit-font-smoothing: antialiased;
+}

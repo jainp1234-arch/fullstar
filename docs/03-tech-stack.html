@@ -110,6 +110,7 @@ footer{font-size:13px;color:var(--muted)}
       <tr><td class="tool">ClamAV</td><td>7.4k</td><td>The standard open-source virus scanner (Cisco Talos).</td></tr>
       <tr><td class="tool">Fluent Emoji 3D (microsoft/fluentui-emoji)</td><td>~9k</td><td>Vendored PNG illustrations, MIT. Official Microsoft set; no comparable free 3D set. Exact files listed in the Content Guidelines.</td></tr>
       <tr><td class="tool">docker/setup-qemu-action, docker/setup-buildx-action</td><td>0.6k, 1.4k</td><td>Docker's official actions; needed to build arm64 images on free private-repo runners.</td></tr>
+      <tr><td class="tool">fonttools (vendoring only)</td><td>5.3k</td><td>The standard font library (used by Google Fonts); converts and subsets the vendored fonts at build time only.</td></tr>
       <tr><td class="tool">Grafana Alloy</td><td>3.5k</td><td>Grafana's official log collector; Promtail reached end of life on 2 Mar 2026.</td></tr>
     </tbody>
   </table></div>
@@ -185,9 +186,10 @@ flowchart LR
       <tr><td class="tool">typescript-eslint</td><td class="v">8.71.0</td><td>Lint</td><td></td></tr>
       <tr><td class="tool">angular-eslint</td><td class="v">22.5.0</td><td>Lint</td><td></td></tr>
       <tr><td class="tool">prettier</td><td class="v">3.9.9</td><td>Formatting</td><td></td></tr>
-      <tr><td class="tool">Poppins (vendored files)</td><td class="v">google/fonts ofl/poppins</td><td>App font, Latin + Devanagari</td><td>WOFF2, weights 400–700, OFL. Record the commit hash used.</td></tr>
-      <tr><td class="tool">Material Symbols Rounded (vendored font)</td><td class="v">google/material-design-icons</td><td>UI icons</td><td>Variable font, Apache-2.0. Record the commit hash used.</td></tr>
-      <tr><td class="tool">Fluent Emoji 3D (vendored PNGs)</td><td class="v">microsoft/fluentui-emoji</td><td>Illustrations, avatars, owl placeholder</td><td>MIT. Record the commit hash used.</td></tr>
+      <tr><td class="tool">Poppins (vendored files)</td><td class="v">google/fonts ofl/poppins @ 8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5</td><td>App font, Latin + Devanagari</td><td>WOFF2 (converted from the TTFs), weights 400–700, OFL. Listed in <code>libs/ui/assets/manifest.json</code>.</td></tr>
+      <tr><td class="tool">Material Symbols Rounded (vendored font)</td><td class="v">google/material-design-icons @ 737e3324305806514d7909874fa1818ae1808232</td><td>UI icons</td><td>Apache-2.0. Subset to the icons listed in the manifest (Guidelines §8 + §11), axes fixed at wght 500, GRAD 0, opsz 24 with FILL kept: 5.8 KB instead of 5.4 MB. Components use codepoints (<code>libs/ui/icons</code>), not ligatures; add an icon to the manifest and run <code>make vendor-assets</code>.</td></tr>
+      <tr><td class="tool">Fluent Emoji 3D (vendored PNGs)</td><td class="v">microsoft/fluentui-emoji @ d90cdcb8750c91a972db17005831fc4ad2e1a8b1</td><td>Illustrations, avatars, owl placeholder</td><td>MIT. The 32 PNGs of Guidelines §9, converted to 256 × 256 WebP.</td></tr>
+      <tr><td class="tool">Vendoring tools (build only, never shipped)</td><td class="v">pillow 12.3.0 · fonttools 4.66.1 · brotli 1.2.0</td><td>PNG → WebP, TTF → WOFF2, icon subset</td><td>Run once by <code>make vendor-assets</code> in python:3.12.15-slim (<code>tools/vendor-assets/requirements.txt</code>); outputs are committed. Plan 2.1.</td></tr>
     </tbody>
   </table></div>
   <div class="callout"><p>Angular 22 is used instead of the org standard Angular 20, because Angular 20 support ends on 28 Nov 2026. Angular 22 is supported to June 2028.</p></div>

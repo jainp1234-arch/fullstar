@@ -1,0 +1,369 @@
+{
+  "comment": "Vendored assets (Guidelines §4, §8, §9). make vendor-assets downloads them at these commits; npm run check:assets fails if one is missing.",
+  "sources": {
+    "poppins": {
+      "repo": "google/fonts",
+      "commit": "8b0a1d0f5983c89bc2b93f1b5fb55f9e252744b5",
+      "licence": "OFL-1.1"
+    },
+    "symbols": {
+      "repo": "google/material-design-icons",
+      "commit": "737e3324305806514d7909874fa1818ae1808232",
+      "licence": "Apache-2.0"
+    },
+    "fluent": {
+      "repo": "microsoft/fluentui-emoji",
+      "commit": "d90cdcb8750c91a972db17005831fc4ad2e1a8b1",
+      "licence": "MIT"
+    }
+  },
+  "files": [
+    {
+      "out": "fonts/poppins-400.woff2",
+      "source": "poppins",
+      "path": "ofl/poppins/Poppins-Regular.ttf",
+      "convert": "woff2"
+    },
+    {
+      "out": "fonts/poppins-500.woff2",
+      "source": "poppins",
+      "path": "ofl/poppins/Poppins-Medium.ttf",
+      "convert": "woff2"
+    },
+    {
+      "out": "fonts/poppins-600.woff2",
+      "source": "poppins",
+      "path": "ofl/poppins/Poppins-SemiBold.ttf",
+      "convert": "woff2"
+    },
+    {
+      "out": "fonts/poppins-700.woff2",
+      "source": "poppins",
+      "path": "ofl/poppins/Poppins-Bold.ttf",
+      "convert": "woff2"
+    },
+    {
+      "out": "fonts/OFL-Poppins.txt",
+      "source": "poppins",
+      "path": "ofl/poppins/OFL.txt"
+    },
+    {
+      "out": "fonts/material-symbols-rounded.woff2",
+      "source": "symbols",
+      "path": "variablefont/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].woff2",
+      "convert": "symbols-subset",
+      "codepoints": "variablefont/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].codepoints"
+    },
+    {
+      "out": "fonts/LICENSE-material-symbols.txt",
+      "source": "symbols",
+      "path": "LICENSE"
+    },
+    {
+      "out": "illustrations/LICENSE-fluent-emoji.txt",
+      "source": "fluent",
+      "path": "LICENSE"
+    },
+    {
+      "out": "illustrations/subject-english.webp",
+      "source": "fluent",
+      "path": "assets/Open book/3D/open_book_3d.png",
+      "convert": "webp256",
+      "key": "subject-english",
+      "fluentName": "Open book"
+    },
+    {
+      "out": "illustrations/subject-hindi.webp",
+      "source": "fluent",
+      "path": "assets/Scroll/3D/scroll_3d.png",
+      "convert": "webp256",
+      "key": "subject-hindi",
+      "fluentName": "Scroll"
+    },
+    {
+      "out": "illustrations/subject-maths.webp",
+      "source": "fluent",
+      "path": "assets/Abacus/3D/abacus_3d.png",
+      "convert": "webp256",
+      "key": "subject-maths",
+      "fluentName": "Abacus"
+    },
+    {
+      "out": "illustrations/subject-evs.webp",
+      "source": "fluent",
+      "path": "assets/Seedling/3D/seedling_3d.png",
+      "convert": "webp256",
+      "key": "subject-evs",
+      "fluentName": "Seedling"
+    },
+    {
+      "out": "illustrations/act-lesson.webp",
+      "source": "fluent",
+      "path": "assets/Clapper board/3D/clapper_board_3d.png",
+      "convert": "webp256",
+      "key": "act-lesson",
+      "fluentName": "Clapper board"
+    },
+    {
+      "out": "illustrations/act-readalong.webp",
+      "source": "fluent",
+      "path": "assets/Speaker high volume/3D/speaker_high_volume_3d.png",
+      "convert": "webp256",
+      "key": "act-readalong",
+      "fluentName": "Speaker high volume"
+    },
+    {
+      "out": "illustrations/act-worksheet.webp",
+      "source": "fluent",
+      "path": "assets/Clipboard/3D/clipboard_3d.png",
+      "convert": "webp256",
+      "key": "act-worksheet",
+      "fluentName": "Clipboard"
+    },
+    {
+      "out": "illustrations/act-tables.webp",
+      "source": "fluent",
+      "path": "assets/Input numbers/3D/input_numbers_3d.png",
+      "convert": "webp256",
+      "key": "act-tables",
+      "fluentName": "Input numbers"
+    },
+    {
+      "out": "illustrations/act-grammar.webp",
+      "source": "fluent",
+      "path": "assets/Input latin letters/3D/input_latin_letters_3d.png",
+      "convert": "webp256",
+      "key": "act-grammar",
+      "fluentName": "Input latin letters"
+    },
+    {
+      "out": "illustrations/act-quiz.webp",
+      "source": "fluent",
+      "path": "assets/Light bulb/3D/light_bulb_3d.png",
+      "convert": "webp256",
+      "key": "act-quiz",
+      "fluentName": "Light bulb"
+    },
+    {
+      "out": "illustrations/act-mistakes.webp",
+      "source": "fluent",
+      "path": "assets/Hammer and wrench/3D/hammer_and_wrench_3d.png",
+      "convert": "webp256",
+      "key": "act-mistakes",
+      "fluentName": "Hammer and wrench"
+    },
+    {
+      "out": "illustrations/act-reading.webp",
+      "source": "fluent",
+      "path": "assets/Studio microphone/3D/studio_microphone_3d.png",
+      "convert": "webp256",
+      "key": "act-reading",
+      "fluentName": "Studio microphone"
+    },
+    {
+      "out": "illustrations/reward-star.webp",
+      "source": "fluent",
+      "path": "assets/Glowing star/3D/glowing_star_3d.png",
+      "convert": "webp256",
+      "key": "reward-star",
+      "fluentName": "Glowing star"
+    },
+    {
+      "out": "illustrations/celebrate.webp",
+      "source": "fluent",
+      "path": "assets/Party popper/3D/party_popper_3d.png",
+      "convert": "webp256",
+      "key": "celebrate",
+      "fluentName": "Party popper"
+    },
+    {
+      "out": "illustrations/empty-books.webp",
+      "source": "fluent",
+      "path": "assets/Books/3D/books_3d.png",
+      "convert": "webp256",
+      "key": "empty-books",
+      "fluentName": "Books"
+    },
+    {
+      "out": "illustrations/empty-done.webp",
+      "source": "fluent",
+      "path": "assets/Trophy/3D/trophy_3d.png",
+      "convert": "webp256",
+      "key": "empty-done",
+      "fluentName": "Trophy"
+    },
+    {
+      "out": "illustrations/state-offline.webp",
+      "source": "fluent",
+      "path": "assets/Cloud/3D/cloud_3d.png",
+      "convert": "webp256",
+      "key": "state-offline",
+      "fluentName": "Cloud"
+    },
+    {
+      "out": "illustrations/state-retry.webp",
+      "source": "fluent",
+      "path": "assets/Thinking face/3D/thinking_face_3d.png",
+      "convert": "webp256",
+      "key": "state-retry",
+      "fluentName": "Thinking face"
+    },
+    {
+      "out": "illustrations/state-wait.webp",
+      "source": "fluent",
+      "path": "assets/Hourglass not done/3D/hourglass_not_done_3d.png",
+      "convert": "webp256",
+      "key": "state-wait",
+      "fluentName": "Hourglass not done"
+    },
+    {
+      "out": "illustrations/avatar-cat.webp",
+      "source": "fluent",
+      "path": "assets/Cat face/3D/cat_face_3d.png",
+      "convert": "webp256",
+      "key": "avatar-cat",
+      "fluentName": "Cat face"
+    },
+    {
+      "out": "illustrations/avatar-dog.webp",
+      "source": "fluent",
+      "path": "assets/Dog face/3D/dog_face_3d.png",
+      "convert": "webp256",
+      "key": "avatar-dog",
+      "fluentName": "Dog face"
+    },
+    {
+      "out": "illustrations/avatar-lion.webp",
+      "source": "fluent",
+      "path": "assets/Lion/3D/lion_3d.png",
+      "convert": "webp256",
+      "key": "avatar-lion",
+      "fluentName": "Lion"
+    },
+    {
+      "out": "illustrations/avatar-panda.webp",
+      "source": "fluent",
+      "path": "assets/Panda/3D/panda_3d.png",
+      "convert": "webp256",
+      "key": "avatar-panda",
+      "fluentName": "Panda"
+    },
+    {
+      "out": "illustrations/avatar-rabbit.webp",
+      "source": "fluent",
+      "path": "assets/Rabbit face/3D/rabbit_face_3d.png",
+      "convert": "webp256",
+      "key": "avatar-rabbit",
+      "fluentName": "Rabbit face"
+    },
+    {
+      "out": "illustrations/avatar-tiger.webp",
+      "source": "fluent",
+      "path": "assets/Tiger face/3D/tiger_face_3d.png",
+      "convert": "webp256",
+      "key": "avatar-tiger",
+      "fluentName": "Tiger face"
+    },
+    {
+      "out": "illustrations/avatar-fox.webp",
+      "source": "fluent",
+      "path": "assets/Fox/3D/fox_3d.png",
+      "convert": "webp256",
+      "key": "avatar-fox",
+      "fluentName": "Fox"
+    },
+    {
+      "out": "illustrations/avatar-koala.webp",
+      "source": "fluent",
+      "path": "assets/Koala/3D/koala_3d.png",
+      "convert": "webp256",
+      "key": "avatar-koala",
+      "fluentName": "Koala"
+    },
+    {
+      "out": "illustrations/avatar-monkey.webp",
+      "source": "fluent",
+      "path": "assets/Monkey face/3D/monkey_face_3d.png",
+      "convert": "webp256",
+      "key": "avatar-monkey",
+      "fluentName": "Monkey face"
+    },
+    {
+      "out": "illustrations/avatar-penguin.webp",
+      "source": "fluent",
+      "path": "assets/Penguin/3D/penguin_3d.png",
+      "convert": "webp256",
+      "key": "avatar-penguin",
+      "fluentName": "Penguin"
+    },
+    {
+      "out": "illustrations/avatar-frog.webp",
+      "source": "fluent",
+      "path": "assets/Frog/3D/frog_3d.png",
+      "convert": "webp256",
+      "key": "avatar-frog",
+      "fluentName": "Frog"
+    },
+    {
+      "out": "illustrations/avatar-unicorn.webp",
+      "source": "fluent",
+      "path": "assets/Unicorn/3D/unicorn_3d.png",
+      "convert": "webp256",
+      "key": "avatar-unicorn",
+      "fluentName": "Unicorn"
+    },
+    {
+      "out": "illustrations/mascot-owl.webp",
+      "source": "fluent",
+      "path": "assets/Owl/3D/owl_3d.png",
+      "convert": "webp256",
+      "key": "mascot-owl",
+      "fluentName": "Owl"
+    }
+  ],
+  "generated": [
+    "sky-stars.svg",
+    "../icons/icon-codepoints.ts"
+  ],
+  "icons": {
+    "comment": "Guidelines §8 symbols plus those named in §11 components. Subset of Material Symbols Rounded, axes fixed at wght 500, GRAD 0, opsz 24; FILL stays variable.",
+    "names": [
+      "arrow_back",
+      "volume_up",
+      "school",
+      "extension",
+      "record_voice_over",
+      "lock",
+      "insights",
+      "menu_book",
+      "assignment",
+      "settings",
+      "notifications",
+      "add",
+      "close",
+      "mic",
+      "photo_camera",
+      "upload_file",
+      "download",
+      "share",
+      "play_arrow",
+      "pause",
+      "replay_10",
+      "check_circle",
+      "hourglass_top",
+      "error",
+      "warning",
+      "flag",
+      "cloud_off",
+      "dashboard",
+      "inbox",
+      "library_books",
+      "quiz",
+      "fact_check",
+      "report",
+      "chevron_right",
+      "check",
+      "backspace"
+    ]
+  }
+}

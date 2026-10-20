@@ -10,3 +10,5 @@ services/
 infra/
 workers/
 *.md
+libs/design-tokens/
+libs/ui/assets/

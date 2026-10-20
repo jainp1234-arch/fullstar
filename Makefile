@@ -20,7 +20,7 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api family studio db-bootstrap db-migrate bootstrap
+.PHONY: help up down test lint api family studio db-bootstrap db-migrate bootstrap vendor-assets
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
@@ -32,6 +32,7 @@ help:
 	@echo "make db-bootstrap     create app_owner/app_api/app_system on NEON_OWNER_URL, write .env"
 	@echo "make db-migrate       run Flyway migrations as app_owner (DB_MIGRATE_JDBC_URL)"
 	@echo "make bootstrap        create the queues + DLQs (and the trial bucket)"
+	@echo "make vendor-assets    download and convert fonts, icons and illustrations (libs/ui/assets)"
 
 up:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
@@ -76,6 +77,11 @@ api:
 db-bootstrap:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
 	MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" postgres:18.6 sh /w/infra/db/bootstrap-roles.sh
+
+vendor-assets:
+	MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -w /w python:3.12.15-slim sh -c \n		"pip install -q --root-user-action=ignore --disable-pip-version-check -r tools/vendor-assets/requirements.txt && python tools/vendor-assets/vendor.py"
+	node tools/vendor-assets/sky-stars.mjs
+	node scripts/check-assets.mjs
 
 bootstrap:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
