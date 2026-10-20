@@ -6,6 +6,7 @@ on:
       - 'apps/**'
       - 'libs/**'
       - 'e2e/**'
+      - 'scripts/**'
       - 'package.json'
       - 'package-lock.json'
       - 'angular.json'
