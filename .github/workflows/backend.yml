@@ -5,6 +5,7 @@ on:
     paths: &paths
       - 'services/**'
       - 'infra/keycloak/email-otp/**'
+      - 'infra/keycloak/realm/**'
       - 'infra/db/**'
       - 'mvnw'
       - '.mvn/**'

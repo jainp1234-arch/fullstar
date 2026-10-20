@@ -66,6 +66,13 @@ CLAUDE.md        instructions for Claude Code
 
 All ports bind to 127.0.0.1. Alloy reads container logs through the Docker socket, so run this stack only on your own laptop.
 
+## Sign in locally (Keycloak)
+
+- `make up` builds Keycloak with the email-code authenticator (`infra/keycloak/email-otp`) and imports `infra/keycloak/realm/fullstar-realm.json` on first start. SMTP comes from `.env` (`SMTP_*`, `MAIL_FROM`).
+- Parents: email + 6-digit code (10 minutes, 5 tries, resend after 30 s); the account is created after the code. Staff: email code + TOTP, accounts created by a super admin.
+- The import runs only when the realm does not exist. To re-import after changing the file, delete the realm in the admin console (http://localhost:8080/auth/admin/) and restart Keycloak.
+- Trial emails come from a Gmail address without domain authentication, so they often land in **Spam**.
+
 ## Database (Neon, trial)
 
 1. Put the Neon owner connection string in `.env` as `NEON_OWNER_URL` (Neon Console → Connect, dev branch).
@@ -94,4 +101,4 @@ Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<
 
 ## Next step
 
-Ask Claude Code: "Do step 1.4 of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 1.5 of docs/06-implementation-plan.html."
