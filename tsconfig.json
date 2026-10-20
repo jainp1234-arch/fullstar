@@ -14,7 +14,8 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@fullstar/ui": ["./libs/ui/index.ts"]
+      "@fullstar/ui": ["./libs/ui/index.ts"],
+      "@fullstar/ui/gallery": ["./libs/ui/gallery/ui-gallery.ts"]
     }
   },
   "angularCompilerOptions": {
