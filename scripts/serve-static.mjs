@@ -2,7 +2,7 @@
 // Unknown paths fall back to index.html, like the real hosting will.
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
-import { extname, join, normalize, resolve } from 'node:path';
+import { extname, join, normalize, resolve, sep } from 'node:path';
 
 const root = resolve(process.argv[2] ?? 'dist/family-app/browser');
 const port = Number(process.argv[3] ?? 4300);
@@ -20,9 +20,15 @@ const types = {
 };
 
 createServer((request, response) => {
-  const path = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
+  let path;
+  try {
+    path = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
+  } catch {
+    response.writeHead(400).end();
+    return;
+  }
   let file = normalize(join(root, path));
-  if (!file.startsWith(root)) {
+  if (file !== root && !file.startsWith(root + sep)) {
     response.writeHead(403).end();
     return;
   }
