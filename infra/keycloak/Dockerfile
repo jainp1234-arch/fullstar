@@ -1,5 +1,5 @@
 # Build context: repository root (needs ./mvnw and .mvn/).
-FROM --platform=$BUILDPLATFORM eclipse-temurin:21.0.12.1_1-jdk AS build
+FROM --platform=$BUILDPLATFORM eclipse-temurin:24.0.2_12-jdk AS build
 # mvnw needs unzip to verify the pinned .zip distribution (build stage only)
 RUN apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
 WORKDIR /src
