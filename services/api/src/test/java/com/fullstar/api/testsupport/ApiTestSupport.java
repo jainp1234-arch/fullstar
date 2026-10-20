@@ -2,6 +2,7 @@ package com.fullstar.api.testsupport;
 
 import com.fullstar.api.common.db.ActorResolver;
 import com.fullstar.api.common.db.RequestActor;
+import com.fullstar.api.common.security.JwtActorResolver;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -39,6 +40,7 @@ public abstract class ApiTestSupport {
 	@DynamicPropertySource
 	static void database(DynamicPropertyRegistry registry) {
 		TestDatabase.register(registry);
+		TestTokens.register(registry);
 	}
 
 	protected static String parent(UUID familyId) {
@@ -76,13 +78,14 @@ public abstract class ApiTestSupport {
 	@TestConfiguration(proxyBeanMethods = false)
 	static class TestApiConfig {
 
+		/** X-Test-Actor for the test endpoints; otherwise the real JWT resolver. */
 		@Bean
 		@Primary
-		ActorResolver headerActorResolver() {
+		ActorResolver headerActorResolver(JwtActorResolver jwtActorResolver) {
 			return request -> {
 				String header = request.getHeader(ACTOR_HEADER);
 				if (header == null) {
-					return RequestActor.ANONYMOUS;
+					return jwtActorResolver.resolve(request);
 				}
 				String[] parts = header.split(":", 2);
 				return switch (parts[0]) {

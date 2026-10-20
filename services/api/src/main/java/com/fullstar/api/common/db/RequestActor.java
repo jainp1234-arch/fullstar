@@ -33,6 +33,14 @@ public record RequestActor(Kind kind, UUID familyId, StaffRole staffRole) {
 
 	public static final RequestActor ANONYMOUS = new RequestActor(Kind.ANONYMOUS, null, null);
 
+	/** Request attribute holding the actor, set by the request transaction filter. */
+	public static final String ATTRIBUTE = RequestActor.class.getName();
+
+	public static RequestActor of(jakarta.servlet.http.HttpServletRequest request) {
+		Object actor = request.getAttribute(ATTRIBUTE);
+		return actor instanceof RequestActor known ? known : ANONYMOUS;
+	}
+
 	public RequestActor {
 		Objects.requireNonNull(kind, "kind");
 		if (kind == Kind.PARENT && (familyId == null || staffRole != null)) {
