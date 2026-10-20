@@ -2,6 +2,7 @@
 @import '../../../libs/design-tokens/tokens.css';
 @import '../../../libs/ui/styles/fonts.css';
 @import '../../../libs/ui/styles/layout.css';
+@import '../../../libs/ui/styles/material.css';
 
 /* Angular Material system tokens mapped to ours (Guidelines §18). */
 :root {

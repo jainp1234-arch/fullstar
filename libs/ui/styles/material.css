@@ -1,0 +1,60 @@
+/* Angular Material overlays restyled to Guidelines §11 (toast, dialog, bottom sheet). */
+.app-dialog-scrim {
+  background: var(--color-scrim);
+}
+
+.app-dialog-panel {
+  --mat-dialog-container-color: var(--color-surface);
+  --mat-dialog-container-shape: var(--radius-xl);
+  --mat-dialog-container-max-width: 400px;
+  --mat-dialog-container-small-max-width: calc(100vw - 32px);
+  --mat-dialog-container-elevation-shadow: var(--shadow-float);
+}
+.app-dialog-panel [dialog-actions] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+@media (min-width: 600px) {
+  .app-dialog-panel [dialog-actions] {
+    flex-direction: row-reverse;
+  }
+  .app-dialog-panel [dialog-actions] > * {
+    flex: 1;
+  }
+}
+
+.app-sheet-panel {
+  --mat-bottom-sheet-container-shape: var(--radius-sheet);
+  --mat-bottom-sheet-container-background-color: var(--color-surface);
+  --mat-bottom-sheet-container-text-color: var(--color-text);
+  --mat-bottom-sheet-container-text-font: var(--font-family);
+}
+/* panelClass lands on the overlay pane; the padding belongs on the sheet container inside it. */
+.app-sheet-panel .mat-bottom-sheet-container {
+  box-sizing: border-box;
+  max-height: 85vh;
+  padding: var(--space-2) var(--space-6) var(--space-6);
+}
+
+/* Shells raise toasts above the bottom navigation with --toast-offset (Plan 2.3). */
+.app-toast-panel {
+  --mat-snack-bar-container-color: var(--color-text);
+  --mat-snack-bar-container-shape: var(--radius-md);
+  --mat-snack-bar-supporting-text-color: #ffffff;
+  width: calc(100vw - 32px);
+  max-width: 480px;
+  margin: 0 var(--space-4) var(--toast-offset, var(--space-4)) !important;
+  box-shadow: var(--shadow-float);
+  border-radius: var(--radius-md);
+}
+.app-toast-panel .mat-mdc-snackbar-surface {
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+  padding: 0;
+  box-shadow: none;
+}
+.app-toast-panel .mat-mdc-snack-bar-label {
+  padding: 0;
+}
