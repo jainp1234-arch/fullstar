@@ -1,20 +1,27 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { DisplayModeService } from '../mode/display-mode';
 import { EN } from '../strings/en';
+import { OwlLoader } from './owl-loader';
 
 /** The real component each block stands in for, so the layout does not jump. */
 export type SkeletonShape = 'list-card' | 'tile' | 'action-card' | 'button' | 'text';
 
 /**
  * app-skeleton (Guidelines §11): parent and Studio loading placeholders with a 1.2 s shimmer
- * (none with reduced motion). Kid mode uses the owl loader instead (Plan 2.2c).
+ * (none with reduced motion). Kid mode shows the owl loader instead.
  */
 @Component({
   selector: 'app-skeleton',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [OwlLoader],
   template: `
-    <span class="ui-visually-hidden" role="status">{{ loading }}</span>
-    @for (block of blocks(); track $index) {
-      <span [class]="'block block--' + shape()" aria-hidden="true"></span>
+    @if (mode() === 'kid') {
+      <app-owl-loader />
+    } @else {
+      <span class="ui-visually-hidden" role="status">{{ loading }}</span>
+      @for (block of blocks(); track $index) {
+        <span [class]="'block block--' + shape()" aria-hidden="true"></span>
+      }
     }
   `,
   styles: `
@@ -78,5 +85,6 @@ export class Skeleton {
   readonly count = input(1);
 
   protected readonly loading = EN.a11y.loading;
+  protected readonly mode = inject(DisplayModeService).mode;
   protected readonly blocks = computed(() => Array.from({ length: Math.max(1, this.count()) }));
 }

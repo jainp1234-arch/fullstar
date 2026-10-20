@@ -40,12 +40,20 @@ describe('app-empty-state', () => {
 
 describe('app-skeleton', () => {
   it('draws hidden blocks of the real size with one loading status', async () => {
+    TestBed.inject(DisplayModeService).set('parent');
     const fixture = await render(Skeleton, { shape: 'tile', count: 3 });
     const blocks = all(fixture, '.block');
     expect(blocks).toHaveLength(3);
     expect(blocks[0].className).toContain('block--tile');
     expect(blocks.every((block) => block.getAttribute('aria-hidden') === 'true')).toBe(true);
     expect(all(fixture, '[role="status"]')).toHaveLength(1);
+  });
+
+  it('shows the owl loader in kid mode', async () => {
+    TestBed.inject(DisplayModeService).set('kid');
+    const fixture = await render(Skeleton, { shape: 'tile', count: 3 });
+    expect(all(fixture, 'app-owl-loader')).toHaveLength(1);
+    expect(all(fixture, '.block')).toHaveLength(0);
   });
 });
 

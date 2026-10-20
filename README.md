@@ -106,4 +106,4 @@ Each step in `docs/06-implementation-plan.html` is done on a branch `step/<id>-<
 
 ## Next step
 
-Ask Claude Code: "Do step 2.2c of docs/06-implementation-plan.html."
+Ask Claude Code: "Do step 2.3 of docs/06-implementation-plan.html."
