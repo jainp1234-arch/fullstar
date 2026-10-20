@@ -68,7 +68,9 @@ test:
 
 api:
 	@test -f services/api/pom.xml || { echo "services/api is missing (created in step 0.3)"; exit 1; }
-	$(MVNW) -f services/api/pom.xml spring-boot:run
+	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
+	$(MVNW) -f services/api/pom.xml spring-boot:run -Dspring-boot.run.profiles=local \
+		"-Dspring-boot.run.arguments=--spring.config.import=optional:file:$(CURDIR)/.env[.properties]"
 
 db-bootstrap:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }

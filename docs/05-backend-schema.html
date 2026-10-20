@@ -974,7 +974,7 @@ CREATE POLICY staff_write_content ON app.content_items FOR ALL USING (app.is_sta
       <tr><td class="p">messages</td><td>Parents: SELECT and UPDATE only (no INSERT)</td><td>As the policy comment says: parents read and mark their own</td></tr>
       <tr><td class="p">functions</td><td>EXECUTE revoked from PUBLIC; granted to <code>app_api</code> and <code>app_system</code></td><td>Least privilege</td></tr>
       <tr><td class="p">staff_users</td><td>SELECT by any staff; writes super admin only</td><td>The staff guard (Plan 1.5) loads the current staff user</td></tr>
-      <tr><td class="p">processed_jobs</td><td>SELECT and INSERT for <code>app_api</code>, no family scope</td><td>Idempotency-Key replay; keys are random UUIDs</td></tr>
+      <tr><td class="p">processed_jobs</td><td>From V12 (Plan 1.3): <code>app_api</code> sees and writes only <code>http</code> rows whose <code>owner</code> = <code>app.current_owner()</code> (family id, or <code>'staff'</code>); job rows are <code>app_system</code> only</td><td>Idempotency-Key replay without one family replaying another's response</td></tr>
       <tr><td class="p">usage_events</td><td>INSERT for <code>app_api</code>; SELECT super admin only</td><td>Success measures for <code>/studio/metrics</code></td></tr>
       <tr><td class="p">anonymous_totals</td><td>SELECT super admin only; written only by <code>app_system</code></td><td>Totals kept after family deletion</td></tr>
     </tbody>
@@ -1076,7 +1076,7 @@ sequenceDiagram
 { "status": "error",   "data": null,    "error": { "code": "VALIDATION_FAILED", "message": "first_name is required",
                                                     "fields": { "first_name": "REQUIRED" } } }</pre></li>
     <li>Lists: <code>?limit=20&amp;cursor=&lt;opaque&gt;</code> (max 100); response <code>data = { "items": [...], "next_cursor": "..." | null }</code>. Cursor = base64 of the last row's sort key and id.</li>
-    <li>Writes that may be retried carry header <code>Idempotency-Key: &lt;uuid&gt;</code>; the API stores it in <code>processed_jobs</code> with type <code>http</code> for 14 days and returns the first result again.</li>
+    <li>Writes that may be retried carry header <code>Idempotency-Key: &lt;uuid&gt;</code>; the API stores it in <code>processed_jobs</code> with type <code>http</code> for 14 days and returns the first result again (same status and body, header <code>Idempotent-Replayed: true</code>). The same key on a different request, or a key owned by someone else, answers 409 <code>CONFLICT</code>; a failed request (4xx/5xx) rolls back and releases the key.</li>
     <li>Rate limits (Resilience4j RateLimiter, per family): PIN verify 5/min, uploads 20/hour, worksheet create 30/hour, sync 60/min, support 10/day.</li>
   </ul>
   <div class="tbl"><table>
@@ -1091,6 +1091,9 @@ sequenceDiagram
       <tr><td>423</td><td class="p">PIN_LOCKED</td><td>Too many wrong PINs; <code>retry_after_s</code> included</td></tr>
       <tr><td>429</td><td class="p">RATE_LIMITED · READING_LIMIT</td><td>Too many requests · reading test limit for today</td></tr>
       <tr><td>503</td><td class="p">DEPENDENCY_UNAVAILABLE</td><td>R2, SQS or Claude circuit open</td></tr>
+      <tr><td>409</td><td class="p">VERSION_IMMUTABLE</td><td>Added in Plan 1.3: a saved content version cannot change (raised by <code>versions_immutable</code>)</td></tr>
+      <tr><td>500</td><td class="p">INTERNAL_ERROR</td><td>Added in Plan 1.3: unexpected error; no details in the response</td></tr>
+      <tr><td>503</td><td class="p">FEATURE_DISABLED</td><td>Trial mode, §12a (AI drafts and checks off)</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -1281,6 +1284,7 @@ sequenceDiagram
       <tr><td class="p">V9__functions_triggers.sql</td><td>Section 6 (run_retention fully implemented)</td></tr>
       <tr><td class="p">V10__row_level_security.sql</td><td>Section 7, every table listed</td></tr>
       <tr><td class="p">V11__seed_reference.sql</td><td>subjects (1 english, 2 hindi, 3 maths, 4 evs, 5 computer inactive); class_subjects for classes 1–5 with subjects 1–4</td></tr>
+      <tr><td class="p">V12__idempotent_responses.sql</td><td>Plan 1.3: <code>processed_jobs</code> gains <code>owner</code>, <code>request</code> (method and path), <code>response_status</code>, <code>response_body</code> (text, stored verbatim) and check <code>processed_jobs_http_ck</code>; function <code>app.current_owner()</code>; owner-scoped policy <code>http_owner</code> replaces the V10 policies</td></tr>
     </tbody>
   </table></div>
   <div class="callout"><p><strong>Tests required before merge:</strong> Testcontainers PostgreSQL 18 tests for every trigger and function (including the error codes), an RLS test proving family A cannot read family B's rows through <code>app_api</code>, and a test proving staff cannot read <code>activity_attempts</code> or <code>reading_tests</code>.</p></div>
