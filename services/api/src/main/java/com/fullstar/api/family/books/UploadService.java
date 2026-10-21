@@ -188,7 +188,7 @@ public class UploadService {
 		}
 		else {
 			jdbc.update("UPDATE app.uploads SET status = 'scanning' WHERE id = ?", uploadId);
-			jobs.publish(JobQueue.UPLOAD_SCAN, SCAN_JOB, uploadId.toString(), Map.of("upload_id", uploadId,
+			jobs.publish(JobQueue.UPLOAD_SCAN, SCAN_JOB, SCAN_JOB + ":" + uploadId, Map.of("upload_id", uploadId,
 					"object_keys", files.stream().map(f -> (String) f.get("object_key")).toList()));
 			log.info("Upload complete familyId={} uploadId={} files={}", actor.familyId(), uploadId, files.size());
 		}

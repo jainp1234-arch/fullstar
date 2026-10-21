@@ -14,7 +14,21 @@
 	<name>book-reader</name>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Not Boot-managed (Tech Stack §6); same versions as services/api -->
+		<resilience4j.version>2.4.0</resilience4j.version>
+		<awssdk.version>2.55.11</awssdk.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>${awssdk.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -27,6 +41,24 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot4</artifactId>
+			<version>${resilience4j.version}</version>
+		</dependency>
+		<!-- Files from R2 (trial: SeaweedFS) and the job queues on SQS (trial: ElasticMQ), Plan 5.2 -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>sqs</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>url-connection-client</artifactId>
 		</dependency>
 
 		<dependency>
@@ -42,6 +74,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

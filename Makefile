@@ -20,13 +20,14 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
+.PHONY: help up down test lint api book-reader family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
 	@echo "make test             all tests"
 	@echo "make lint             all linters"
 	@echo "make api              run services/api locally"
+	@echo "make book-reader      run services/book-reader locally (upload scan worker)"
 	@echo "make family           run apps/family-app locally"
 	@echo "make studio           run apps/content-studio locally"
 	@echo "make db-bootstrap     create app_owner/app_api/app_system on NEON_OWNER_URL, write .env"
@@ -76,12 +77,18 @@ api:
 	$(MVNW) -f services/api/pom.xml spring-boot:run -Dspring-boot.run.profiles=local \
 		"-Dspring-boot.run.arguments=--spring.config.import=optional:file:$(CURDIR)/.env[.properties]"
 
+book-reader:
+	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
+	$(MVNW) -f services/book-reader/pom.xml spring-boot:run \
+		"-Dspring-boot.run.arguments=--spring.config.import=optional:file:$(CURDIR)/.env[.properties]"
+
 db-bootstrap:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
 	MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" postgres:18.6 sh /w/infra/db/bootstrap-roles.sh
 
 vendor-assets:
-	MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -w /w python:3.12.15-slim sh -c \n		"pip install -q --root-user-action=ignore --disable-pip-version-check -r tools/vendor-assets/requirements.txt && python tools/vendor-assets/vendor.py"
+	MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -w /w python:3.12.15-slim sh -c \
+		"pip install -q --root-user-action=ignore --disable-pip-version-check -r tools/vendor-assets/requirements.txt && python tools/vendor-assets/vendor.py"
 	node tools/vendor-assets/sky-stars.mjs
 	node scripts/check-assets.mjs
 
