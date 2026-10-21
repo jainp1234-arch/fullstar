@@ -19,11 +19,19 @@ export class CurrentScreen {
   private readonly router = inject(Router);
   private readonly access = inject(NAV_ACCESS);
   private readonly byId = new Map(this.config.screens.map((screen) => [screen.id, screen]));
+  /** The last address each screen was shown at, so Back and Close return to the same chapter or topic. */
+  private readonly lastUrl = new Map<ScreenId, string>();
 
   readonly screen = toSignal(
     this.router.events.pipe(
       filter((event) => event instanceof NavigationEnd),
-      map(() => this.read()),
+      map((event) => {
+        const screen = this.read();
+        if (screen) {
+          this.lastUrl.set(screen.id, event.urlAfterRedirects);
+        }
+        return screen;
+      }),
     ),
     { initialValue: this.read() },
   );
@@ -62,7 +70,12 @@ export class CurrentScreen {
 
   readonly parentUrl = computed(() => {
     const parent = this.screen()?.parent;
-    return parent ? this.urlOf(parent) : null;
+    if (!parent) {
+      return null;
+    }
+    // A screen with a path parameter goes back to where the child was; others to their own path
+    const def = this.byId.get(parent);
+    return (def?.path.includes(':') ? this.lastUrl.get(parent) : undefined) ?? this.urlOf(parent);
   });
 
   readonly links = computed<readonly ScreenLink[]>(() => {

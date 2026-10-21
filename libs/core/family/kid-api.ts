@@ -1,0 +1,97 @@
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiClient } from '../api/api-client';
+
+export type SubjectMode = 'book' | 'practice';
+
+export interface KidSubjectTile {
+  readonly subject_id: number;
+  readonly code: 'english' | 'hindi' | 'maths' | 'evs';
+  readonly name: string;
+  /** book: a ready chapter of the child's book; practice: grade-level topics. */
+  readonly mode: SubjectMode;
+}
+
+export interface ContinueCard {
+  readonly attempt_id: string;
+  readonly kind: 'lesson' | 'readalong';
+  readonly subject_id: number;
+  readonly subject: KidSubjectTile['code'];
+  readonly content_item_id: string | null;
+  readonly title: string | null;
+  readonly family_chapter_id: string | null;
+  readonly topic_id: string | null;
+  readonly resume_state: unknown;
+}
+
+export interface KidHome {
+  readonly child: {
+    readonly id: string;
+    readonly first_name: string;
+    readonly class_level: number;
+    readonly avatar_key: string;
+  };
+  readonly stars: number;
+  readonly minutes_today: number;
+  readonly daily_limit_minutes: number;
+  readonly subjects: readonly KidSubjectTile[];
+  readonly continue_card: ContinueCard | null;
+}
+
+/** A K2 row: a chapter of the book (number set) or a grade-level topic. */
+export interface KidEntry {
+  readonly id: string;
+  readonly number: number | null;
+  readonly title: string;
+  readonly done: boolean;
+}
+
+export interface KidSubject {
+  readonly subject_id: number;
+  readonly code: KidSubjectTile['code'];
+  readonly name: string;
+  readonly mode: SubjectMode;
+  readonly entries: readonly KidEntry[];
+}
+
+export interface KidLessonCard {
+  readonly content_item_id: string;
+  readonly title: string;
+  readonly duration_seconds: number | null;
+  readonly done: boolean;
+}
+
+/** K3: no lessons means the Watch lesson card is "Coming soon". */
+export interface KidActivity {
+  readonly kind: 'chapter' | 'topic';
+  readonly id: string;
+  readonly title: string;
+  readonly number: number | null;
+  readonly subject_id: number;
+  readonly subject: KidSubjectTile['code'];
+  readonly lessons: readonly KidLessonCard[];
+  readonly read_along: boolean;
+  readonly worksheet: boolean;
+}
+
+/** Kid mode Learn (Schema §11 /family/kid/**; Plan 6.1). X-Child-Id is added by the interceptor. */
+@Injectable({ providedIn: 'root' })
+export class KidApi {
+  private readonly api = inject(ApiClient);
+
+  home(): Observable<KidHome> {
+    return this.api.get<KidHome>('/family/kid/home');
+  }
+
+  subject(subjectId: number): Observable<KidSubject> {
+    return this.api.get<KidSubject>(`/family/kid/subjects/${subjectId}`);
+  }
+
+  chapter(familyChapterId: string): Observable<KidActivity> {
+    return this.api.get<KidActivity>(`/family/kid/chapters/${encodeURIComponent(familyChapterId)}`);
+  }
+
+  topic(topicId: string): Observable<KidActivity> {
+    return this.api.get<KidActivity>(`/family/kid/topics/${encodeURIComponent(topicId)}`);
+  }
+}

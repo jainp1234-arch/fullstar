@@ -656,6 +656,27 @@ export const EN = {
     lessonNotReady: 'Coming soon! Read along for now.',
     offline: 'This needs the internet.',
     needsParent: 'Ask Mummy or Papa to help.',
+    /** K1–K3 Learn (Plan 6.1). */
+    learn: {
+      hello: (name: string) => `Hi ${name}!`,
+      mySubjects: 'My subjects',
+      myBook: 'My book',
+      practice: (classLevel: number) => `Class ${classLevel} practice`,
+      continueEyebrow: 'Continue',
+      continueLesson: (title: string) => `Carry on with ${title}`,
+      continueReadAlong: 'Carry on reading along',
+      chapterLine: (number: number, title: string) => `Chapter ${number}: ${title}`,
+      done: 'Done',
+      topicsTitle: 'Topics',
+      chaptersTitle: 'Chapters',
+      nothingYet: 'Nothing here yet. Check back soon!',
+      watchLesson: 'Watch lesson',
+      readAlong: 'Read along',
+      worksheet: 'Worksheet',
+      comingSoon: 'Coming soon',
+      minutes: (seconds: number) => `${Math.max(1, Math.round(seconds / 60))} min`,
+      worksheetSoon: 'Worksheets are coming soon.',
+    },
   },
 
   parent: {
