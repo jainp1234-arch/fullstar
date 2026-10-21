@@ -8,7 +8,14 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiError, BookApi, FamilyApi, FamilyChild, SubjectBookRow } from '@fullstar/core';
+import {
+  ApiError,
+  BookApi,
+  BookChapter,
+  FamilyApi,
+  FamilyChild,
+  SubjectBookRow,
+} from '@fullstar/core';
 import {
   AVATAR_KEYS,
   Avatar,
@@ -68,6 +75,14 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
                     <li class="chapter">
                       <span>{{ text.chapterLine(chapter.number, chapter.title) }}</span>
                       <app-status-chip [status]="chipOf(chapter.status)" />
+                      @if (chapter.unclear_pages > 0) {
+                        <app-button
+                          variant="ghost"
+                          icon="photo_camera"
+                          [label]="text.fixPages(chapter.unclear_pages)"
+                          (pressed)="fixPages(row, chapter.id)"
+                        />
+                      }
                     </li>
                   }
                 </ul>
@@ -92,6 +107,13 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
               }
             }
             <div class="row__actions">
+              @if (row.book?.chapters?.some(isSuggested)) {
+                <app-button
+                  icon="fact_check"
+                  [label]="text.checkChapters"
+                  (pressed)="open(row, 'chapters')"
+                />
+              }
               @if (!row.book || (row.book.upload_mode === 'whole' && rejectedOnly(row))) {
                 <app-button
                   variant="secondary"
@@ -286,9 +308,18 @@ export class BooksPage {
     });
   }
 
-  protected open(row: SubjectBookRow, page: 'upload' | 'add-chapter'): void {
+  protected readonly isSuggested = (chapter: BookChapter): boolean =>
+    chapter.status === 'suggested';
+
+  protected open(row: SubjectBookRow, page: 'upload' | 'add-chapter' | 'chapters'): void {
     void this.router.navigate(['/parent/books', row.subject, page], {
       queryParams: { child: this.childId() },
+    });
+  }
+
+  protected fixPages(row: SubjectBookRow, chapterId: string): void {
+    void this.router.navigate(['/parent/books', row.subject, 'fix-pages'], {
+      queryParams: { child: this.childId(), chapter: chapterId },
     });
   }
 

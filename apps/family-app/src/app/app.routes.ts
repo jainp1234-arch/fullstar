@@ -12,6 +12,8 @@ import {
 import { ConsentPage } from './auth/consent.page';
 import { SignInReturnPage } from './auth/sign-in-return.page';
 import { BookUploadPage } from './books/book-upload.page';
+import { CheckChaptersPage } from './books/check-chapters.page';
+import { FixPagesPage } from './books/fix-pages.page';
 import { BooksPage } from './books/books.page';
 import { WelcomePage } from './auth/welcome.page';
 import { ForgotPinPage } from './parent/forgot-pin.page';
@@ -105,7 +107,9 @@ export const routes: Routes = [
         P0: ParentPinPage,
         P4: BooksPage,
         P5: BookUploadPage,
+        P6: CheckChaptersPage,
         P7: BookUploadPage,
+        P8: FixPagesPage,
         P14: SettingsPage,
         P15: EditChildPage,
         P16: HelpPage,

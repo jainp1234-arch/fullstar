@@ -86,7 +86,7 @@ Fonts, icons and illustrations are vendored into `libs/ui/assets` at the commits
 5. `make bootstrap-admin EMAIL=you@example.com NAME="Your Name"`: makes that person the first Content Studio super admin (Keycloak account with authenticator set-up required, realm role `super_admin`, `staff_users` row). Needs `KEYCLOAK_API_ADMIN_SECRET` in `.env` and Keycloak running (`make up`). Safe to run again. Everyone else is added in the Studio under Staff (S13).
 
    Keycloak imports the realm only when it does not exist yet. A realm imported before Plan 4.1 has no `fullstar-api-admin` client: either recreate the local Keycloak (`make down`, `docker volume rm fullstar_keycloak-db`, `make up`; this deletes local Keycloak accounts) or add the client by hand in the admin console (confidential, service accounts only, secret = `KEYCLOAK_API_ADMIN_SECRET`, service-account roles `realm-management` → `manage-users`, `view-users`).
-6. `make book-reader`: runs the book-reader worker on the laptop (Plan 5.2: the upload virus scan, with the ClamAV of `make up` on `localhost:3310`). `CLAMAV_HOST=127.0.0.1 ./mvnw -f services/book-reader/pom.xml test` also runs the real-ClamAV EICAR test.
+6. `make book-reader`: builds and runs the book-reader worker in Docker next to the services of `make up` (Plan 5.2 virus scan; Plan 5.3 page reading with PDFBox, Tesseract 5.5.3 and cwebp built into the image). `make test-ocr` builds the image and runs the real OCR test on the sample pages in `services/book-reader/src/test/resources/pages` (`make test-pages` renders them again). `CLAMAV_HOST=127.0.0.1 ./mvnw -f services/book-reader/pom.xml test` also runs the real-ClamAV EICAR test.
 7. `make seed-content`: loads the Class 3 starter content from `infra/seed/class3/*.json` (Plan 4.5: 5 topics each for English, Hindi, Maths and EVS, one lesson and 10 questions per topic, 10 reading passages) through the Studio services, as the first super admin: each item is checked against Schema §5, gets a manual check and is published. Every seeded item has an audit row `content.seed`. Safe to run again (existing items are skipped). `SeedFilesTest` checks the files without a database.
 
 Database tests (`make test`) use a throwaway PostgreSQL 18.6 container (Testcontainers), prepared the same way.
@@ -100,7 +100,7 @@ GitHub Actions in `.github/workflows/`. Path filters run only the parts a change
 | `frontend` | npm ci, lint, format check, unit tests, build, Playwright |
 | `backend` | `mvn verify` for api, book-reader, email-otp |
 | `python` | Ruff and pytest for the workers |
-| `docker` | build every image for linux/amd64 and linux/arm64 (no push) |
+| `docker` | build every image for linux/amd64 and linux/arm64 (no push); job `book-reader-tools` runs the real OCR test against the amd64 image |
 | `security` | gitleaks over the full git history and `npm audit --audit-level=high` (every PR, push and weekly) |
 
 Dependabot (`.github/dependabot.yml`) proposes weekly updates, only for releases at least 14 days old.

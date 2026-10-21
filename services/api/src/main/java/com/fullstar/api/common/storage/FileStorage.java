@@ -72,6 +72,12 @@ public class FileStorage {
 		return new SignedUrl(presigned.url(), "PUT", presigned.expiration());
 	}
 
+	/** A whole stored object, for small files such as a worker's pages.json (Plan 5.3). */
+	public byte[] read(String key) {
+		return resilientCalls.call(Dependency.R2,
+				() -> s3.getObjectAsBytes(get -> get.bucket(properties.bucket()).key(key)).asByteArray());
+	}
+
 	/** Size of a stored object in bytes, or -1 when it is not there (yet). */
 	public long size(String key) {
 		return resilientCalls.call(Dependency.R2, () -> {

@@ -25,6 +25,26 @@ export interface BookChapter {
   readonly title: string;
   readonly status: ChapterStatus;
   readonly page_count: number;
+  /** Pages to retake in P8. */
+  readonly unclear_pages: number;
+}
+
+/** One chapter of a confirmed split (P6); start_page counts over the whole book, from 1. */
+export interface SplitChapter {
+  readonly number: number;
+  readonly title: string;
+  readonly start_page: number;
+}
+
+export type PageQuality = 'ok' | 'unclear' | 'retaken';
+
+/** A page for P8 with a short-lived signed image link. */
+export interface BookPage {
+  readonly id: string;
+  readonly page_no: number;
+  readonly quality: PageQuality;
+  readonly confidence: number;
+  readonly image_url: string;
 }
 
 export interface LatestUpload {
@@ -133,6 +153,25 @@ export class BookApi {
     );
   }
 
+  /** P6: the full ordered list of chapters with their first pages; answers the chapters. */
+  confirmSplit(
+    bookId: string,
+    chapters: readonly SplitChapter[],
+  ): Observable<readonly BookChapter[]> {
+    return this.api.put<readonly BookChapter[]>(
+      `/family/parent/books/${encodeURIComponent(bookId)}/chapters`,
+      { chapters },
+    );
+  }
+
+  /** P8: a chapter's pages, or only those of one quality. */
+  pages(chapterId: string, quality?: PageQuality): Observable<readonly BookPage[]> {
+    return this.api.get<readonly BookPage[]>(
+      `/family/parent/chapters/${encodeURIComponent(chapterId)}/pages`,
+      quality ? { quality } : {},
+    );
+  }
+
   /**
    * The whole upload: ask for signed URLs, send each file straight to storage, then complete. The
    * last value is the completed upload (scanning, or rejected with a reason).
@@ -142,40 +181,58 @@ export class BookApi {
     request: UploadRequest,
     files: readonly File[],
   ): Observable<UploadProgress> {
-    const specs = files.map((file) => ({
-      name: file.name || 'page',
-      type: file.type,
-      size: file.size,
-    }));
-    return this.api
-      .post<BookUpload>(`/family/parent/books/${encodeURIComponent(bookId)}/uploads`, {
+    return this.send(
+      this.api.post<BookUpload>(`/family/parent/books/${encodeURIComponent(bookId)}/uploads`, {
         ...request,
-        files: specs,
-      })
-      .pipe(
-        switchMap((upload) =>
-          concat(
-            from(upload.files.map((signed, i) => ({ signed, i }))).pipe(
-              concatMap(({ signed, i }) =>
-                from(putFile(signed, files[i])).pipe(
-                  map((): UploadProgress => ({
-                    kind: 'sending',
-                    sent: i + 1,
-                    total: files.length,
-                  })),
-                ),
+        files: files.map(spec),
+      }),
+      files,
+    );
+  }
+
+  /** P8: one new photo for a page; then that page alone is read again. */
+  retake(pageId: string, photo: File): Observable<UploadProgress> {
+    return this.send(
+      this.api.post<BookUpload>(
+        `/family/parent/pages/${encodeURIComponent(pageId)}/retake`,
+        spec(photo),
+      ),
+      [photo],
+    );
+  }
+
+  private send(
+    created: Observable<BookUpload>,
+    files: readonly File[],
+  ): Observable<UploadProgress> {
+    return created.pipe(
+      switchMap((upload) =>
+        concat(
+          from(upload.files.map((signed, i) => ({ signed, i }))).pipe(
+            concatMap(({ signed, i }) =>
+              from(putFile(signed, files[i])).pipe(
+                map((): UploadProgress => ({
+                  kind: 'sending',
+                  sent: i + 1,
+                  total: files.length,
+                })),
               ),
             ),
-            defer(() =>
-              this.api.post<BookUpload>(
-                `/family/parent/uploads/${encodeURIComponent(upload.id)}/complete`,
-                {},
-              ),
-            ).pipe(map((done): UploadProgress => ({ kind: 'done', upload: done }))),
           ),
+          defer(() =>
+            this.api.post<BookUpload>(
+              `/family/parent/uploads/${encodeURIComponent(upload.id)}/complete`,
+              {},
+            ),
+          ).pipe(map((done): UploadProgress => ({ kind: 'done', upload: done }))),
         ),
-      );
+      ),
+    );
   }
+}
+
+function spec(file: File): { name: string; type: string; size: number } {
+  return { name: file.name || 'page', type: file.type, size: file.size };
 }
 
 /** PUT to the signed storage URL: no API headers, only the signed Content-Type. */

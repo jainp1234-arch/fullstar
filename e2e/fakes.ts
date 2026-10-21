@@ -53,6 +53,8 @@ export interface FakeServer {
     deletionRequestedAt: string | null;
     /** Books, chapters and uploads (Plan 5.1). */
     books: FakeBook[];
+    /** Confirmed chapter splits (P6), as sent. */
+    splits: { number: number; title: string; start_page: number }[][];
     /** Files PUT to the fake storage. */
     stored: string[];
   };
@@ -154,6 +156,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       deletionRequests: 0,
       deletionRequestedAt: null,
       books: [],
+      splits: [],
       stored: [],
     },
     staff: [
@@ -345,7 +348,8 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
     if (
       path.startsWith('/family/parent/books') ||
       path.startsWith('/family/parent/uploads') ||
-      path.startsWith('/family/parent/chapters')
+      path.startsWith('/family/parent/chapters') ||
+      path.startsWith('/family/parent/pages')
     ) {
       return familyBooks(route, server, path, method, body);
     }
@@ -1026,7 +1030,20 @@ export interface FakeChapter {
   title: string;
   status: string;
   page_count: number;
+  unclear_pages: number;
+  /** Read pages (Plan 5.3); absent means none yet. */
+  pages?: FakePage[];
 }
+
+export interface FakePage {
+  id: string;
+  page_no: number;
+  quality: 'ok' | 'unclear' | 'retaken';
+}
+
+/** A 1×1 grey PNG for page thumbnails. */
+const PAGE_IMAGE =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGO4BwAA0gDQjvrmxgAAAABJRU5ErkJggg==';
 
 export interface FakeUpload {
   id: string;
@@ -1038,6 +1055,7 @@ export interface FakeUpload {
   file_count: number;
   /** File names, to fake the content check: a name with "not-a-photo" is the wrong type. */
   names: string[];
+  retake_page_id?: string;
 }
 
 export interface FakeBook {
@@ -1058,11 +1076,17 @@ const SUBJECTS = [
   { id: 4, code: 'evs', name: 'EVS' },
 ];
 
+function chapterView(chapter: FakeChapter) {
+  const { pages, ...rest } = chapter;
+  return { ...rest, unclear_pages: (pages ?? []).filter((p) => p.quality === 'unclear').length };
+}
+
 function bookView(book: FakeBook) {
-  const { uploads, ...rest } = book;
+  const { uploads, chapters, ...rest } = book;
   const latest = uploads[uploads.length - 1];
   return {
     ...rest,
+    chapters: chapters.map(chapterView),
     latest_upload: latest
       ? {
           id: latest.id,
@@ -1172,6 +1196,7 @@ function familyBooks(
           title: chapter.title,
           status: 'processing',
           page_count: 0,
+          unclear_pages: 0,
         };
         book.chapters.push(created);
         chapterId = created.id;
@@ -1199,10 +1224,103 @@ function familyBooks(
       }));
       return envelope(route, 201, uploadView(upload, signed));
     }
+    if (path === `/family/parent/books/${book.id}/chapters` && method === 'PUT') {
+      // Confirm the split (P6): pages are renumbered over the new chapter starts
+      const split = (body['chapters'] ?? []) as {
+        number: number;
+        title: string;
+        start_page: number;
+      }[];
+      const pages = book.chapters.flatMap((c) => c.pages ?? []);
+      const ordered = split.every(
+        (c, i) =>
+          (i === 0 ? c.start_page === 1 : c.start_page > split[i - 1].start_page) &&
+          c.start_page <= pages.length,
+      );
+      if (!split.length || !ordered) {
+        return envelope(route, 400, null, 'VALIDATION_FAILED', {
+          fields: { 'chapters[0].start_page': 'INVALID' },
+        });
+      }
+      if (
+        book.chapters.some(
+          (c) => !['suggested', 'processing', 'needs_attention'].includes(c.status),
+        )
+      ) {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      server.family.splits.push(split);
+      book.chapters = split.map((c, i) => {
+        const end = i + 1 < split.length ? split[i + 1].start_page - 1 : pages.length;
+        const own = pages.slice(c.start_page - 1, end).map((p, n) => ({ ...p, page_no: n + 1 }));
+        return {
+          id: book.chapters[i]?.id ?? next('chapter'),
+          number: c.number,
+          title: c.title,
+          status: own.some((p) => p.quality === 'unclear') ? 'needs_attention' : 'processing',
+          page_count: own.length,
+          unclear_pages: 0,
+          pages: own,
+        };
+      });
+      return envelope(route, 200, book.chapters.map(chapterView));
+    }
+    for (const chapter of book.chapters) {
+      if (path === `/family/parent/chapters/${chapter.id}/pages` && method === 'GET') {
+        const quality = url.searchParams.get('quality');
+        return envelope(
+          route,
+          200,
+          (chapter.pages ?? [])
+            .filter((p) => !quality || p.quality === quality)
+            .map((p) => ({
+              ...p,
+              confidence: p.quality === 'unclear' ? 31.5 : 91,
+              image_url: PAGE_IMAGE,
+            })),
+        );
+      }
+      for (const pageRow of chapter.pages ?? []) {
+        if (path === `/family/parent/pages/${pageRow.id}/retake` && method === 'POST') {
+          const upload: FakeUpload = {
+            id: next('upload'),
+            family_book_id: book.id,
+            family_chapter_id: chapter.id,
+            source: 'photos',
+            status: 'awaiting_files',
+            reject_reason: null,
+            file_count: 1,
+            names: [String(body['name'])],
+            retake_page_id: pageRow.id,
+          };
+          book.uploads.push(upload);
+          return envelope(
+            route,
+            201,
+            uploadView(upload, [
+              {
+                id: `${upload.id}-f0`,
+                name: String(body['name']),
+                url: `${url.origin}/fake-storage/${upload.id}/0`,
+                method: 'PUT',
+                headers: { 'Content-Type': String(body['type']) },
+                expires_at: new Date(Date.now() + 600_000).toISOString(),
+              },
+            ]),
+          );
+        }
+      }
+    }
   }
   for (const book of books) {
     for (const upload of book.uploads) {
       if (path === `/family/parent/uploads/${upload.id}/complete` && method === 'POST') {
+        const retaken = book.chapters
+          .flatMap((c) => c.pages ?? [])
+          .find((p) => p.id === upload.retake_page_id);
+        if (retaken && upload.status === 'awaiting_files') {
+          retaken.quality = 'retaken';
+        }
         if (upload.status === 'awaiting_files') {
           if (upload.names.some((n) => n.includes('not-a-photo'))) {
             upload.status = 'rejected';
