@@ -62,6 +62,9 @@ export interface FakeServer {
     /** P8a answers by content item, and the reports they opened. */
     previews: Record<string, string>;
     reports: { content_item_id: string; reason: string; note: string | null }[];
+    /** Bodies of POST /family/kid/sync and the attempts kept, by id (Plan 6.2). */
+    syncs: { childId: string; body: Record<string, unknown[]> }[];
+    attempts: Record<string, { stars: number; completed_at: string | null }>;
   };
   /** Studio staff list as the fake API holds it (s1 is the signed-in member). */
   readonly staff: FakeStaffMember[];
@@ -167,6 +170,8 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       messages: [],
       previews: {},
       reports: [],
+      syncs: [],
+      attempts: {},
       stored: [],
     },
     staff: [
@@ -1741,6 +1746,75 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
     server.family.books.find((b) => b.subject_id === subjectId && b.child_ids.includes(child.id));
   const readyChapters = (subjectId: number) =>
     (bookOf(subjectId)?.chapters ?? []).filter((c) => ready.includes(c.status));
+  if (path === '/family/kid/sync' && route.request().method() === 'POST') {
+    // Schema §11: attempts upsert by id, stars from the counts (0 of anything = 1, >50% = 2, >80% = 3)
+    const body = (route.request().postDataJSON() ?? {}) as Record<string, unknown[]>;
+    server.family.syncs.push({ childId: child.id, body });
+    for (const raw of (body['attempts'] ?? []) as Record<string, unknown>[]) {
+      const id = String(raw['id']);
+      const done = raw['completed_at'] as string | null;
+      const correct = raw['correct_count'] as number | null;
+      const total = raw['total_count'] as number | null;
+      const share = correct !== null && total ? correct / total : null;
+      const stars = !done ? 0 : share === null ? 1 : share > 0.8 ? 3 : share > 0.5 ? 2 : 1;
+      if (!server.family.attempts[id]?.completed_at) {
+        server.family.attempts[id] = { stars, completed_at: done };
+      }
+    }
+    const earned = Object.values(server.family.attempts).reduce((sum, a) => sum + a.stars, 0);
+    return envelope(route, 200, {
+      stars_total: 12 + earned,
+      minutes_today: 5,
+      accepted: {
+        attempts: (body['attempts'] ?? []).length,
+        answers: (body['answers'] ?? []).length,
+        minutes: (body['minutes'] ?? []).length,
+      },
+      rejected: { attempts: 0, answers: 0, minutes: 0 },
+    });
+  }
+  if (path === '/family/kid/lessons/sample') {
+    return envelope(route, 200, {
+      id: 'sample',
+      version_id: 'sample-v1',
+      title: 'Birds build nests',
+      lang: 'en',
+      duration_seconds: 20,
+      subject_id: 1,
+      topic_id: 't-sample',
+      catalog_chapter_id: null,
+      body: {
+        scenes: [
+          {
+            id: 's1',
+            duration_ms: 60000,
+            text: 'A bird builds a nest.',
+            visual: { illustration: 'subject-evs', animation: 'fade-up' },
+          },
+          { id: 'q1', duration_ms: 0, quiz: { question_item_id: 'q-nest' } },
+          { id: 's2', duration_ms: 60000, text: 'Now the eggs are safe.', visual: null },
+        ],
+      },
+      questions: [
+        {
+          id: 'q-nest',
+          version_id: 'q-nest-v1',
+          question_type: 'mcq',
+          topic_id: 't-sample',
+          body: {
+            prompt: 'What does a bird build?',
+            image_key: null,
+            options: [
+              { id: 'a', text: 'A nest' },
+              { id: 'b', text: 'A car' },
+            ],
+          },
+          solution: { correct: ['a'], explanation: 'Birds build nests for their eggs.' },
+        },
+      ],
+      resume: null,
+    });
+  }
   if (path === '/family/kid/home') {
     return envelope(route, 200, {
       child: {

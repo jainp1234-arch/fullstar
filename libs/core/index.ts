@@ -20,3 +20,4 @@ export * from './family/book-api';
 export * from './studio/prep-api';
 export * from './family/message-api';
 export * from './family/kid-api';
+export * from './family/kid-events';

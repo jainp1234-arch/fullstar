@@ -19,6 +19,8 @@ import { MessagesPage } from './messages/messages.page';
 import { ActivityPage } from './kid/activity.page';
 import { LearnHomePage } from './kid/learn-home.page';
 import { SubjectPage } from './kid/subject.page';
+import { LessonPlayerPage } from './kid/lesson-player.page';
+import { WellDonePage } from './kid/well-done.page';
 import { BooksPage } from './books/books.page';
 import { WelcomePage } from './auth/welcome.page';
 import { ForgotPinPage } from './parent/forgot-pin.page';
@@ -112,6 +114,8 @@ export const routes: Routes = [
         K1: LearnHomePage,
         K2: SubjectPage,
         K3: ActivityPage,
+        K4: LessonPlayerPage,
+        K7: WellDonePage,
         P0: ParentPinPage,
         P4: BooksPage,
         P5: BookUploadPage,

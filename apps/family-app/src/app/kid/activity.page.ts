@@ -28,7 +28,7 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
             [subtitle]="subtitleOf(lesson)"
             [cornerTab]="lesson.done ? { text: text.done, tone: 'green' } : null"
             [attr.data-screen-link]="linkTo('/kid/lesson/' + lesson.content_item_id)"
-            (pressed)="go('/kid/lesson/' + lesson.content_item_id)"
+            (pressed)="watch(a, lesson)"
           />
         } @empty {
           <app-list-card
@@ -125,6 +125,16 @@ export class ActivityPage {
   /** Guidelines §11: a locked card is never hidden silently; tapping says why. */
   protected soon(message: string): void {
     this.toasts.show(message);
+  }
+
+  /** K4 with the chapter for the attempt and the way back here for K7. */
+  protected watch(activity: KidActivity, lesson: KidLessonCard): void {
+    void this.router.navigate(['/kid/lesson', lesson.content_item_id], {
+      queryParams: {
+        ...(activity.kind === 'chapter' ? { chapter: activity.id } : {}),
+        back: this.router.url,
+      },
+    });
   }
 
   protected linkTo(url: string): string {

@@ -13,3 +13,6 @@ export const AUTH_RETRIED = new HttpContextToken<boolean>(() => false);
 export function isApiUrl(url: string): boolean {
   return url === API_BASE || url.startsWith(`${API_BASE}/`);
 }
+
+/** The child a kid-mode call is for when it is not the active child (Plan 6.2 offline sync). */
+export const CHILD_ID = new HttpContextToken<string | null>(() => null);

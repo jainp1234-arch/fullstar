@@ -677,6 +677,18 @@ export const EN = {
       minutes: (seconds: number) => `${Math.max(1, Math.round(seconds / 60))} min`,
       worksheetSoon: 'Worksheets are coming soon.',
     },
+    /** K4 lesson player and K7 well done (Plan 6.2). */
+    player: {
+      progress: (scene: number, total: number) => `Part ${scene} of ${total}`,
+      back: 'Back',
+      next: 'Next',
+      pause: 'Pause',
+      play: 'Play',
+      finish: 'Finish',
+      matchHint: 'Think which ones go together, then show the pairs.',
+      showPairs: 'Show the pairs',
+      backToSubject: 'Back to subject',
+    },
   },
 
   parent: {
