@@ -41,9 +41,12 @@ public class BookService {
 
 	private final FileStorage storage;
 
-	public BookService(JdbcTemplate jdbc, FileStorage storage) {
+	private final ReadAlongJobs readAlong;
+
+	public BookService(JdbcTemplate jdbc, FileStorage storage, ReadAlongJobs readAlong) {
 		this.jdbc = jdbc;
 		this.storage = storage;
+		this.readAlong = readAlong;
 	}
 
 	/** unclearPages: pages to retake in P8 (Plan 5.3). */
@@ -194,6 +197,8 @@ public class BookService {
 		}
 		jdbc.update("UPDATE app.family_books SET split_confirmed_at = now() WHERE id = ?", bookId);
 		log.info("Split confirmed bookId={} chapters={}", bookId, split.size());
+		// Chapters without unclear pages are read aloud now (Plan 5.4)
+		chaptersOf(bookId).forEach(c -> readAlong.queueIfReady(jdbc, c.id()));
 		return chaptersOf(bookId);
 	}
 

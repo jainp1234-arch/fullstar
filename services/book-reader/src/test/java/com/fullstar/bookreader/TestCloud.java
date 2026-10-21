@@ -82,7 +82,7 @@ public abstract class TestCloud {
 			.region(Region.AP_SOUTH_1)
 			.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")))
 			.build()) {
-			for (String name : List.of("upload-scan", "book-process", "job-results")) {
+			for (String name : List.of("upload-scan", "book-process", "readalong-narrate", "job-results")) {
 				client.createQueue(request -> request.queueName(name));
 			}
 		}
@@ -119,13 +119,16 @@ public abstract class TestCloud {
 	}
 
 	protected String put(byte[] content) {
+		return putAt("families/" + UUID.randomUUID() + "/uploads/" + UUID.randomUUID() + "/" + UUID.randomUUID(), content);
+	}
+
+	protected String putAt(String key, byte[] content) {
 		try {
 			s3.headBucket(r -> r.bucket(BUCKET));
 		}
 		catch (NoSuchBucketException ex) {
 			s3.createBucket(r -> r.bucket(BUCKET));
 		}
-		String key = "families/" + UUID.randomUUID() + "/uploads/" + UUID.randomUUID() + "/" + UUID.randomUUID();
 		s3.putObject(r -> r.bucket(BUCKET).key(key), RequestBody.fromBytes(content));
 		return key;
 	}
