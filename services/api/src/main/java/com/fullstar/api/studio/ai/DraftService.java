@@ -176,7 +176,7 @@ public class DraftService {
 	}
 
 	/** The JSON object in a reply or paste, also inside a ```json fence; null if there is none. */
-	static JsonNode readJson(String text) {
+	public static JsonNode readJson(String text) {
 		if (text == null) {
 			return null;
 		}

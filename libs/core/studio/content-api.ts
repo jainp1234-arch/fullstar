@@ -83,10 +83,26 @@ export interface ContentVersionInfo {
   readonly published: boolean;
 }
 
+export type CheckStatus = 'running' | 'passed' | 'failed' | 'error';
+
+/** The current version's latest content check, in GET /studio/content-items/{id}. */
+export interface CheckSummary {
+  readonly id: string;
+  readonly status: CheckStatus;
+  /** "manual" or the Claude model ID. */
+  readonly model: string;
+  readonly critical_count: number;
+  readonly warning_count: number;
+  readonly open_flags: number;
+  /** Latest check passed and no flag is open: publishing is allowed. */
+  readonly publishable: boolean;
+}
+
 export interface ContentDetail {
   readonly item: ContentSummary;
   readonly current_version: ContentVersion | null;
   readonly versions: readonly ContentVersionInfo[];
+  readonly latest_check: CheckSummary | null;
 }
 
 export interface Page<T> {
@@ -220,5 +236,116 @@ export class DraftApi {
 
   prompt(request: DraftRequest): Observable<DraftPrompt> {
     return this.api.post<DraftPrompt>('/studio/ai/draft-prompt', request, { idempotent: false });
+  }
+}
+
+export type FlagSeverity = 'critical' | 'warning';
+export type FlagCategory =
+  | 'age_suitability'
+  | 'fact_mismatch'
+  | 'wrong_answer'
+  | 'language'
+  | 'difficulty'
+  | 'bias'
+  | 'personal_info'
+  | 'other';
+
+export const FLAG_CATEGORIES: readonly FlagCategory[] = [
+  'age_suitability',
+  'fact_mismatch',
+  'wrong_answer',
+  'language',
+  'difficulty',
+  'bias',
+  'personal_info',
+  'other',
+];
+
+/** Schema §12a manual-check checklist; every item must be true for the check to pass. */
+export const CHECKLIST_ITEMS = [
+  'age_suitability',
+  'facts_match',
+  'answers_correct',
+  'language',
+  'difficulty',
+  'no_bias',
+  'no_personal_info',
+] as const;
+
+export type ChecklistItem = (typeof CHECKLIST_ITEMS)[number];
+
+export interface NewFlag {
+  readonly severity: FlagSeverity;
+  readonly category: FlagCategory;
+  /** JSON path inside the content, e.g. "body.scenes[2].text" or "title". */
+  readonly location: string;
+  readonly reason: string;
+}
+
+export interface CheckFlag extends NewFlag {
+  readonly id: string;
+  readonly resolution: 'open' | 'fixed' | 'accepted';
+  readonly resolution_note: string | null;
+  readonly resolved_at: string | null;
+}
+
+/** GET /studio/content-checks/{id} (Schema §11, S11). */
+export interface ContentCheck extends CheckSummary {
+  readonly version_id: string;
+  readonly item_id: string;
+  readonly version_no: number;
+  readonly error_message: string | null;
+  readonly started_at: string;
+  readonly finished_at: string | null;
+  readonly flags: readonly CheckFlag[];
+}
+
+/** Content checks and publishing (Schema §11, §12a; S11, S6; Plan 4.4). */
+@Injectable({ providedIn: 'root' })
+export class CheckApi {
+  private readonly api = inject(ApiClient);
+
+  /** The content-check agent (FEATURE_AI_CHECK); answers the running check. */
+  runAgent(versionId: string): Observable<ContentCheck> {
+    return this.api.post<ContentCheck>(
+      `/studio/content-versions/${encodeURIComponent(versionId)}/checks`,
+      {},
+    );
+  }
+
+  manualCheck(
+    versionId: string,
+    checklist: Readonly<Record<ChecklistItem, boolean>>,
+    flags: readonly NewFlag[],
+  ): Observable<ContentCheck> {
+    return this.api.post<ContentCheck>(
+      `/studio/content-versions/${encodeURIComponent(versionId)}/manual-check`,
+      { checklist, flags },
+    );
+  }
+
+  check(id: string): Observable<ContentCheck> {
+    return this.api.get<ContentCheck>(`/studio/content-checks/${encodeURIComponent(id)}`);
+  }
+
+  acceptFlag(id: string, note: string): Observable<ContentCheck> {
+    return this.api.patch<ContentCheck>(`/studio/content-check-flags/${encodeURIComponent(id)}`, {
+      resolution: 'accepted',
+      note,
+    });
+  }
+
+  publish(itemId: string): Observable<ContentDetail> {
+    return this.api.post<ContentDetail>(
+      `/studio/content-items/${encodeURIComponent(itemId)}/publish`,
+      {},
+    );
+  }
+
+  unpublish(itemId: string): Observable<ContentDetail> {
+    return this.api.post<ContentDetail>(
+      `/studio/content-items/${encodeURIComponent(itemId)}/unpublish`,
+      {},
+    );
   }
 }

@@ -12,7 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 /**
- * Prompt templates in resources/prompts (Plan 4.3). {@code {{name}}} placeholders are filled in;
+ * Prompt templates in resources/prompts (Plan 4.3 drafts, 4.4 content check). {@code {{name}}} placeholders are filled in;
  * an unknown placeholder fails loudly so a template never goes out half-filled.
  */
 @Component
@@ -23,7 +23,8 @@ public class DraftPrompts {
 	private final Map<String, String> templates = new HashMap<>();
 
 	public DraftPrompts() {
-		for (String name : new String[] { "draft-system", "draft-lesson", "draft-question_bank", "draft-passage" }) {
+		for (String name : new String[] { "draft-system", "draft-lesson", "draft-question_bank", "draft-passage",
+				"content-check-system", "content-check-user" }) {
 			templates.put(name, read(name));
 		}
 	}
@@ -34,6 +35,11 @@ public class DraftPrompts {
 	/** type is lesson, question_bank or passage. */
 	public Prompt draft(String type, Map<String, String> values) {
 		return new Prompt(templates.get("draft-system"), fill(templates.get("draft-" + type), values));
+	}
+
+	/** The content-check agent (Plan 4.4): checklist and flag format, then the content itself. */
+	public Prompt contentCheck(Map<String, String> values) {
+		return new Prompt(templates.get("content-check-system"), fill(templates.get("content-check-user"), values));
 	}
 
 	static String fill(String template, Map<String, String> values) {

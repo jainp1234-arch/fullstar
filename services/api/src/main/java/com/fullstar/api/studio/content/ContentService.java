@@ -76,7 +76,12 @@ public class ContentService {
 			boolean current, boolean published) {
 	}
 
-	public record Detail(Summary item, Version currentVersion, List<VersionInfo> versions) {
+	/** The current version's latest content check (S11), or null before the first one. */
+	public record CheckSummary(UUID id, String status, String model, int criticalCount, int warningCount,
+			int openFlags, boolean publishable) {
+	}
+
+	public record Detail(Summary item, Version currentVersion, List<VersionInfo> versions, CheckSummary latestCheck) {
 	}
 
 	public record Filter(String kind, UUID topicId, UUID catalogChapterId, String status, String q, Integer classLevel,
@@ -146,7 +151,22 @@ public class ContentService {
 						rs.getTimestamp("created_at").toInstant(), rs.getString("display_name"),
 						rs.getBoolean("is_current"), rs.getBoolean("is_published")),
 				id);
-		return new Detail(item, current, versions);
+		CheckSummary check = item.currentVersionId() == null ? null : latestCheck(item.currentVersionId());
+		return new Detail(item, current, versions, check);
+	}
+
+	private CheckSummary latestCheck(UUID versionId) {
+		List<CheckSummary> rows = jdbc.query("""
+				SELECT c.id, c.status, c.model, c.critical_count, c.warning_count,
+				       (SELECT count(*) FROM app.content_check_flags f WHERE f.check_id = c.id AND f.resolution = 'open')
+				         AS open_flags,
+				       app.version_check_passed(c.version_id) AS publishable
+				  FROM app.content_checks c WHERE c.version_id = ? ORDER BY c.started_at DESC, c.id LIMIT 1""",
+				(rs, n) -> new CheckSummary(rs.getObject("id", UUID.class), rs.getString("status"), rs.getString("model"),
+						rs.getInt("critical_count"), rs.getInt("warning_count"), rs.getInt("open_flags"),
+						rs.getBoolean("publishable")),
+				versionId);
+		return rows.isEmpty() ? null : rows.get(0);
 	}
 
 	public Version version(UUID versionId) {

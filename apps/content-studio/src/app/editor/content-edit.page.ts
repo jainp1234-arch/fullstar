@@ -227,7 +227,7 @@ function starterQuestion(type: QuestionType): QuestionContent {
                 variant="secondary"
                 [label]="text.sendToCheck"
                 [attr.data-screen-link]="link('/content-check')"
-                (pressed)="go('/content-check')"
+                (pressed)="openCheck()"
               />
               <app-button
                 variant="secondary"
@@ -489,6 +489,12 @@ export class ContentEditPage {
 
   protected link(path: string): string {
     return this.location.prepareExternalUrl(path);
+  }
+
+  /** S11 for this item. */
+  protected openCheck(): void {
+    const id = this.detail()?.item.id;
+    void this.router.navigate(['/content-check'], { queryParams: id ? { item: id } : {} });
   }
 
   protected go(path: string): void {
