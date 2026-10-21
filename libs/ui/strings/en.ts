@@ -372,6 +372,36 @@ export const EN = {
     },
     languages: { en: 'English', hi: 'Hindi' },
     difficulties: { 1: 'Easy', 2: 'Medium', 3: 'Hard' } as Record<number, string>,
+    /** S4 Draft with AI (Plan 4.3). In trial the admin uses a Claude chat and pastes the reply. */
+    draft: {
+      intro: 'Choose what to draft. The draft is not saved until you save it.',
+      topic: 'Topic',
+      noTopics: 'This class and subject has no topics yet. Add one in the Library.',
+      type: 'Content type',
+      types: { lesson: 'Lesson', question_bank: 'Question bank', passage: 'Reading passage' },
+      count: 'Number of questions',
+      language: 'Language',
+      withAi: 'Draft with AI',
+      aiOff:
+        'AI drafts are switched off. Copy the prompt into a Claude chat, then paste its reply below.',
+      copyPrompt: 'Copy prompt for a Claude chat',
+      promptCopied: 'Prompt copied. Paste it into a Claude chat.',
+      promptLabel: 'Prompt',
+      paste: 'Paste the reply from Claude',
+      checkPaste: 'Check pasted draft',
+      checking: 'Checking the draft',
+      result: 'Draft',
+      ready: 'Ready to save',
+      problems: (count: number) => `${count} ${count === 1 ? 'problem' : 'problems'} to fix`,
+      problem: (path: string, message: string) => `${path}: ${message}`,
+      openInEditor: (title: string) => `Open ${title || 'draft'} in the editor`,
+      saveAll: (count: number) =>
+        `Save ${count} ready ${count === 1 ? 'question' : 'questions'} as drafts`,
+      savedAll: (count: number) =>
+        `Saved ${count} ${count === 1 ? 'question' : 'questions'} as drafts.`,
+      noQuestionsReady: 'No question is ready to save yet.',
+      untitled: 'Untitled',
+    },
     /** S5 Edit and preview. */
     editor: {
       newTitle: (kind: string) => `New ${kind.toLowerCase()}`,

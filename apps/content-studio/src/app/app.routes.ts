@@ -3,6 +3,7 @@ import { staffGuard, superAdminGuard } from '@fullstar/core';
 import { PlaceholderPage, StudioShell, screenRoutes } from '@fullstar/ui';
 import { StaffSignInPage } from './auth/staff-sign-in.page';
 import { DashboardPage } from './dashboard/dashboard.page';
+import { DraftPage } from './draft/draft.page';
 import { ContentEditPage } from './editor/content-edit.page';
 import { LibraryPage } from './library/library.page';
 import { STUDIO_SCREENS } from './screens';
@@ -16,6 +17,7 @@ export const routes: Routes = [
       S1: StaffSignInPage,
       S2: DashboardPage,
       S3: LibraryPage,
+      S4: DraftPage,
       S5: ContentEditPage,
       S13: StaffPage,
     },

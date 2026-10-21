@@ -40,6 +40,7 @@ import {
   errorMessage,
   fieldMessage,
 } from '@fullstar/ui';
+import { DraftHandoff } from './draft-handoff';
 import { FieldErrors } from './editor-shared';
 import { LessonEditor } from './lesson-editor';
 import { PassageEditor } from './passage-editor';
@@ -429,6 +430,7 @@ export class ContentEditPage {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly toasts = inject(ToastService);
+  private readonly handoff = inject(DraftHandoff);
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
@@ -601,9 +603,21 @@ export class ContentEditPage {
     this.detail.set(null);
     this.viewing.set(null);
     this.place.set({ kind, classLevel, subject: subject as SubjectCode, topicId });
-    this.meta.reset({ title: '', questionType: 'mcq', difficulty: '2', lang: 'en' });
+    // A draft from S4 for this topic opens instead of the empty form
+    const draft = this.handoff.take(topicId, kind);
+    const value = draft?.value ?? starter(kind, 'mcq');
+    this.meta.reset(
+      {
+        title: draft?.title ?? '',
+        questionType: value.kind === 'question' ? value.type : 'mcq',
+        difficulty: String(draft?.difficulty ?? 2),
+        lang: draft?.lang ?? (subject === 'hindi' ? 'hi' : 'en'),
+      },
+      { emitEvent: false },
+    );
+    this.metaValue.set(this.meta.getRawValue());
     this.meta.enable({ emitEvent: false });
-    this.openContent(starter(kind, 'mcq'));
+    this.openContent(value);
   }
 
   private load(id: string): void {

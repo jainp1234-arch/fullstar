@@ -104,6 +104,13 @@ public abstract class ApiTestSupport {
 			return new FakeKeycloakAdmin();
 		}
 
+		/** Claude without the network (AnthropicClaudeClientTest covers the real client). */
+		@Bean
+		@Primary
+		FakeClaude fakeClaude() {
+			return new FakeClaude();
+		}
+
 		/** Queues and the bucket exist before the job-results consumer starts polling. */
 		@Bean
 		org.springframework.beans.factory.InitializingBean cloudReady(com.fullstar.api.common.jobs.QueueBootstrap queues,

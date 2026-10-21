@@ -324,7 +324,7 @@ flowchart LR
     </tbody>
   </table></div>
   <ul>
-    <li>Model IDs are configuration values, not hard-coded.</li>
+    <li>Model IDs are configuration values, not hard-coded. Implemented in Plan 4.3: <code>CLAUDE_MODEL</code> (default <code>claude-sonnet-5-5</code>), key <code>ANTHROPIC_API_KEY</code>, flags <code>FEATURE_AI_DRAFTS</code> / <code>FEATURE_AI_CHECK</code> (on only when <code>true</code>). The SDK's own retries are off; Resilience4j instance <code>claude</code> (60 s timeout) does retry and circuit breaking. Prompt templates live in <code>services/api/src/main/resources/prompts/</code>; the Studio can show the same prompt for a Claude chat (trial).</li>
     <li>Only book text and our own content are sent. No child names, recordings or progress.</li>
     <li>The API key comes from an environment variable. Calls use Resilience4j retry, timeout and circuit breaker.</li>
     <li>This is the only paid item in the prototype; usage is small and per chapter.</li>
