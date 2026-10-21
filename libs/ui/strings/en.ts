@@ -189,7 +189,7 @@ export const EN = {
     maxChildrenNote: 'You have added 2 children, the most a family can have.',
     booksIntro: "Upload your child's books now so our team can prepare lessons.",
     booksPracticeNote: 'Grade-level practice is ready even without a book.',
-    booksLaterNote: 'Book uploads open soon. Parent mode will remind you to add them.',
+    booksLaterNote: 'You can also add books later in parent mode, under Books.',
     later: 'Later',
     timeIntro: 'How long should your child learn each day?',
     timeNote: 'Your child is reminded when time is up. The app never locks them out.',
@@ -689,6 +689,52 @@ export const EN = {
     warning: 'Warning',
     goToItem: 'Go to item',
     acceptWithNote: 'Accept with note',
+  },
+
+  /** School books and uploads (App Flow B3, P4, P5, P7; Plan 5.1). Parent voice. */
+  books: {
+    intro: 'Upload the school books so our team can prepare lessons that follow them.',
+    practiceNote: 'Grade-level practice is ready even without a book.',
+    childTabs: 'Whose books',
+    uploadBook: 'Upload book',
+    addChapter: 'Add chapter',
+    addFirstChapter: 'Add first chapter',
+    chapterLine: (number: number, title: string) => `Chapter ${number}: ${title}`,
+    pages: (count: number) => `${count} ${count === 1 ? 'page' : 'pages'}`,
+    shareWith: (name: string) => `Use this book for ${name} too`,
+    shared: (name: string) => `${name} uses this book too.`,
+    sharedDone: (name: string) => `${name} can now use this book.`,
+    latestRejected: (reason: string) => `The last upload could not be used: ${reason}`,
+    reasons: {
+      infected: 'a file looked unsafe.',
+      wrong_type: 'a file was not a real PDF or photo.',
+      too_large: 'a file was too large.',
+      too_many_pages: 'the PDF has more than 300 pages.',
+      unreadable: 'we could not read the file.',
+    } as Record<string, string>,
+    scanning: 'We are checking your upload.',
+    loadFailed: "We couldn't load the books.",
+    // Upload screens (P5 whole book, P7 a chapter)
+    wholeIntro:
+      'Pick the PDF of the book or take photos of its pages. You can leave this screen once it is sent; a message arrives when it is ready.',
+    chapterIntro:
+      'Add one chapter at a time: its number and name, then a PDF or photos of its pages.',
+    chapterNumber: 'Chapter number',
+    chapterTitle: 'Chapter name',
+    selectedPdf: (name: string, mb: string) => `${name} (${mb} MB)`,
+    selectedPhotos: (count: number) => `${count} ${count === 1 ? 'photo' : 'photos'} ready`,
+    mixed: 'Choose either one PDF or photos, not both.',
+    send: 'Send',
+    sending: (sent: number, total: number) => `Sending ${sent} of ${total}`,
+    sent: 'Thank you. We are checking the pages now. A message arrives when it is ready.',
+    rejected: (reason: string) => `This upload could not be used: ${reason} Please try again.`,
+    clear: 'Choose again',
+    backToBooks: 'Back to books',
+    wholeIsChapterwise: 'This book is uploaded chapter by chapter. Add a chapter instead.',
+    chapterwiseIsWhole:
+      'This book was uploaded as a whole. Replace the book to upload it by chapter.',
+    alreadyUploaded: 'This book is already uploaded. Use Replace book to upload it again.',
+    chapterExists: 'This chapter number is already used. Choose another number.',
   },
 
   /** Book status chips (App Flow P4, Guidelines §11 app-status-chip). */

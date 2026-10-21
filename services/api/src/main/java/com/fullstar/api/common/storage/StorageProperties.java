@@ -4,14 +4,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * fullstar.storage.*: Cloudflare R2 (trial: SeaweedFS) through the S3 API. endpoint empty = AWS
- * default endpoints. createBucket: trial only, the bootstrap command creates the bucket.
+ * default endpoints. publicEndpoint: the address signed URLs use, when browsers reach storage
+ * somewhere else than the API does (trial: the local Caddy, http://localhost:8080, Plan 5.1); empty =
+ * endpoint. createBucket: trial only, the bootstrap command creates the bucket.
  */
 @ConfigurationProperties("fullstar.storage")
 public record StorageProperties(String endpoint, String region, String bucket, String accessKeyId,
-		String secretAccessKey, boolean createBucket) {
+		String secretAccessKey, boolean createBucket, String publicEndpoint) {
 
 	public StorageProperties {
 		region = region == null || region.isBlank() ? "auto" : region;
+		publicEndpoint = publicEndpoint == null || publicEndpoint.isBlank() ? endpoint : publicEndpoint.strip();
 	}
 
 }

@@ -50,6 +50,13 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
         '/parent/settings/children/child-asha',
         '/parent/settings/help',
         '/parent/settings/privacy',
+        // P4 opens the book screens with buttons (Plan 5.1)
+        '/parent/books/english/upload',
+        '/parent/books/english/add-chapter',
+        '/parent/books/english/chapters',
+        '/parent/books/english/fix-pages',
+        '/parent/books/english/preview',
+        '/parent/books/english/replace',
       ]) {
         await navigateInApp(page, path);
         await walk(page, [], seen);

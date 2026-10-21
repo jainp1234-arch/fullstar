@@ -11,6 +11,8 @@ import {
 } from '@fullstar/ui';
 import { ConsentPage } from './auth/consent.page';
 import { SignInReturnPage } from './auth/sign-in-return.page';
+import { BookUploadPage } from './books/book-upload.page';
+import { BooksPage } from './books/books.page';
 import { WelcomePage } from './auth/welcome.page';
 import { ForgotPinPage } from './parent/forgot-pin.page';
 import { ParentPinPage } from './parent/parent-pin.page';
@@ -101,6 +103,9 @@ export const routes: Routes = [
         B5: SetupDonePage,
         C1: WhoPage,
         P0: ParentPinPage,
+        P4: BooksPage,
+        P5: BookUploadPage,
+        P7: BookUploadPage,
         P14: SettingsPage,
         P15: EditChildPage,
         P16: HelpPage,
