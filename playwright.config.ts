@@ -68,13 +68,13 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /(pwa-offline|studio-routes|real-sign-in)\.spec\.ts/,
+      testIgnore: /(pwa-offline|studio-[a-z-]+|real-sign-in)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4200' },
     },
     {
       // Content Studio dev server under its base href (Plan 2.3 routes)
       name: 'studio',
-      testMatch: /studio-routes\.spec\.ts/,
+      testMatch: /studio-[a-z-]+\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:4201/studio/' },
     },
     {

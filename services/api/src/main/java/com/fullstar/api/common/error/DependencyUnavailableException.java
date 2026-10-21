@@ -1,6 +1,6 @@
 package com.fullstar.api.common.error;
 
-/** An outside service (R2, SQS, Claude, Gotenberg) is down or its circuit is open. */
+/** An outside service (R2, SQS, Claude, Gotenberg, Keycloak admin) is down or its circuit is open. */
 public class DependencyUnavailableException extends ApiException {
 
 	private final String dependency;

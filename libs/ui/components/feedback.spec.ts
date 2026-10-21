@@ -117,6 +117,28 @@ describe('app-data-table', () => {
     expect(all(fixture, 'tbody tr')).toHaveLength(2);
     expect(all(fixture, 'td')[1].className).toContain('end');
   });
+
+  it('adds one labelled button per row when given a row action', async () => {
+    const fixture = await render(DataTable<Row>, {
+      caption: 'Staff',
+      columns: [{ key: 'name', header: 'Name', cell: (row: Row) => row.name }],
+      rows: [
+        { id: '1', name: 'Asha', chapters: 0 },
+        { id: '2', name: 'Ravi', chapters: 0 },
+      ],
+      action: { header: 'Change', label: (row: Row) => `Change ${row.name}` },
+    });
+    const pressed: Row[] = [];
+    fixture.componentInstance.rowAction.subscribe((row) => pressed.push(row));
+    const buttons = all(fixture, 'tbody button');
+    expect(buttons.map((button) => button.textContent?.trim())).toEqual([
+      'Change Asha',
+      'Change Ravi',
+    ]);
+    expect(all(fixture, 'th')[1].textContent?.trim()).toBe('Change');
+    buttons[1].click();
+    expect(pressed.map((row) => row.name)).toEqual(['Ravi']);
+  });
 });
 
 describe('DialogService.confirm', () => {

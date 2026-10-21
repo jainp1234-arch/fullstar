@@ -102,3 +102,9 @@ export const staffGuard: CanActivateFn = (): boolean | UrlTree | Observable<bool
     catchError(() => of(router.parseUrl(`${signedOut}?denied=1`))),
   );
 };
+
+/** Super-admin screens (S13): run after staffGuard; anyone else goes to the given path. */
+export function superAdminGuard(otherwisePath: string): CanActivateFn {
+  return (): boolean | UrlTree =>
+    inject(StudioApi).me()?.role === 'super_admin' ? true : inject(Router).parseUrl(otherwisePath);
+}

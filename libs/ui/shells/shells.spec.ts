@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { DisplayModeService } from '../mode/display-mode';
 import { CurrentScreen } from './current-screen';
-import { SCREEN_CONFIG, ScreenConfig, screenRoutes } from './screen';
+import { NAV_ACCESS, SCREEN_CONFIG, ScreenConfig, screenRoutes } from './screen';
 
 @Component({ template: '' })
 class Page {}
@@ -28,7 +28,12 @@ const CONFIG: ScreenConfig = {
     { id: 'K4', path: 'kid/lesson/x', shell: 'focus', mode: 'kid', parent: 'K2' },
     { id: 'P0', path: 'parent/pin', shell: 'focus', mode: 'parent', parent: 'C1' },
   ],
-  nav: { kid: [{ tab: 'learn', label: 'Learn', icon: 'school', screen: 'K1' }] },
+  nav: {
+    kid: [
+      { tab: 'learn', label: 'Learn', icon: 'school', screen: 'K1' },
+      { tab: 'secret', label: 'Secret', icon: 'lock', screen: 'K1', requires: 'boss' },
+    ],
+  },
 };
 
 describe('screenRoutes', () => {
@@ -49,9 +54,13 @@ describe('screenRoutes', () => {
 });
 
 describe('CurrentScreen', () => {
+  const role = signal<string | null>(null);
+
   async function at(url: string): Promise<CurrentScreen> {
+    role.set(null);
     TestBed.configureTestingModule({
       providers: [
+        { provide: NAV_ACCESS, useValue: (requirement: string) => role() === requirement },
         provideRouter(screenRoutes(CONFIG, { 'sky-list': Shell, focus: Shell }, Page)),
         { provide: SCREEN_CONFIG, useValue: CONFIG },
       ],
@@ -78,6 +87,13 @@ describe('CurrentScreen', () => {
     const current = await at('/kid/learn/english');
     expect(current.navItems().map((item) => item.tab)).toEqual(['learn']);
     expect(current.tab()).toBe('learn');
+  });
+
+  it('shows items with a requirement only when NAV_ACCESS allows it, and follows changes', async () => {
+    const current = await at('/kid/learn/english');
+    expect(current.navItems().map((item) => item.tab)).toEqual(['learn']);
+    role.set('boss');
+    expect(current.navItems().map((item) => item.tab)).toEqual(['learn', 'secret']);
   });
 
   it('lists children and extra links; hides navigation when asked', async () => {

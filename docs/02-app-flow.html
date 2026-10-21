@@ -241,7 +241,7 @@ flowchart TD
     <thead><tr><th>ID</th><th>Screen</th><th>What it shows and does</th></tr></thead>
     <tbody>
       <tr><td class="id">S1</td><td class="hi">Staff sign-in</td><td>Email + code, then authenticator-app code.</td></tr>
-      <tr><td class="id">S2</td><td class="hi">Dashboard</td><td>New book uploads from families (with a notification badge), drafts in progress, recently published, and open problem reports.</td></tr>
+      <tr><td class="id">S2</td><td class="hi">Dashboard</td><td>New book uploads from families (with a notification badge), drafts in progress, recently published (last 7 days), open problem reports and open support tickets. Each count opens its queue.</td></tr>
       <tr><td class="id">S8</td><td class="hi">Uploaded books queue</td><td>Every book or chapter a family uploads arrives here as a notification: family, child's class, subject, chapters, waiting time. Open one to start preparing it.</td></tr>
       <tr><td class="id">S9</td><td class="hi">Prepare chapter</td><td>Chapter text side by side with Claude. The admin uses Claude to draft the animated lesson and a <strong>question bank</strong> (20+ questions with answers and the topic each one tests). Admin edits and previews, then sends it to the content check (S11). After the check passes, the admin publishes to that family only. The family gets "Lessons ready".</td></tr>
       <tr><td class="id">S11</td><td class="hi">Content check report</td><td>A content-check agent reviews every lesson, question and answer before it can be published, and lists red flags by severity:
@@ -260,6 +260,7 @@ flowchart TD
       <tr><td class="id">S5</td><td class="hi">Edit and preview</td><td>Edit text, questions, answers, narration. Preview exactly as a child will see it.</td></tr>
       <tr><td class="id">S6</td><td class="hi">Publish</td><td>Available only after the content check (S11) has no critical flags. Unpublish if something is wrong.</td></tr>
       <tr><td class="id">S12</td><td class="hi">Support inbox</td><td>"Contact us" tickets from parents, newest first, with status (open, answered, closed). Open a ticket to read the conversation and reply; the reply appears in the parent's messages.</td></tr>
+      <tr><td class="id">S13</td><td class="hi">Staff</td><td>Super admins only (added in Plan 4.1). Everyone with Studio access: name, role (content admin or super admin), active or switched off, date added. Add a staff member by email, name and role; they sign in with an emailed code and set up an authenticator app the first time. Change a name or role, or switch someone off. Nobody can change their own role or switch themselves off. The menu item is shown to super admins only.</td></tr>
       <tr><td class="id">S7</td><td class="hi">Problem reports</td><td>Reports from parents with the item, reason and note. Open the item, fix it, mark <em>Fixed</em> (sends the parent a message).</td></tr>
     </tbody>
   </table></div>

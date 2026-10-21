@@ -97,6 +97,13 @@ public abstract class ApiTestSupport {
 			};
 		}
 
+		/** Staff accounts without a Keycloak server (KeycloakAdminClientTest covers the real client). */
+		@Bean
+		@Primary
+		FakeKeycloakAdmin fakeKeycloakAdmin() {
+			return new FakeKeycloakAdmin();
+		}
+
 		/** Queues and the bucket exist before the job-results consumer starts polling. */
 		@Bean
 		org.springframework.beans.factory.InitializingBean cloudReady(com.fullstar.api.common.jobs.QueueBootstrap queues,

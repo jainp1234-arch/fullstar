@@ -19,7 +19,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.stereotype.Component;
 
 /**
- * Wraps every outside call (Claude, R2, SQS, Gotenberg) in timeout, retry with exponential
+ * Wraps every outside call (Claude, R2, SQS, Gotenberg, Keycloak admin) in timeout, retry with exponential
  * backoff and circuit breaker (Tech Stack §10). Instances and their settings come from the
  * resilience4j.* properties; a call that cannot complete becomes DEPENDENCY_UNAVAILABLE (503).
  */
@@ -44,7 +44,7 @@ public class ResilientCalls implements DisposableBean {
 	}
 
 	/**
-	 * Runs the call as the named dependency (r2, sqs, claude, gotenberg). The call runs on another
+	 * Runs the call as the named dependency (r2, sqs, claude, gotenberg, keycloak). The call runs on another
 	 * thread, outside the request transaction: never touch the database inside it (RLS session values
 	 * would be missing). Do the outside call here and the database work after it returns.
 	 */

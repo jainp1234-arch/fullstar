@@ -34,6 +34,7 @@ export const EN = {
       questionBank: 'Question bank',
       contentCheck: 'Content check',
       reports: 'Reports',
+      staff: 'Staff',
     },
     back: 'Back',
     close: 'Close',
@@ -104,6 +105,7 @@ export const EN = {
     S10: 'Question bank',
     S11: 'Content check',
     S12: 'Support inbox',
+    S13: 'Staff',
   },
 
   /** Error codes (Schema §10) as messages; mapped by errorMessage() (Guidelines §16). */
@@ -284,6 +286,43 @@ export const EN = {
     cancel: 'Cancel',
     requested: (date: string) =>
       `Deletion requested on ${date}. Our team completes it within 30 days.`,
+  },
+
+  /** Content Studio screens (App Flow §7). No exclamation marks. */
+  studio: {
+    dashboard: {
+      uploadsWaiting: (count: number) =>
+        `${count} new ${count === 1 ? 'upload' : 'uploads'} to prepare`,
+      drafts: (count: number) => `${count} ${count === 1 ? 'draft' : 'drafts'} in progress`,
+      recentlyPublished: (count: number) => `${count} published in the last 7 days`,
+      openReports: (count: number) => `${count} open problem ${count === 1 ? 'report' : 'reports'}`,
+      openTickets: (count: number) => `${count} open support ${count === 1 ? 'ticket' : 'tickets'}`,
+      loadFailed: "We couldn't load the dashboard.",
+      tryAgain: 'Try again',
+    },
+    staff: {
+      intro: 'Add teachers and choose what they can do. Only super admins see this page.',
+      add: 'Add staff member',
+      addTitle: 'Add staff member',
+      addIntro: 'They sign in with this email and set up an authenticator app the first time.',
+      editTitle: (name: string) => `Change ${name}`,
+      email: 'Email address',
+      name: 'Name',
+      role: 'Role',
+      active: 'Can sign in to the Studio',
+      save: 'Save',
+      cancel: 'Cancel',
+      you: 'You',
+      off: 'Switched off',
+      added: (name: string) => `${name} can now sign in to the Studio.`,
+      saved: 'Changes saved.',
+      alreadyStaff: 'This person is already on the staff list.',
+      notYourself: "You can't change your own role or switch yourself off.",
+      loadFailed: "We couldn't load the staff list.",
+      empty: 'No staff yet.',
+      columns: { name: 'Name', role: 'Role', status: 'Status', since: 'Added', change: 'Change' },
+      statusOn: 'Active',
+    },
   },
 
   /** Parent PIN and Forgot PIN (App Flow P0, A4; Schema §8.2). */
