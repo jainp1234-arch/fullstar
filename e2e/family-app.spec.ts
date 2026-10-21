@@ -1,7 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { installFakes } from './fakes';
 
-test('the family app opens on Who is learning?', async ({ page }) => {
+test('signed out, the family app opens on Welcome', async ({ page }) => {
+  await installFakes(page);
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Who is learning?');
-  await expect(page).toHaveTitle('Who is learning? · FullStar');
+  await expect(page).toHaveURL(/\/welcome$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('FullStar');
+  await expect(page).toHaveTitle('Welcome · FullStar');
 });

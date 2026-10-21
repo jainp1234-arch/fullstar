@@ -6,6 +6,7 @@ export * from './icons/icons';
 export * from './illustrations/illustrations';
 export * from './mode/display-mode';
 export * from './strings/en';
+export * from './strings/errors';
 export * from './components/button';
 export * from './components/icon-button';
 export * from './components/star-pill';

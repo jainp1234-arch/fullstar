@@ -175,6 +175,28 @@
           }
         }
       }
+    },
+    "core": {
+      "projectType": "library",
+      "root": "libs/core",
+      "sourceRoot": "libs/core",
+      "prefix": "app",
+      "architect": {
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "libs/core/tsconfig.spec.json",
+            "buildTarget": "family-app:build:development"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["libs/core/**/*.ts", "libs/core/**/*.html"],
+            "eslintConfig": "libs/core/eslint.config.js"
+          }
+        }
+      }
     }
   }
 }

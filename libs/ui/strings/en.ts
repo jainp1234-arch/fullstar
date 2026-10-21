@@ -106,6 +106,67 @@ export const EN = {
     S12: 'Support inbox',
   },
 
+  /** Error codes (Schema §10) as messages; mapped by errorMessage() (Guidelines §16). */
+  errors: {
+    parent: {
+      signInAgain: 'Your session ended. Please sign in again.',
+      pinRequired: 'Enter your parent PIN to continue.',
+      pinLocked: (minutes: number) =>
+        `Too many wrong PINs. Try again in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'} or use Forgot PIN.`,
+      recentLogin: 'For your safety, sign in again to change the PIN.',
+      forbidden: "You don't have access to this.",
+      notFound: "We couldn't find this. It may have been removed.",
+      familyNotFound: 'Finish setting up your family to continue.',
+      validation: 'Please check the highlighted fields.',
+      conflict: 'This changed in the meantime. Please refresh and try again.',
+      maxChildren: 'You can add up to 2 children.',
+      bookExists: 'This subject already has a book. Replace it to upload a new one.',
+      checkNotPassed: 'Fix the critical flags before publishing.',
+      maxClass: 'This is the highest class we support for now.',
+      bookMismatch: "These pages don't seem to match this book.",
+      versionImmutable: 'A saved version cannot change. Save a new version instead.',
+      uploadLimit:
+        'Please use a PDF (up to 50 MB, 300 pages) or JPG/PNG photos (up to 10 MB each, 50 per upload).',
+      rateLimited: 'Too many tries. Please wait a minute and try again.',
+      readingLimit: 'The reading test can be taken again tomorrow.',
+      featureDisabled: 'This is not available yet.',
+    },
+    kid: {
+      readingLimit: 'One reading test a day. See you tomorrow!',
+    },
+    fields: {
+      required: 'This is required.',
+      invalid: 'Please check this.',
+      length: 'This is too short or too long.',
+      range: 'This number is outside the allowed range.',
+      wrongPin: 'That PIN is not right.',
+    },
+  },
+
+  /** Sign-in and sign-up (App Flow A1–A3, S1; Schema §8). */
+  auth: {
+    welcomeTagline: "Lessons, practice and reading that follow your child's school books.",
+    signIn: 'Sign in',
+    signUp: 'Sign up',
+    consentIntro: "We keep your child's name, class and learning progress to run FullStar.",
+    consentLabel:
+      "I agree to FullStar storing my child's learning data as the privacy notice explains.",
+    consentRequired: 'Please agree to continue.',
+    continue: 'Continue to email',
+    createFamily: 'Create family',
+    signingIn: 'Signing you in',
+    signInFailed: 'We could not sign you in. Please try again.',
+    tryAgain: 'Try again',
+    signOut: 'Sign out',
+    noChildrenTitle: 'No children yet',
+    noChildrenBody: 'Finish setup to add your child.',
+    finishSetup: 'Finish setup',
+    staffIntro: 'Sign in with your email code, then your authenticator app.',
+    staffDenied: 'This account is not an active staff account.',
+    signedInAs: (name: string, role: string) => `${name} · ${role}`,
+    roles: { content_admin: 'Content admin', super_admin: 'Super admin' },
+  },
+
   /** Placeholder pages until each screen is built (Plan 2.3). */
   placeholder: {
     body: 'This screen is built in a later step.',
