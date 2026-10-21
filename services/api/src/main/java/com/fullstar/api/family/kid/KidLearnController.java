@@ -17,8 +17,11 @@ public class KidLearnController {
 
 	private final KidLearnService learn;
 
-	public KidLearnController(KidLearnService learn) {
+	private final KidReadAlongService readAlong;
+
+	public KidLearnController(KidLearnService learn, KidReadAlongService readAlong) {
 		this.learn = learn;
+		this.readAlong = readAlong;
 	}
 
 	@GetMapping("/home")
@@ -41,6 +44,12 @@ public class KidLearnController {
 	@GetMapping("/chapters/{id}")
 	ApiResponse<KidLearnService.Activity> chapter(HttpServletRequest request, @PathVariable String id) {
 		return ApiResponse.success(learn.chapter(child(request), uuid(id)));
+	}
+
+	/** K5 read-along pages (Plan 6.3). */
+	@GetMapping("/chapters/{id}/pages")
+	ApiResponse<KidReadAlongService.Chapter> pages(HttpServletRequest request, @PathVariable String id) {
+		return ApiResponse.success(readAlong.pages(child(request), uuid(id)));
 	}
 
 	@GetMapping("/topics/{id}")

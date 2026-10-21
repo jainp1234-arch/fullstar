@@ -72,5 +72,5 @@ test('a ready chapter makes the subject My book; its lesson is Coming soon while
   await lesson.click();
   await expect(page.getByText('Coming soon! Read along for now.')).toBeVisible();
   await page.getByRole('button', { name: /Read along/ }).click();
-  await expect(page).toHaveURL(/\/kid\/read-along\/ch-water$/);
+  await expect(page).toHaveURL(/\/kid\/read-along\/ch-water\?back=/);
 });

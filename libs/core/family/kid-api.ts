@@ -98,6 +98,12 @@ export class KidApi {
   lesson(contentItemId: string): Observable<KidLesson> {
     return this.api.get<KidLesson>(`/family/kid/lessons/${encodeURIComponent(contentItemId)}`);
   }
+
+  readAlong(familyChapterId: string): Observable<ReadAlongChapter> {
+    return this.api.get<ReadAlongChapter>(
+      `/family/kid/chapters/${encodeURIComponent(familyChapterId)}/pages`,
+    );
+  }
 }
 
 /** A quiz question of a lesson, with its solution so the player can check answers offline. */
@@ -123,5 +129,33 @@ export interface KidLesson {
   /** Schema §5 lesson body; @fullstar/ui content-body.ts has the types. */
   readonly body: unknown;
   readonly questions: readonly KidQuizQuestion[];
+  readonly resume: { readonly attempt_id: string; readonly resume_state: unknown } | null;
+}
+
+/** Schema §4.3 pages.word_timings. */
+export interface WordTiming {
+  readonly w: string;
+  readonly start_ms: number;
+  readonly end_ms: number;
+}
+
+export interface ReadAlongPage {
+  readonly id: string;
+  readonly page_no: number;
+  readonly text: string;
+  readonly image_url: string;
+  /** null until the chapter's narration is made. */
+  readonly audio_url: string | null;
+  readonly word_timings: readonly WordTiming[];
+}
+
+/** K5 (Plan 6.3): signed links are valid for 10 minutes; ReadAlongCache keeps copies. */
+export interface ReadAlongChapter {
+  readonly id: string;
+  readonly number: number;
+  readonly title: string;
+  readonly subject_id: number;
+  readonly lang: 'en' | 'hi';
+  readonly pages: readonly ReadAlongPage[];
   readonly resume: { readonly attempt_id: string; readonly resume_state: unknown } | null;
 }

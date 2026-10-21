@@ -44,7 +44,7 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
             illustration="act-readalong"
             [title]="text.readAlong"
             [attr.data-screen-link]="linkTo('/kid/read-along/' + a.id)"
-            (pressed)="go('/kid/read-along/' + a.id)"
+            (pressed)="readAlong(a)"
           />
         }
         <app-list-card
@@ -125,6 +125,13 @@ export class ActivityPage {
   /** Guidelines §11: a locked card is never hidden silently; tapping says why. */
   protected soon(message: string): void {
     this.toasts.show(message);
+  }
+
+  /** K5 with the way back here for K7. */
+  protected readAlong(activity: KidActivity): void {
+    void this.router.navigate(['/kid/read-along', activity.id], {
+      queryParams: { back: this.router.url },
+    });
   }
 
   /** K4 with the chapter for the attempt and the way back here for K7. */
