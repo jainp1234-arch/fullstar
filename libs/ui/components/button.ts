@@ -14,6 +14,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
       [attr.type]="type()"
       [disabled]="disabled() || loading()"
       [attr.aria-busy]="loading() || null"
+      [attr.aria-label]="ariaLabel()"
       (click)="pressed.emit($event)"
     >
       @if (loading()) {
@@ -137,6 +138,8 @@ export class Button {
   readonly icon = input<IconName | null>(null);
   readonly disabled = input(false);
   readonly loading = input(false);
+  /** A fuller name when the label alone repeats, e.g. "Link Water" for one of many "Link" buttons. */
+  readonly ariaLabel = input<string | null>(null);
   /** Full width (phone, Focus and Celebration shells). */
   readonly fullWidth = input(false);
   readonly pressed = output<MouseEvent>();

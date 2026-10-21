@@ -1,5 +1,6 @@
 package com.fullstar.api.studio.ai;
 
+import com.fullstar.api.common.audit.AuditLog;
 import com.fullstar.api.common.claude.AiProperties;
 import com.fullstar.api.common.claude.ClaudeClient;
 import com.fullstar.api.common.error.ApiException;
@@ -48,8 +49,11 @@ public class DraftService {
 
 	private final ContentFormats formats;
 
+	private final AuditLog audit;
+
 	public DraftService(JdbcTemplate jdbc, DraftPrompts prompts, ClaudeClient claude, AiProperties ai,
-			ContentFormats formats) {
+			ContentFormats formats, AuditLog audit) {
+		this.audit = audit;
 		this.jdbc = jdbc;
 		this.prompts = prompts;
 		this.claude = claude;
@@ -57,9 +61,21 @@ public class DraftService {
 		this.formats = formats;
 	}
 
-	/** What to draft. type: lesson, question_bank or passage. */
-	public record Request(String type, int classLevel, String subject, UUID topicId, int count, String lang) {
+	/**
+	 * What to draft. type: lesson, question_bank or passage. familyChapterId: base it on that family
+	 * chapter's text (S9, Plan 5.5); staffId is then needed for the audit log (upload.view).
+	 */
+	public record Request(String type, int classLevel, String subject, UUID topicId, int count, String lang,
+			UUID familyChapterId, UUID staffId) {
+
+		public Request(String type, int classLevel, String subject, UUID topicId, int count, String lang) {
+			this(type, classLevel, subject, topicId, count, lang, null, null);
+		}
+
 	}
+
+	/** Chapter text sent to Claude at most; a long chapter is cut here. */
+	static final int CHAPTER_TEXT_MAX = 40_000;
 
 	/** One drafted item, with Schema §5 problems by field path (empty = ready to save). */
 	public record Item(String kind, String questionType, String title, int difficulty, JsonNode body,
@@ -77,7 +93,12 @@ public class DraftService {
 				"topic", topic, "lang_name", "hi".equals(request.lang()) ? "Hindi" : "English", "count",
 				String.valueOf(request.count()), "words", String.valueOf(60 + 30 * request.classLevel()),
 				"illustrations", String.join(", ", formats.illustrations()));
-		return prompts.draft(request.type(), values);
+		if (request.familyChapterId() == null) {
+			return prompts.draft(request.type(), values);
+		}
+		Map<String, String> withChapter = new java.util.HashMap<>(values);
+		withChapter.putAll(chapter(request));
+		return prompts.chapterDraft(request.type(), withChapter);
 	}
 
 	/** Asks Claude; FEATURE_AI_DRAFTS must be on (trial: 503 FEATURE_DISABLED, use the pasted path). */
@@ -162,6 +183,34 @@ public class DraftService {
 		// A draft cannot point at published questions yet; quiz scenes are added in the editor
 		checked.quizQuestionPaths().keySet().forEach(path -> errors.put(path, "INVALID"));
 		return new Item(kind, questionType, title, difficulty, body, solution, errors);
+	}
+
+	/** chapter_title and chapter_text of the family chapter, which must be of the same class and subject. */
+	private Map<String, String> chapter(Request request) {
+		List<Map<String, Object>> rows = jdbc.queryForList("""
+				SELECT fc.number, fc.title,
+				       (SELECT string_agg(COALESCE(p.ocr_text, ''), E'
+
+' ORDER BY p.page_no) FROM app.pages p
+				         WHERE p.family_chapter_id = fc.id) AS text
+				  FROM app.family_chapters fc
+				  JOIN app.family_books fb ON fb.id = fc.family_book_id
+				  JOIN app.subjects s ON s.id = fb.subject_id
+				 WHERE fc.id = ? AND fb.class_level = ? AND s.code = ?""", request.familyChapterId(),
+				request.classLevel(), request.subject());
+		if (rows.isEmpty()) {
+			throw new ValidationException("family_chapter_id is not valid", Map.of("family_chapter_id", "INVALID"));
+		}
+		String text = rows.get(0).get("text") == null ? "" : (String) rows.get(0).get("text");
+		// The block's end marker cannot come from the book text
+		text = text.replace("</chapter>", "").replace("<chapter>", "");
+		if (text.length() > CHAPTER_TEXT_MAX) {
+			text = text.substring(0, CHAPTER_TEXT_MAX);
+		}
+		audit.staff(request.staffId(), "upload.view", "family_chapter", request.familyChapterId(),
+				Map.of("purpose", "draft"));
+		return Map.of("chapter_title", "Chapter " + rows.get(0).get("number") + ": " + rows.get(0).get("title"),
+				"chapter_text", text);
 	}
 
 	private String topicName(Request request) {

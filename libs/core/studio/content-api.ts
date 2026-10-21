@@ -54,6 +54,8 @@ export interface ContentSummary {
   readonly title: string;
   readonly version_no: number;
   readonly updated_at: string;
+  /** Set for content of a prepared chapter (S9). */
+  readonly catalog_chapter_id: string | null;
 }
 
 /** A saved version. Only the current one can be edited (as a new version); others are read-only. */
@@ -113,6 +115,7 @@ export interface Page<T> {
 export interface ContentFilter {
   readonly kind?: ContentKind;
   readonly topic_id?: string;
+  readonly catalog_chapter_id?: string;
   readonly status?: ContentStatus;
   readonly q?: string;
   readonly class?: number;
@@ -133,6 +136,8 @@ export interface NewContentItem {
   /** Schema §5 formats; @fullstar/ui content-body.ts has the types. */
   readonly body: unknown;
   readonly solution?: unknown;
+  /** Content of a prepared chapter (S9, Plan 5.5); library content without it. */
+  readonly catalog_chapter_id?: string;
 }
 
 /** A new version: title, body and (questions) solution. */
@@ -201,6 +206,8 @@ export interface DraftRequest {
   readonly lang?: ContentLang;
   /** A draft pasted from a Claude chat; without it the API asks Claude (FEATURE_AI_DRAFTS). */
   readonly pasted?: string;
+  /** Base the draft on this family chapter's text (S9, Plan 5.5). */
+  readonly family_chapter_id?: string;
 }
 
 /** One drafted item; errors are Schema §5 problems by field path (empty = ready to save). */

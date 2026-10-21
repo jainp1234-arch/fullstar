@@ -17,3 +17,5 @@ export * from './studio/studio-api';
 export * from './studio/content-api';
 export * from './provide';
 export * from './family/book-api';
+export * from './studio/prep-api';
+export * from './family/message-api';

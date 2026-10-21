@@ -14,7 +14,7 @@ const SCREENS: readonly ScreenDef[] = [
   { id: 'S8', path: 'uploads', shell: 'studio', mode: 'studio', tab: 'uploads' },
   {
     id: 'S9',
-    path: 'uploads/:uploadId/prepare',
+    path: 'uploads/:taskId/prepare',
     sample: 'uploads/sample/prepare',
     shell: 'studio',
     mode: 'studio',

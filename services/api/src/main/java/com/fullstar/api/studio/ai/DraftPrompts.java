@@ -24,7 +24,7 @@ public class DraftPrompts {
 
 	public DraftPrompts() {
 		for (String name : new String[] { "draft-system", "draft-lesson", "draft-question_bank", "draft-passage",
-				"content-check-system", "content-check-user" }) {
+				"content-check-system", "content-check-user", "draft-chapter" }) {
 			templates.put(name, read(name));
 		}
 	}
@@ -35,6 +35,12 @@ public class DraftPrompts {
 	/** type is lesson, question_bank or passage. */
 	public Prompt draft(String type, Map<String, String> values) {
 		return new Prompt(templates.get("draft-system"), fill(templates.get("draft-" + type), values));
+	}
+
+	/** A draft based on a family chapter (S9, Plan 5.5): the type prompt, then the chapter text block. */
+	public Prompt chapterDraft(String type, Map<String, String> values) {
+		return new Prompt(templates.get("draft-system"),
+				fill(templates.get("draft-" + type), values) + fill(templates.get("draft-chapter"), values));
 	}
 
 	/** The content-check agent (Plan 4.4): checklist and flag format, then the content itself. */

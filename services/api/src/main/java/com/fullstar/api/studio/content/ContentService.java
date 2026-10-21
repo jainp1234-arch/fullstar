@@ -27,7 +27,7 @@ import tools.jackson.databind.json.JsonMapper;
 /**
  * Content items and their versions (Schema §4.2, §11, S3/S5). Saving always inserts a new version
  * (versions are immutable, trigger versions_no_update); the item points at its current version.
- * Library scope only for now: chapter content arrives with Phase 5 (S9).
+ * Library content, or content of a prepared catalog chapter (S9, Plan 5.5).
  */
 @Service
 public class ContentService {
@@ -39,7 +39,7 @@ public class ContentService {
 	private static final String SUMMARY = """
 			SELECT ci.id, ci.kind, ci.question_type, ci.class_level, s.code AS subject, ci.topic_id, ci.difficulty,
 			       ci.lang, ci.status, ci.current_version_id, ci.published_version_id, ci.updated_at,
-			       cv.title, cv.version_no
+			       cv.title, cv.version_no, ci.catalog_chapter_id
 			  FROM app.content_items ci
 			  JOIN app.subjects s ON s.id = ci.subject_id
 			  LEFT JOIN app.content_versions cv ON cv.id = ci.current_version_id""";
@@ -63,7 +63,7 @@ public class ContentService {
 
 	public record Summary(UUID id, String kind, String questionType, int classLevel, String subject, UUID topicId,
 			int difficulty, String lang, String status, UUID currentVersionId, UUID publishedVersionId, String title,
-			int versionNo, Instant updatedAt) {
+			int versionNo, Instant updatedAt, UUID catalogChapterId) {
 	}
 
 	/** A saved version; only the current one can be the base of the next save. */
@@ -88,8 +88,15 @@ public class ContentService {
 			String subject) {
 	}
 
+	/** catalogChapterId set: content of a prepared chapter (scope catalog_chapter, S9); otherwise library. */
 	public record NewItem(String kind, int classLevel, String subject, UUID topicId, String questionType,
-			int difficulty, String lang, String title, JsonNode body, JsonNode solution) {
+			int difficulty, String lang, String title, JsonNode body, JsonNode solution, UUID catalogChapterId) {
+
+		public NewItem(String kind, int classLevel, String subject, UUID topicId, String questionType, int difficulty,
+				String lang, String title, JsonNode body, JsonNode solution) {
+			this(kind, classLevel, subject, topicId, questionType, difficulty, lang, title, body, solution, null);
+		}
+
 	}
 
 	public CursorPage<Summary> list(Filter filter, PageRequest page) {
@@ -187,6 +194,15 @@ public class ContentService {
 		if (topic == null || topic == 0) {
 			errors.put("topic_id", "INVALID");
 		}
+		if (item.catalogChapterId() != null) {
+			Integer chapter = jdbc.queryForObject("""
+					SELECT count(*) FROM app.catalog_chapters cc JOIN app.catalog_books cb ON cb.id = cc.catalog_book_id
+					 WHERE cc.id = ? AND cb.class_level = ? AND cb.subject_id = ?""", Integer.class,
+					item.catalogChapterId(), item.classLevel(), subjectId);
+			if (chapter == null || chapter == 0) {
+				errors.put("catalog_chapter_id", "INVALID");
+			}
+		}
 		ContentFormats.Kind kind = ContentFormats.Kind.valueOf(item.kind().toUpperCase(Locale.ROOT));
 		boolean question = kind == ContentFormats.Kind.QUESTION;
 		if (question != (item.questionType() != null)) {
@@ -200,9 +216,10 @@ public class ContentService {
 		}
 		UUID itemId = jdbc.queryForObject("""
 				INSERT INTO app.content_items (kind, scope, class_level, subject_id, topic_id, question_type, difficulty,
-				                               lang, created_by)
-				VALUES (?, 'library', ?, ?, ?, ?, ?, ?, ?) RETURNING id""", UUID.class, item.kind(), item.classLevel(),
-				subjectId, item.topicId(), item.questionType(), item.difficulty(), item.lang(), staffId);
+				                               lang, created_by, catalog_chapter_id)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id""", UUID.class, item.kind(),
+				item.catalogChapterId() == null ? "library" : "catalog_chapter", item.classLevel(), subjectId,
+				item.topicId(), item.questionType(), item.difficulty(), item.lang(), staffId, item.catalogChapterId());
 		UUID versionId = insertVersion(staffId, itemId, kind, item.title(), item.body(), item.solution());
 		jdbc.update("UPDATE app.content_items SET current_version_id = ? WHERE id = ?", versionId, itemId);
 		log.info("Content item created itemId={} kind={}", itemId, item.kind());
@@ -279,7 +296,8 @@ public class ContentService {
 				rs.getInt("class_level"), rs.getString("subject"), rs.getObject("topic_id", UUID.class),
 				rs.getInt("difficulty"), rs.getString("lang"), rs.getString("status"),
 				rs.getObject("current_version_id", UUID.class), rs.getObject("published_version_id", UUID.class),
-				rs.getString("title"), rs.getInt("version_no"), updated.toInstant());
+				rs.getString("title"), rs.getInt("version_no"), updated.toInstant(),
+				rs.getObject("catalog_chapter_id", UUID.class));
 	}
 
 	private static Version version(ResultSet rs, int n) throws SQLException {
