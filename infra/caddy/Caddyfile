@@ -13,6 +13,11 @@
 		# make api (Spring Boot on the laptop, API_PORT 8081)
 		reverse_proxy host.docker.internal:8081
 	}
+	handle /{$S3_BUCKET}/* {
+		# Signed upload and page URLs (S3_PUBLIC_ENDPOINT=http://localhost:8080): path and Host stay
+		# unchanged, so the signature still matches (Plan 5.1)
+		reverse_proxy seaweedfs:8333
+	}
 	handle /studio/* {
 		# make studio (ng serve content-studio on 4201, base href /studio/)
 		reverse_proxy host.docker.internal:4201

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
@@ -52,6 +54,47 @@ public class FileStorage {
 			.build();
 		var presigned = presigner.presignPutObject(request);
 		return new SignedUrl(presigned.url(), "PUT", presigned.expiration());
+	}
+
+	/**
+	 * Upload URL bound to an exact size (Plan 5.1): Content-Length is signed, so a larger file is
+	 * refused by storage itself; the client sends the same Content-Type and Content-Length.
+	 */
+	public SignedUrl signedPut(String key, String contentType, long contentLength) {
+		var request = PutObjectPresignRequest.builder()
+			.signatureDuration(URL_VALIDITY)
+			.putObjectRequest(put -> put.bucket(properties.bucket())
+				.key(key)
+				.contentType(contentType)
+				.contentLength(contentLength))
+			.build();
+		var presigned = presigner.presignPutObject(request);
+		return new SignedUrl(presigned.url(), "PUT", presigned.expiration());
+	}
+
+	/** Size of a stored object in bytes, or -1 when it is not there (yet). */
+	public long size(String key) {
+		return resilientCalls.call(Dependency.R2, () -> {
+			try {
+				return s3.headObject(head -> head.bucket(properties.bucket()).key(key)).contentLength();
+			}
+			catch (NoSuchKeyException ex) {
+				return -1L;
+			}
+			catch (S3Exception ex) {
+				if (ex.statusCode() == 404) {
+					return -1L;
+				}
+				throw ex;
+			}
+		});
+	}
+
+	/** The first bytes of a stored object (for the file-type check by content). */
+	public byte[] firstBytes(String key, int count) {
+		return resilientCalls.call(Dependency.R2,
+				() -> s3.getObjectAsBytes(get -> get.bucket(properties.bucket()).key(key).range("bytes=0-" + (count - 1)))
+					.asByteArray());
 	}
 
 	public SignedUrl signedGet(String key) {

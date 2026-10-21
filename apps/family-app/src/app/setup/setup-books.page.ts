@@ -5,9 +5,15 @@ import { FamilyApi } from '@fullstar/core';
 import { Button, EN, NoticeCard } from '@fullstar/ui';
 import { PAGE_STYLES } from './page-styles';
 
+interface SubjectRow {
+  readonly code: string;
+  readonly name: string;
+}
+
 /**
- * B3 Add books (App Flow §4). Plan 3.1: only "Later" for now; uploads arrive in Phase 5. Shows
- * the subjects of the children's classes and that grade-level practice is ready without a book.
+ * B3 Add books (App Flow §4; Plan 5.1). One row per subject of the first child's class with Upload
+ * book (P5), Add first chapter (P7) or Later; the upload screens return here (?next=). Grade-level
+ * practice is ready without a book, and P4 keeps reminding until each subject has one.
  */
 @Component({
   selector: 'app-setup-books-page',
@@ -18,10 +24,21 @@ import { PAGE_STYLES } from './page-styles';
     <p class="page__intro">{{ text.booksIntro }}</p>
     @if (subjects().length) {
       <ul class="subjects" role="list">
-        @for (subject of subjects(); track subject) {
+        @for (subject of subjects(); track subject.code) {
           <li class="subjects__row">
-            <span>{{ subject }}</span>
-            <span class="subjects__later">{{ text.later }}</span>
+            <span class="subjects__name">{{ subject.name }}</span>
+            <div class="subjects__actions">
+              <app-button
+                variant="secondary"
+                [label]="books.uploadBook"
+                (pressed)="open(subject, 'upload')"
+              />
+              <app-button
+                variant="ghost"
+                [label]="books.addFirstChapter"
+                (pressed)="open(subject, 'add-chapter')"
+              />
+            </div>
           </li>
         }
       </ul>
@@ -46,6 +63,8 @@ import { PAGE_STYLES } from './page-styles';
       }
       .subjects__row {
         display: flex;
+        flex-wrap: wrap;
+        align-items: center;
         justify-content: space-between;
         gap: var(--space-3);
         padding: var(--space-3) var(--space-4);
@@ -55,9 +74,13 @@ import { PAGE_STYLES } from './page-styles';
       .subjects__row + .subjects__row {
         border-top: 1px solid var(--color-border);
       }
-      .subjects__later {
-        font: var(--type-small);
-        color: var(--color-text-2);
+      .subjects__name {
+        font: var(--type-label);
+      }
+      .subjects__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
       }
     `,
   ],
@@ -65,19 +88,25 @@ import { PAGE_STYLES } from './page-styles';
 export class SetupBooksPage {
   protected readonly title = EN.screens.B3;
   protected readonly text = EN.setup;
+  protected readonly books = EN.books;
 
   private readonly family = inject(FamilyApi);
   private readonly router = inject(Router);
   private readonly config = toSignal(this.family.publicConfig(), { initialValue: null });
+  private readonly child = computed(() => this.family.me()?.children[0] ?? null);
 
-  /** One row per subject across the children's classes (App Flow B3). */
-  protected readonly subjects = computed(() => {
-    const levels = new Set((this.family.me()?.children ?? []).map((child) => child.class_level));
-    const names = (this.config()?.classes ?? [])
-      .filter((entry) => levels.has(entry.class_level))
-      .flatMap((entry) => entry.subjects.map((subject) => subject.name));
-    return [...new Set(names)];
+  /** The subjects of the first child's class (App Flow B3). */
+  protected readonly subjects = computed<readonly SubjectRow[]>(() => {
+    const level = this.child()?.class_level;
+    const entry = (this.config()?.classes ?? []).find((c) => c.class_level === level);
+    return (entry?.subjects ?? []).map((subject) => ({ code: subject.code, name: subject.name }));
   });
+
+  protected open(subject: SubjectRow, page: 'upload' | 'add-chapter'): void {
+    void this.router.navigate(['/parent/books', subject.code, page], {
+      queryParams: { child: this.child()?.id, next: '/setup/books' },
+    });
+  }
 
   protected next(): void {
     void this.router.navigateByUrl('/setup/time-limit');

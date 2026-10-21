@@ -39,8 +39,9 @@ public class StorageConfig {
 			.region(Region.of(properties.region()))
 			.credentialsProvider(credentials(properties))
 			.serviceConfiguration(s3Configuration());
-		if (properties.endpoint() != null && !properties.endpoint().isBlank()) {
-			builder.endpointOverride(URI.create(properties.endpoint()));
+		// Signed URLs are used by browsers: sign them for the address browsers reach (Plan 5.1)
+		if (properties.publicEndpoint() != null && !properties.publicEndpoint().isBlank()) {
+			builder.endpointOverride(URI.create(properties.publicEndpoint()));
 		}
 		return builder.build();
 	}

@@ -16,6 +16,9 @@ services:
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data
+    environment:
+      # The bucket path is proxied to SeaweedFS so browsers upload on the same address (Plan 5.1)
+      S3_BUCKET: ${S3_BUCKET:?set S3_BUCKET in .env}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
