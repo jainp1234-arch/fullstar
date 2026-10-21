@@ -186,7 +186,8 @@ class BookUploadTest extends ApiTestSupport {
 		String uploadId = upload.path("id").asString();
 		put(upload.path("files").get(0), JPEG);
 		send(post("/api/v1/family/parent/uploads/" + uploadId + "/complete"), "").andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.fields['files[1]']").value("REQUIRED"));
+			.andExpect(jsonPath("$.error.fields['files." + upload.path("files").get(1).path("id").asString() + "']")
+				.value("REQUIRED"));
 
 		byte[] notAnImage = Arrays.copyOf("MZ-not-a-photo".getBytes(), 11);
 		put(upload.path("files").get(1), notAnImage);

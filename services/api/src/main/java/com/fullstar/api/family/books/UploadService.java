@@ -153,7 +153,7 @@ public class UploadService {
 			return view(uploadId, upload);
 		}
 		List<Map<String, Object>> files = jdbc.queryForList(
-				"SELECT object_key, content_type, byte_size FROM app.upload_files WHERE upload_id = ? ORDER BY created_at, id",
+				"SELECT id, object_key, content_type, byte_size FROM app.upload_files WHERE upload_id = ? ORDER BY id",
 				uploadId);
 		Map<String, String> missing = new LinkedHashMap<>();
 		String reason = null;
@@ -163,7 +163,8 @@ public class UploadService {
 			String type = (String) file.get("content_type");
 			long size = storage.size(key);
 			if (size < 0) {
-				missing.put("files[" + i + "]", "REQUIRED");
+				// By file id (as in the create answer): files of one upload have no order of their own
+				missing.put("files." + file.get("id"), "REQUIRED");
 				continue;
 			}
 			if (size > limitFor(type) || size != ((Number) file.get("byte_size")).longValue()) {
