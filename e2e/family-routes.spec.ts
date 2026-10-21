@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { signInFamily } from './fakes';
-import { WIDTHS, WidthName, walk } from './routes';
+import { enterPin, signInFamily, unlockParent } from './fakes';
+import { WIDTHS, WidthName, navigateInApp, walk } from './routes';
 
 /**
  * App Flow §4–§6 screen IDs and their shells (Guidelines §10), walked signed in. A1 (signed out
@@ -36,13 +36,23 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
     }) => {
       test.setTimeout(180_000);
       await signInFamily(page);
-      const seen = await walk(page, [
-        '/who',
-        '/parent/pin',
-        '/kid/learn',
-        '/setup/pin',
-        '/sign-up',
-      ]);
+      // Kid mode needs a picked child and parent mode the PIN, both in memory: no reloads
+      const seen = await walk(page);
+      await page.getByRole('button', { name: 'Asha' }).click();
+      await walk(page, [], seen);
+      await page.getByRole('button', { name: 'Parent mode' }).click();
+      await walk(page, [], seen);
+      await enterPin(page);
+      await expect(page).toHaveURL(/\/parent\/progress$/);
+      await walk(page, [], seen);
+      // Setup and sign-up screens need only a family; B4 also asks for the PIN
+      await walk(page, ['/sign-up', '/parent/forgot-pin', '/setup/pin', '/setup/child'], seen);
+      await walk(page, ['/setup/books', '/setup/done'], seen);
+      await page.goto('/setup/time-limit');
+      await expect(page).toHaveURL(/\/parent\/pin\?next=%2Fsetup%2Ftime-limit$/);
+      await enterPin(page);
+      await expect(page).toHaveURL(/\/setup\/time-limit$/);
+      await walk(page, [], seen);
       expect([...seen.keys()].sort()).toEqual(EXPECTED.map((e) => e.id).sort());
       for (const { id, shell } of EXPECTED) {
         const visit = seen.get(id);
@@ -61,16 +71,20 @@ test.describe('headers', () => {
   });
 
   test('kid mode: Parent on a tab, Back inside it, Close in focus screens', async ({ page }) => {
-    await page.goto('/kid/learn');
+    await page.getByRole('button', { name: 'Asha' }).click();
+    await expect(page).toHaveURL(/\/kid\/learn$/);
     await page.getByRole('button', { name: 'Parent mode' }).click();
     await expect(page).toHaveURL(/\/parent\/pin$/);
+    await page.goBack();
 
-    await page.goto('/kid/learn/english');
+    await page.locator('a[href$="/kid/learn/english"]').first().click();
     await expect(page.getByRole('button', { name: 'Read aloud' })).toBeVisible();
     await page.getByRole('button', { name: 'Back' }).click();
     await expect(page).toHaveURL(/\/kid\/learn$/);
 
-    await page.goto('/kid/lesson/sample');
+    await page.locator('a[href$="/kid/learn/english"]').first().click();
+    await page.locator('a[href$="/kid/learn/english/1"]').first().click();
+    await page.locator('a[href$="/kid/lesson/sample"]').first().click();
     await page.getByRole('button', { name: 'Close' }).click();
     await expect(page).toHaveURL(/\/kid\/learn\/english\/1$/);
     await expect(page.locator('html')).toHaveAttribute('data-mode', 'kid');
@@ -79,19 +93,22 @@ test.describe('headers', () => {
   test('parent mode: Back to kids, the bell, and focus moves to the new heading', async ({
     page,
   }) => {
-    await page.goto('/parent/books');
+    await unlockParent(page, '/parent/books');
     await expect(page.locator('html')).toHaveAttribute('data-mode', 'parent');
     await page.getByRole('button', { name: 'Messages' }).click();
     await expect(page).toHaveURL(/\/parent\/messages$/);
     await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
-    await page.goto('/parent/settings');
+    await page
+      .getByRole('navigation', { name: 'Parent mode' })
+      .getByRole('link', { name: 'Settings' })
+      .click();
     await page.getByRole('button', { name: 'Back to kids' }).click();
     await expect(page).toHaveURL(/\/who$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Who is learning?' })).toBeVisible();
   });
 
   test('the active tab follows sub-screens', async ({ page }) => {
-    await page.goto('/parent/books/english/upload');
+    await unlockParent(page, '/parent/books/english/upload');
     const nav = page.getByRole('navigation', { name: 'Parent mode' });
     await expect(nav.getByRole('link', { name: 'Books' })).toHaveAttribute('aria-current', 'page');
     await expect(nav.locator('[aria-current]')).toHaveCount(1);
@@ -117,9 +134,14 @@ test.describe('accessibility of each shell', () => {
     '/parent/progress',
   ]) {
     test(`${path} has no WCAG 2.1 AA violations at phone and tablet width`, async ({ page }) => {
+      if (path.startsWith('/kid/')) {
+        await page.getByRole('button', { name: 'Asha' }).click();
+      } else if (path.startsWith('/parent/')) {
+        await unlockParent(page, path);
+      }
       for (const size of [WIDTHS.phone, WIDTHS.tablet]) {
         await page.setViewportSize(size);
-        await page.goto(path);
+        await navigateInApp(page, path);
         await page.evaluate(() => document.fonts.ready);
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

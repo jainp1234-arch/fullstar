@@ -3,12 +3,13 @@ import { Router } from '@angular/router';
 import { ApiError, AuthService, FamilyApi, FamilyState } from '@fullstar/core';
 import { Button, EN, OwlLoader, errorMessage } from '@fullstar/ui';
 import { Observable, of, switchMap } from 'rxjs';
+import { takePinReset } from '../parent/pending-pin-reset';
 import { takeConsent } from './pending-consent';
 
 /**
  * A3 (App Flow §4): the code is entered on the Keycloak page; Keycloak returns here. New
  * families go to consent (or are created with the consent given before sign-up), then B1;
- * returning families go to C1.
+ * returning families go to C1, or back to A4 after a Forgot PIN code.
  */
 @Component({
   selector: 'app-sign-in-return-page',
@@ -95,6 +96,9 @@ export class SignInReturnPage {
 function nextPath(state: FamilyState): string {
   if (state === 'new' || state === null) {
     return '/sign-up';
+  }
+  if (takePinReset() && state.family.pin_set) {
+    return '/parent/forgot-pin';
   }
   return state.family.pin_set ? '/who' : '/setup/pin';
 }

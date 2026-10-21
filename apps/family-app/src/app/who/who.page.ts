@@ -51,6 +51,11 @@ export class WhoPage {
   private readonly session = inject(FamilySession);
   private readonly router = inject(Router);
 
+  constructor() {
+    // App Flow §3: "Back to kids" ends parent mode; the PIN is asked again to return
+    this.session.lockParent();
+  }
+
   protected readonly profiles = computed<readonly ChildProfile[]>(() => {
     const state = this.family.state();
     if (!state || state === 'new') {
@@ -65,7 +70,6 @@ export class WhoPage {
 
   protected pick(childId: string): void {
     this.session.selectChild(childId);
-    this.session.lockParent();
     void this.router.navigateByUrl('/kid/learn');
   }
 

@@ -219,4 +219,22 @@ describe('ApiClient with the interceptors', () => {
     await expect(state).resolves.toBe('new');
     expect(family.state()).toBe('new');
   });
+
+  it('FamilyApi: the first PIN unlocks parent mode; a PIN check is never replayed', async () => {
+    const family = TestBed.inject(FamilyApi);
+    const first = firstValueFrom(family.setFirstPin('1234'));
+    (await expectOne('/api/v1/family/pin')).flush(
+      ok({ pin_set: true, parent_grant: 'grant-b1', expires_in: 900 }),
+    );
+    await first;
+    expect(session.parentGrant()).toBe('grant-b1');
+
+    session.lockParent();
+    const verify = firstValueFrom(family.verifyPin('1234'));
+    const req = await expectOne('/api/v1/family/pin/verify');
+    expect(req.request.headers.has('Idempotency-Key')).toBe(false);
+    req.flush(ok({ parent_grant: 'grant-p0', expires_in: 900 }));
+    await verify;
+    expect(session.parentGrant()).toBe('grant-p0');
+  });
 });

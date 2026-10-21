@@ -167,6 +167,48 @@ export const EN = {
     roles: { content_admin: 'Content admin', super_admin: 'Super admin' },
   },
 
+  /** Setup after sign-up (App Flow B1–B5). */
+  setup: {
+    pinIntro: 'Choose a 4-digit PIN. It keeps parent mode away from little hands.',
+    pinConfirm: 'Enter the same PIN again.',
+    pinMismatch: "Those PINs didn't match. Choose your PIN again.",
+    childIntro: 'Tell us about your child. You can add a second child too.',
+    secondChildIntro: 'Add your second child, or continue.',
+    firstName: 'First name',
+    age: 'Age',
+    ageHelper: 'From 4 to 12',
+    classLabel: 'Class',
+    picture: 'Choose a picture',
+    subjectsFor: (classLevel: number) => `Subjects for Class ${classLevel}`,
+    saveChild: 'Save child',
+    addAnother: 'Add another child',
+    continue: 'Continue',
+    childAdded: (name: string) => `${name} is added.`,
+    maxChildrenNote: 'You have added 2 children, the most a family can have.',
+    booksIntro: "Upload your child's books now so our team can prepare lessons.",
+    booksPracticeNote: 'Grade-level practice is ready even without a book.',
+    booksLaterNote: 'Book uploads open soon. Parent mode will remind you to add them.',
+    later: 'Later',
+    timeIntro: 'How long should your child learn each day?',
+    timeNote: 'Your child is reminded when time is up. The app never locks them out.',
+    minutes: (minutes: number) => `${minutes} minutes`,
+    doneTitle: 'All set!',
+    doneBody: 'Hand the tablet to your child.',
+    start: 'Start',
+  },
+
+  /** Parent PIN and Forgot PIN (App Flow P0, A4; Schema §8.2). */
+  pin: {
+    enter: 'Enter your parent PIN.',
+    forgot: 'Forgot PIN?',
+    triesLeft: (left: number) =>
+      `That PIN is not right. ${left} ${left === 1 ? 'try' : 'tries'} left.`,
+    forgotIntro: "We'll email you a code to make sure it's you. Then choose a new PIN.",
+    sendCode: 'Email me a code',
+    newPin: 'Choose a new PIN.',
+    saved: 'Your new PIN is saved.',
+  },
+
   /** Placeholder pages until each screen is built (Plan 2.3). */
   placeholder: {
     body: 'This screen is built in a later step.',

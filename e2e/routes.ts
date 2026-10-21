@@ -18,6 +18,18 @@ export interface Visit {
 
 const SCREEN = '[data-screen]';
 
+/**
+ * Router navigation without a reload (history entry + popstate), so the in-memory child and
+ * parent grant survive; page.goto would start a new session state.
+ */
+export async function navigateInApp(page: Page, path: string): Promise<void> {
+  await page.evaluate((target) => {
+    history.pushState(null, '', target);
+    dispatchEvent(new PopStateEvent('popstate', { state: null }));
+  }, path);
+  await expect(page).toHaveURL((url) => url.pathname === path);
+}
+
 /** Which navigation is on screen: the first visible variant. */
 async function visibleNav(page: Page): Promise<Visit['nav']> {
   for (const variant of ['bottom', 'rail', 'side'] as const) {
