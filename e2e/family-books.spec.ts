@@ -122,3 +122,95 @@ test('B3 offers an upload for each subject and returns to setup', async ({ page 
   await page.getByRole('button', { name: 'Back to books' }).click();
   await expect(page).toHaveURL(/\/setup\/books$/);
 });
+
+/** Plan 5.3: a whole book read by book-reader, with suggested chapters and one unclear page. */
+function readBook(server: Awaited<ReturnType<typeof signInFamily>>): void {
+  const page = (id: string, quality: 'ok' | 'unclear' = 'ok') => ({ id, page_no: 0, quality });
+  const chapter = (id: string, number: number, title: string, ids: string[], unclearAt = -1) => ({
+    id,
+    number,
+    title,
+    status: 'suggested',
+    page_count: ids.length,
+    unclear_pages: 0,
+    pages: ids.map((p, i) => ({ ...page(p, i === unclearAt ? 'unclear' : 'ok'), page_no: i + 1 })),
+  });
+  server.family.books.push({
+    id: 'book-evs',
+    subject_id: 4,
+    upload_mode: 'whole',
+    status: 'getting_ready',
+    class_level: 3,
+    child_ids: ['child-asha'],
+    chapters: [
+      chapter('ch-1', 1, 'Plants', ['p1', 'p2']),
+      chapter('ch-2', 2, 'Animals', ['p3', 'p4'], 1),
+      chapter('ch-3', 3, 'Water', ['p5', 'p6']),
+    ],
+    uploads: [],
+  });
+}
+
+test('P6: the parent renames, joins and moves chapter starts, then saves', async ({ page }) => {
+  const server = await signInFamily(page);
+  readBook(server);
+  await unlockParent(page, '/parent/books');
+  const evs = page.getByRole('listitem').filter({ hasText: 'EVS' }).first();
+  await evs.getByRole('button', { name: 'Check chapters' }).click();
+  await expect(page).toHaveURL(/\/parent\/books\/evs\/chapters\?child=child-asha$/);
+  await expect(page.getByText('6 pages in the book')).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+
+  const chapters = page.locator('li.chapter');
+  await expect(chapters).toHaveCount(3);
+  await chapters.nth(1).getByRole('button', { name: 'Join with the chapter above' }).click();
+  await expect(chapters).toHaveCount(2);
+  await expect(chapters.nth(0).getByText('Pages 1 to 4', { exact: false })).toBeVisible();
+  await chapters.nth(0).getByLabel('Chapter name').fill('Plants and animals');
+
+  // A start before the chapter above is refused on the device
+  await chapters.nth(1).getByLabel('Starts on page').fill('1');
+  await page.getByRole('button', { name: 'Save chapters' }).click();
+  await expect(
+    page.getByText('Each chapter must start after the one before it', { exact: false }),
+  ).toBeVisible();
+  await chapters.nth(1).getByLabel('Starts on page').fill('4');
+  await page.getByRole('button', { name: 'Save chapters' }).click();
+  await expect(
+    page.getByText('We are getting the chapters ready now.', { exact: false }),
+  ).toBeVisible();
+  expect(server.family.splits).toEqual([
+    [
+      { number: 1, title: 'Plants and animals', start_page: 1 },
+      { number: 2, title: 'Water', start_page: 4 },
+    ],
+  ]);
+
+  await page.getByRole('button', { name: 'Back to books' }).click();
+  const row = page.getByRole('listitem').filter({ hasText: 'EVS' }).first();
+  await expect(row.getByText('Chapter 2: Water')).toBeVisible();
+  await expect(row.getByRole('button', { name: 'Check chapters' })).toHaveCount(0);
+});
+
+test('P8: only the unclear page is shown and a new photo is sent for it', async ({ page }) => {
+  const server = await signInFamily(page);
+  readBook(server);
+  server.family.books[0].chapters.forEach((c) => (c.status = 'processing'));
+  server.family.books[0].chapters[1].status = 'needs_attention';
+  await unlockParent(page, '/parent/books');
+  const evs = page.getByRole('listitem').filter({ hasText: 'EVS' }).first();
+  await evs.getByRole('button', { name: 'Fix 1 unclear page' }).click();
+  await expect(page).toHaveURL(/\/parent\/books\/evs\/fix-pages\?child=child-asha&chapter=ch-2$/);
+  await expect(page.locator('app-page-thumb')).toHaveCount(1);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+
+  await page.getByRole('button', { name: 'Retake page 2' }).click();
+  await expect(page.getByText('New photo of page 2')).toBeVisible();
+  await chooseFiles(page, photos(2));
+  await expect(page.getByText('Choose one photo of this page.')).toBeVisible();
+  await chooseFiles(page, photos(1, 'retake'));
+  await expect(page.getByText('Page 2: new photo sent.', { exact: false })).toBeVisible();
+  await expect(page.getByText('All pages are clear. Thank you.')).toBeVisible();
+  expect(server.family.stored).toHaveLength(1);
+  expect(server.family.books[0].chapters[1].pages?.[1].quality).toBe('retaken');
+});

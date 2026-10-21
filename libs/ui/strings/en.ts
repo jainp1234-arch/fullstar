@@ -735,6 +735,39 @@ export const EN = {
       'This book was uploaded as a whole. Replace the book to upload it by chapter.',
     alreadyUploaded: 'This book is already uploaded. Use Replace book to upload it again.',
     chapterExists: 'This chapter number is already used. Choose another number.',
+    // P4 actions for P6 and P8
+    checkChapters: 'Check chapters',
+    fixPages: (count: number) => `Fix ${count} unclear ${count === 1 ? 'page' : 'pages'}`,
+  },
+
+  /** P6 Check chapters (App Flow §6). */
+  splitCheck: {
+    intro:
+      'We split the book into chapters. Check the names and where each chapter starts, then save.',
+    startPage: 'Starts on page',
+    pagesOf: (from: number, to: number) =>
+      from === to ? `Page ${from}` : `Pages ${from} to ${to}`,
+    totalPages: (count: number) => `${count} ${count === 1 ? 'page' : 'pages'} in the book`,
+    mergeUp: 'Join with the chapter above',
+    addStart: 'Add a chapter here',
+    newTitle: (number: number) => `Chapter ${number}`,
+    startOrder: 'Each chapter must start after the one before it, within the book.',
+    save: 'Save chapters',
+    saved: 'Thank you. We are getting the chapters ready now.',
+    nothingToCheck: 'There is nothing to check for this book right now.',
+    alreadyFixed: 'These chapters are already being prepared, so they can no longer be changed.',
+  },
+
+  /** P8 Fix unclear pages (App Flow §6). */
+  fixPages: {
+    intro: 'We could not read these pages. Take a new, clear photo of each one.',
+    tips: 'Good light, the whole page in the frame, and the phone held flat.',
+    retakeTitle: (page: number) => `New photo of page ${page}`,
+    retakeLimits: 'One JPG or PNG photo, up to 10 MB.',
+    onePhoto: 'Choose one photo of this page.',
+    sent: (page: number) => `Page ${page}: new photo sent. We are reading it now.`,
+    allClear: 'All pages are clear. Thank you.',
+    cancel: 'Cancel',
   },
 
   /** Book status chips (App Flow P4, Guidelines §11 app-status-chip). */

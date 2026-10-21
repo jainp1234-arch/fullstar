@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -65,6 +66,13 @@ public class BookController {
 			@Valid ChapterRequest chapter, @NotEmpty @Size(max = 60) List<@Valid FileRequest> files) {
 	}
 
+	record SplitChapterRequest(@NotNull @Min(1) @Max(99) Integer number,
+			@NotBlank @Size(max = BookService.TITLE_MAX) String title, @NotNull @Min(1) @Max(300) Integer startPage) {
+	}
+
+	record SplitRequest(@NotEmpty @Size(max = 99) List<@Valid SplitChapterRequest> chapters) {
+	}
+
 	@GetMapping("/books")
 	ApiResponse<List<BookService.SubjectRow>> list(@RequestParam(name = "child_id") String childId) {
 		return ApiResponse.success(books.list(field(childId, "child_id")));
@@ -86,6 +94,34 @@ public class BookController {
 	@GetMapping("/books/{id}/chapters")
 	ApiResponse<List<BookService.Chapter>> chapters(@PathVariable String id) {
 		return ApiResponse.success(books.chapters(path(id)));
+	}
+
+	/** Confirm the split of a whole book (P6). */
+	@PutMapping("/books/{id}/chapters")
+	ApiResponse<List<BookService.Chapter>> confirmSplit(@PathVariable String id, @Valid @RequestBody SplitRequest body) {
+		return ApiResponse.success(books.confirmSplit(path(id), body.chapters()
+			.stream()
+			.map(c -> new BookService.SplitChapter(c.number(), c.title().strip(), c.startPage()))
+			.toList()));
+	}
+
+	/** Pages of a chapter, optionally only unclear ones (P8). */
+	@GetMapping("/chapters/{id}/pages")
+	ApiResponse<List<BookService.Page>> pages(@PathVariable String id,
+			@RequestParam(name = "quality", required = false) String quality) {
+		if (quality != null && !Set.of("ok", "unclear", "retaken").contains(quality)) {
+			throw new ValidationException("quality is not valid", Map.of("quality", "INVALID"));
+		}
+		return ApiResponse.success(books.pages(path(id), quality));
+	}
+
+	/** A new photo for one page (P8): answers the one-photo upload with its signed PUT URL. */
+	@PostMapping("/pages/{id}/retake")
+	@ResponseStatus(HttpStatus.CREATED)
+	ApiResponse<UploadService.Upload> retake(HttpServletRequest request, @PathVariable String id,
+			@Valid @RequestBody FileRequest body) {
+		return ApiResponse.success(uploads.retake(RequestActor.of(request), path(id),
+				new UploadService.FileSpec(body.name().strip(), body.type(), body.size())));
 	}
 
 	@PostMapping("/books/{id}/uploads")

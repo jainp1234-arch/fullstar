@@ -20,14 +20,15 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api book-reader family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
+.PHONY: help up down test lint api book-reader test-ocr test-pages family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
 	@echo "make test             all tests"
 	@echo "make lint             all linters"
 	@echo "make api              run services/api locally"
-	@echo "make book-reader      run services/book-reader locally (upload scan worker)"
+	@echo "make book-reader      rebuild and restart the book-reader worker in compose"
+	@echo "make test-ocr         real Tesseract and cwebp of the book-reader image on the sample pages"
 	@echo "make family           run apps/family-app locally"
 	@echo "make studio           run apps/content-studio locally"
 	@echo "make db-bootstrap     create app_owner/app_api/app_system on NEON_OWNER_URL, write .env"
@@ -77,10 +78,20 @@ api:
 	$(MVNW) -f services/api/pom.xml spring-boot:run -Dspring-boot.run.profiles=local \
 		"-Dspring-boot.run.arguments=--spring.config.import=optional:file:$(CURDIR)/.env[.properties]"
 
+# book-reader needs Tesseract and cwebp, which exist only in its image (Plan 5.3): it runs in compose
 book-reader:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
-	$(MVNW) -f services/book-reader/pom.xml spring-boot:run \
-		"-Dspring-boot.run.arguments=--spring.config.import=optional:file:$(CURDIR)/.env[.properties]"
+	$(COMPOSE) up -d --build --wait book-reader
+
+# The real OCR test: Tesseract and cwebp of the built image read the sample pages
+test-ocr:
+	docker build -f services/book-reader/Dockerfile -t fullstar/book-reader:local .
+	$(MVNW) -f services/book-reader/pom.xml test -Dtest=RealToolsImageTest -Dbookreader.image=fullstar/book-reader:local
+
+# Renders the sample pages of test-ocr (services/book-reader/src/test/resources/pages)
+test-pages:
+	MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:/root/.cache/pip -w /w $(PY_IMAGE) sh -c \
+		"apt-get update -qq && apt-get install -y -qq --no-install-recommends libraqm0 && pip install -q --root-user-action=ignore --disable-pip-version-check pillow==12.3.0 fonttools==4.66.1 brotli==1.2.0 && python tools/test-pages/make_pages.py"
 
 db-bootstrap:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }

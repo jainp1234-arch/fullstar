@@ -53,7 +53,8 @@ public class UploadScanResultHandler implements JobResultHandler {
 		// Keys are "<job type>:<upload id>", so every job of one upload has its own key
 		UUID uploadId = UUID.fromString(result.idempotencyKey().substring(result.idempotencyKey().indexOf(':') + 1));
 		List<Map<String, Object>> rows = system.queryForList("""
-				SELECT u.family_id, u.family_book_id, u.family_chapter_id, u.status, fb.upload_mode, s.name AS subject
+				SELECT u.family_id, u.family_book_id, u.family_chapter_id, u.status, u.retake_page_id, fb.upload_mode,
+				       s.name AS subject, s.code AS subject_code
 				  FROM app.uploads u
 				  JOIN app.family_books fb ON fb.id = u.family_book_id
 				  JOIN app.subjects s ON s.id = fb.subject_id
@@ -70,8 +71,9 @@ public class UploadScanResultHandler implements JobResultHandler {
 		if (!result.succeeded()) {
 			system.update("UPDATE app.uploads SET status = 'failed' WHERE id = ?", uploadId);
 			needsAttention(system, chapterId);
-			message(system, familyId, (UUID) upload.get("family_book_id"), "We could not check your upload",
-					"We could not check the pages you uploaded for " + subject + ". Please upload them again.");
+			message(system, familyId, "upload_problem", "We could not check your upload",
+					"We could not check the pages you uploaded for " + subject + ". Please upload them again.",
+					Map.of("screen", "P4", "family_book_id", upload.get("family_book_id")));
 			log.warn("Upload scan failed uploadId={}", uploadId);
 			return;
 		}
@@ -89,9 +91,9 @@ public class UploadScanResultHandler implements JobResultHandler {
 			system.update("UPDATE app.uploads SET status = 'rejected', reject_reason = 'infected' WHERE id = ?",
 					uploadId);
 			needsAttention(system, chapterId);
-			message(system, familyId, (UUID) upload.get("family_book_id"), "Upload not used",
-					"A file you uploaded for " + subject
-							+ " looked unsafe, so we did not use it. Please upload the pages again.");
+			message(system, familyId, "upload_problem", "Upload not used",
+					"A file you uploaded for " + subject + " looked unsafe, so we did not use it. Please upload the pages again.",
+					Map.of("screen", "P4", "family_book_id", upload.get("family_book_id")));
 			deleteAfterCommit(system.queryForList("SELECT object_key FROM app.upload_files WHERE upload_id = ?",
 					String.class, uploadId));
 			log.warn("Upload infected uploadId={} files={}", uploadId, infected.size());
@@ -103,6 +105,13 @@ public class UploadScanResultHandler implements JobResultHandler {
 		payload.put("family_book_id", upload.get("family_book_id"));
 		payload.put("family_chapter_id", chapterId);
 		payload.put("mode", upload.get("upload_mode"));
+		// What book-reader needs without the database (Plan 5.3): where pages go, the files in order, OCR languages
+		payload.put("family_id", familyId);
+		payload.put("retake_page_id", upload.get("retake_page_id"));
+		payload.put("langs", "hindi".equals(upload.get("subject_code")) ? "hin+eng" : "eng");
+		payload.put("files", system.queryForList("""
+				SELECT id AS file_id, object_key, content_type FROM app.upload_files
+				 WHERE upload_id = ? ORDER BY position NULLS LAST, id""", uploadId));
 		jobs.publish(JobQueue.BOOK_PROCESS, PROCESS_JOB, PROCESS_JOB + ":" + uploadId, payload);
 		log.info("Upload clean uploadId={}", uploadId);
 	}
@@ -113,12 +122,12 @@ public class UploadScanResultHandler implements JobResultHandler {
 		}
 	}
 
-	/** An upload_problem message that opens the book on P4 (Schema §4.6 messages). */
-	private static void message(JdbcTemplate system, UUID familyId, UUID bookId, String title, String body) {
+	/** A parent message (Schema §4.6 messages) with a link to the screen that fixes it. As app_system. */
+	static void message(JdbcTemplate system, UUID familyId, String kind, String title, String body,
+			Map<String, Object> link) {
 		system.update("""
 				INSERT INTO app.messages (family_id, kind, title, body, link)
-				VALUES (?, 'upload_problem', ?, ?, CAST(? AS jsonb))""", familyId, title, body,
-				JSON.writeValueAsString(Map.of("screen", "P4", "family_book_id", bookId)));
+				VALUES (?, ?, ?, ?, CAST(? AS jsonb))""", familyId, kind, title, body, JSON.writeValueAsString(link));
 	}
 
 	private void deleteAfterCommit(List<String> keys) {

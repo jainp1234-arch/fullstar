@@ -121,20 +121,51 @@ public class UploadService {
 				INSERT INTO app.uploads (family_id, family_book_id, family_chapter_id, source, file_count)
 				VALUES (?, ?, ?, ?, ?) RETURNING id""", UUID.class, actor.familyId(), bookId, targetChapter, source,
 				files.size());
+		List<SignedFile> signed = addFiles(actor.familyId(), uploadId, files);
+		log.info("Upload created familyId={} uploadId={} source={} files={}", actor.familyId(), uploadId, source,
+				files.size());
+		return new Upload(uploadId, bookId, targetChapter, source, "awaiting_files", null, files.size(), signed);
+	}
+
+	/**
+	 * A new photo for one unclear page (P8, Plan 5.3): a one-photo upload of the page's chapter that
+	 * remembers the page, so book-process replaces only that page.
+	 */
+	public Upload retake(RequestActor actor, UUID pageId, FileSpec photo) {
+		checkLimits("photos", List.of(photo));
+		List<Map<String, Object>> rows = jdbc.queryForList("""
+				SELECT c.family_book_id, p.family_chapter_id FROM app.pages p
+				  JOIN app.family_chapters c ON c.id = p.family_chapter_id
+				 WHERE p.id = ?""", pageId);
+		if (rows.isEmpty()) {
+			throw new NotFoundException();
+		}
+		UUID bookId = (UUID) rows.get(0).get("family_book_id");
+		UUID chapterId = (UUID) rows.get(0).get("family_chapter_id");
+		UUID uploadId = jdbc.queryForObject("""
+				INSERT INTO app.uploads (family_id, family_book_id, family_chapter_id, source, file_count, retake_page_id)
+				VALUES (?, ?, ?, 'photos', 1, ?) RETURNING id""", UUID.class, actor.familyId(), bookId, chapterId,
+				pageId);
+		List<SignedFile> signed = addFiles(actor.familyId(), uploadId, List.of(photo));
+		log.info("Retake created familyId={} uploadId={} pageId={}", actor.familyId(), uploadId, pageId);
+		return new Upload(uploadId, bookId, chapterId, "photos", "awaiting_files", null, 1, signed);
+	}
+
+	/** File rows in the parent's order (position) and their signed PUT URLs. */
+	private List<SignedFile> addFiles(UUID familyId, UUID uploadId, List<FileSpec> files) {
 		List<SignedFile> signed = new ArrayList<>();
-		for (FileSpec file : files) {
+		for (int i = 0; i < files.size(); i++) {
+			FileSpec file = files.get(i);
 			UUID fileId = UUID.randomUUID();
-			String key = StorageKeys.upload(actor.familyId(), uploadId, fileId);
+			String key = StorageKeys.upload(familyId, uploadId, fileId);
 			jdbc.update("""
-					INSERT INTO app.upload_files (id, upload_id, family_id, object_key, content_type, byte_size)
-					VALUES (?, ?, ?, ?, ?, ?)""", fileId, uploadId, actor.familyId(), key, file.type(), file.size());
+					INSERT INTO app.upload_files (id, upload_id, family_id, object_key, content_type, byte_size, position)
+					VALUES (?, ?, ?, ?, ?, ?, ?)""", fileId, uploadId, familyId, key, file.type(), file.size(), i);
 			FileStorage.SignedUrl url = storage.signedPut(key, file.type(), file.size());
 			signed.add(new SignedFile(fileId, file.name(), url.url().toString(), url.method(),
 					Map.of("Content-Type", file.type()), url.expiresAt()));
 		}
-		log.info("Upload created familyId={} uploadId={} source={} files={}", actor.familyId(), uploadId, source,
-				files.size());
-		return new Upload(uploadId, bookId, targetChapter, source, "awaiting_files", null, files.size(), signed);
+		return signed;
 	}
 
 	/**
