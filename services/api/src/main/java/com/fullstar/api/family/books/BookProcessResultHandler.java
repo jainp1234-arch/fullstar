@@ -36,8 +36,11 @@ public class BookProcessResultHandler implements JobResultHandler {
 
 	private final FileStorage storage;
 
-	public BookProcessResultHandler(FileStorage storage) {
+	private final ReadAlongJobs readAlong;
+
+	public BookProcessResultHandler(FileStorage storage, ReadAlongJobs readAlong) {
 		this.storage = storage;
+		this.readAlong = readAlong;
 	}
 
 	@Override
@@ -98,8 +101,7 @@ public class BookProcessResultHandler implements JobResultHandler {
 	}
 
 	private void retake(JdbcTemplate system, Upload upload, JsonNode page) {
-		List<String> old = system.queryForList("SELECT image_key FROM app.pages WHERE id = ?", String.class,
-				upload.retakePageId());
+		List<String> old = oldFiles(system, "id", upload.retakePageId());
 		boolean unclear = "unclear".equals(page.path("quality").asString());
 		system.update("""
 				UPDATE app.pages
@@ -116,12 +118,13 @@ public class BookProcessResultHandler implements JobResultHandler {
 			system.update("""
 					UPDATE app.family_chapters SET status = 'processing'
 					 WHERE id = ? AND status = 'needs_attention'""", upload.chapterId());
+			// The new page (or, after the last retake, the whole chapter) is read aloud (Plan 5.4)
+			readAlong.queueIfReady(system, upload.chapterId());
 		}
 	}
 
 	private void fillChapter(JdbcTemplate system, Upload upload, UUID chapterId, List<JsonNode> pages) {
-		deleteAfterCommit(system.queryForList("SELECT image_key FROM app.pages WHERE family_chapter_id = ?",
-				String.class, chapterId));
+		deleteAfterCommit(oldFiles(system, "family_chapter_id", chapterId));
 		system.update("DELETE FROM app.pages WHERE family_chapter_id = ?", chapterId);
 		int unclear = insertPages(system, upload, chapterId, pages, 0, pages.size());
 		system.update("UPDATE app.family_chapters SET page_count = ?, status = ? WHERE id = ?", pages.size(),
@@ -129,6 +132,21 @@ public class BookProcessResultHandler implements JobResultHandler {
 		if (unclear > 0) {
 			unclearMessage(system, upload, chapterId);
 		}
+		else {
+			readAlong.queueIfReady(system, chapterId);
+		}
+	}
+
+	/** Page images and narration of the pages being replaced. column is "id" or "family_chapter_id". */
+	private static List<String> oldFiles(JdbcTemplate system, String column, UUID id) {
+		List<String> keys = new ArrayList<>();
+		system.query("SELECT image_key, narration_audio_key FROM app.pages WHERE " + column + " = ?", rs -> {
+			keys.add(rs.getString("image_key"));
+			if (rs.getString("narration_audio_key") != null) {
+				keys.add(rs.getString("narration_audio_key"));
+			}
+		}, id);
+		return keys;
 	}
 
 	/** Suggested chapters with their pages; start_page counts over the whole upload. */

@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
@@ -76,6 +77,13 @@ public class FileStorage {
 	public byte[] read(String key) {
 		return resilientCalls.call(Dependency.R2,
 				() -> s3.getObjectAsBytes(get -> get.bucket(properties.bucket()).key(key)).asByteArray());
+	}
+
+	/** Stores a small file the API writes itself, such as a worker's job input (Plan 5.4). */
+	public void put(String key, byte[] bytes, String contentType) {
+		resilientCalls.call(Dependency.R2, () -> s3.putObject(
+				put -> put.bucket(properties.bucket()).key(key).contentType(contentType),
+				RequestBody.fromBytes(bytes)));
 	}
 
 	/** Size of a stored object in bytes, or -1 when it is not there (yet). */

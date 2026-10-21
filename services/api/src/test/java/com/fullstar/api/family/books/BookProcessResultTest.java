@@ -270,4 +270,159 @@ class BookProcessResultTest extends ApiTestSupport {
 		assertThat(body).contains("more than 300 pages");
 	}
 
+	/** The readalong-narrate job queued for this chapter (Plan 5.4). */
+	private JsonNode narrateJob(UUID chapterId) throws InterruptedException {
+		String url = queueUrls.of(JobQueue.READALONG_NARRATE);
+		Instant until = Instant.now().plus(Duration.ofSeconds(20));
+		while (Instant.now().isBefore(until)) {
+			JsonNode found = null;
+			for (var message : sqs.receiveMessage(r -> r.queueUrl(url).maxNumberOfMessages(10).waitTimeSeconds(1))
+				.messages()) {
+				JsonNode envelope = JSON.readTree(message.body());
+				if (found == null
+						&& envelope.path("payload").path("family_chapter_id").asString().equals(chapterId.toString())) {
+					sqs.deleteMessage(r -> r.queueUrl(url).receiptHandle(message.receiptHandle()));
+					found = envelope;
+				}
+				else {
+					// Another chapter's job: visible again at once (the queue's timeout is 30 minutes)
+					sqs.changeMessageVisibility(
+							r -> r.queueUrl(url).receiptHandle(message.receiptHandle()).visibilityTimeout(0));
+				}
+			}
+			if (found != null) {
+				return found;
+			}
+		}
+		throw new AssertionError("no readalong-narrate job for " + chapterId);
+	}
+
+	/** What the stand-in writes and reports for a narrate job: silent audio and timings per page. */
+	private String narrate(JsonNode job, String outcome) {
+		JsonNode payload = job.path("payload");
+		String familyKey = "families/" + payload.path("family_id").asString();
+		String resultKey = payload.path("pages_key").asString().replace("-input.json", "-result.json");
+		List<Map<String, Object>> pages = new ArrayList<>();
+		JsonNode input = JSON.readTree(s3.getObjectAsBytes(r -> r.bucket(TestAws.BUCKET)
+			.key(payload.path("pages_key").asString())).asByteArray());
+		for (JsonNode page : input.path("pages")) {
+			pages.add(Map.of("page_id", page.path("page_id").asString(), "audio_key",
+					familyKey + "/audio/" + page.path("page_id").asString() + ".mp3", "word_timings",
+					List.of(Map.of("w", "Page", "start_ms", 300, "end_ms", 620))));
+		}
+		s3.putObject(r -> r.bucket(TestAws.BUCKET).key(resultKey),
+				RequestBody.fromBytes(JSON.writeValueAsBytes(Map.of("pages", pages))));
+		String key = job.path("idempotency_key").asString();
+		Map<String, Object> result = new LinkedHashMap<>();
+		result.put("job_id", job.path("job_id").asString());
+		result.put("idempotency_key", key);
+		result.put("type", "readalong.narrate");
+		result.put("outcome", outcome);
+		result.put("result", "success".equals(outcome) ? Map.of("result_key", resultKey, "page_count", pages.size()) : null);
+		result.put("error", "failure".equals(outcome) ? Map.of("code", "WORKER_FAILED") : null);
+		String body = JSON.writeValueAsString(new JobEnvelope(UUID.randomUUID(), key, "job.result", 1, Instant.now(),
+				JSON.valueToTree(result)));
+		resend(body);
+		return body;
+	}
+
+	private void resend(String body) {
+		String url = queueUrls.of(JobQueue.JOB_RESULTS);
+		sqs.sendMessage(r -> r.queueUrl(url).messageBody(body));
+	}
+
+	private String chapterStatus(UUID chapterId) {
+		return systemQuery("SELECT status FROM app.family_chapters WHERE id = ?", chapterId);
+	}
+
+	@Test
+	void aClearChapterIsReadAloudThenReadyWithAMessageAndAPrepTask() throws Exception {
+		UUID bookId = newBook("chapterwise");
+		UUID chapterId = systemQuery("""
+				INSERT INTO app.family_chapters (family_book_id, family_id, number, title)
+				VALUES (?, ?, 2, 'Water') RETURNING id""", bookId, familyId);
+		UUID uploadId = processingUpload(bookId, chapterId, null);
+		String key = pagesJson(uploadId, List.of("ok", "ok"), List.of());
+		report(uploadId, "success", Map.of("result_key", key, "page_count", 2, "unclear_pages", 0));
+
+		JsonNode job = narrateJob(chapterId);
+		assertThat(job.path("type").asString()).isEqualTo("readalong.narrate");
+		assertThat(job.path("payload").path("lang").asString()).isEqualTo("en");
+		assertThat(job.path("payload").path("page_count").asInt()).isEqualTo(2);
+		assertThat(chapterStatus(chapterId)).isEqualTo("processing");
+
+		String result = narrate(job, "success");
+		await(() -> "readalong_ready".equals(chapterStatus(chapterId)), "chapter readalong_ready");
+		Long narrated = systemQuery("""
+				SELECT count(*) FROM app.pages WHERE family_chapter_id = ? AND narration_audio_key LIKE 'families/%/audio/%.mp3'
+				   AND jsonb_array_length(word_timings) = 1""", chapterId);
+		assertThat(narrated).isEqualTo(2L);
+		String book = systemQuery("SELECT status FROM app.family_books WHERE id = ?", bookId);
+		assertThat(book).isEqualTo("readalong_ready");
+		String message = systemQuery("SELECT title || ' | ' || body FROM app.messages WHERE family_id = ? AND kind = 'readalong_ready'",
+				familyId);
+		assertThat(message).isEqualTo("Ready to read along | EVS Ch 2 is ready to read along.");
+		Long open = systemQuery("SELECT count(*) FROM app.prep_tasks WHERE family_chapter_id = ? AND status = 'open'",
+				chapterId);
+		assertThat(open).isEqualTo(1L);
+		// The narration files are cleaned up once applied
+		await(() -> s3.listObjectsV2(r -> r.bucket(TestAws.BUCKET)
+			.prefix("families/" + familyId + "/chapters/")).keyCount() == 0, "narration files deleted");
+
+		// A repeated result changes nothing
+		resend(result);
+		Thread.sleep(2_000);
+		Long messages = systemQuery("SELECT count(*) FROM app.messages WHERE family_id = ? AND kind = 'readalong_ready'",
+				familyId);
+		assertThat(messages).isEqualTo(1L);
+	}
+
+	@Test
+	void unclearPagesWaitForTheRetakeAndAFailedNarrationKeepsTheChapterGettingReady() throws Exception {
+		UUID bookId = newBook("chapterwise");
+		UUID chapterId = systemQuery("""
+				INSERT INTO app.family_chapters (family_book_id, family_id, number, title)
+				VALUES (?, ?, 1, 'Plants') RETURNING id""", bookId, familyId);
+		UUID uploadId = processingUpload(bookId, chapterId, null);
+		String key = pagesJson(uploadId, List.of("ok", "unclear"), List.of());
+		report(uploadId, "success", Map.of("result_key", key, "page_count", 2, "unclear_pages", 1));
+		await(() -> "processed".equals(uploadStatus(uploadId)), "upload processed");
+		assertThat(chapterStatus(chapterId)).isEqualTo("needs_attention");
+
+		UUID pageId = systemQuery("SELECT id FROM app.pages WHERE family_chapter_id = ? AND quality = 'unclear'",
+				chapterId);
+		UUID retakeId = processingUpload(bookId, chapterId, pageId);
+		String retakeKey = pagesJson(retakeId, List.of("ok"), List.of());
+		report(retakeId, "success", Map.of("result_key", retakeKey, "page_count", 1, "unclear_pages", 0));
+		JsonNode job = narrateJob(chapterId);
+		assertThat(job.path("payload").path("page_count").asInt()).isEqualTo(2);
+
+		narrate(job, "failure");
+		Thread.sleep(2_000);
+		assertThat(chapterStatus(chapterId)).isEqualTo("processing");
+		Long tasks = systemQuery("SELECT count(*) FROM app.prep_tasks WHERE family_chapter_id = ?", chapterId);
+		assertThat(tasks).isZero();
+	}
+
+	@Test
+	void confirmingASplitReadsEachChapterAloud() throws Exception {
+		UUID bookId = newBook("whole");
+		UUID uploadId = processingUpload(bookId, null, null);
+		String key = pagesJson(uploadId, List.of("ok", "ok", "ok"),
+				List.of(Map.of("number", 1, "title", "Plants", "start_page", 1),
+						Map.of("number", 2, "title", "Water", "start_page", 3)));
+		report(uploadId, "success", Map.of("result_key", key, "page_count", 3, "unclear_pages", 0));
+		await(() -> "processed".equals(uploadStatus(uploadId)), "upload processed");
+
+		JsonNode chapters = data(send(put("/api/v1/family/parent/books/" + bookId + "/chapters"), """
+				{ "chapters": [ { "number": 1, "title": "Plants", "start_page": 1 },
+				                { "number": 2, "title": "Water", "start_page": 2 } ] }""")
+			.andExpect(status().isOk())
+			.andReturn());
+		JsonNode first = narrateJob(UUID.fromString(chapters.path(0).path("id").asString()));
+		JsonNode second = narrateJob(UUID.fromString(chapters.path(1).path("id").asString()));
+		assertThat(first.path("payload").path("page_count").asInt()).isEqualTo(1);
+		assertThat(second.path("payload").path("page_count").asInt()).isEqualTo(2);
+	}
+
 }

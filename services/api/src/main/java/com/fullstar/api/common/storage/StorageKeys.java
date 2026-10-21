@@ -31,6 +31,15 @@ public final class StorageKeys {
 		return familyPrefix(familyId) + "audio/" + pageId + ".mp3";
 	}
 
+	/** Input and result of one read-along narration run (Plan 5.4); deleted once applied. */
+	public static String narration(UUID familyId, UUID chapterId, UUID runId, String part) {
+		if (!"input".equals(part) && !"result".equals(part)) {
+			throw new IllegalArgumentException("Invalid narration part");
+		}
+		return familyPrefix(familyId) + "chapters/" + Objects.requireNonNull(chapterId) + "/narration-"
+				+ Objects.requireNonNull(runId) + "-" + part + ".json";
+	}
+
 	public static String recording(UUID familyId, UUID readingTestId) {
 		return familyPrefix(familyId) + "recordings/" + readingTestId + ".webm";
 	}
