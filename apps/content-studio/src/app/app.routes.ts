@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { staffGuard, superAdminGuard } from '@fullstar/core';
 import { PlaceholderPage, StudioShell, screenRoutes } from '@fullstar/ui';
 import { StaffSignInPage } from './auth/staff-sign-in.page';
+import { ContentCheckPage } from './check/content-check.page';
+import { PublishPage } from './check/publish.page';
 import { DashboardPage } from './dashboard/dashboard.page';
 import { DraftPage } from './draft/draft.page';
 import { ContentEditPage } from './editor/content-edit.page';
@@ -19,6 +21,8 @@ export const routes: Routes = [
       S3: LibraryPage,
       S4: DraftPage,
       S5: ContentEditPage,
+      S6: PublishPage,
+      S11: ContentCheckPage,
       S13: StaffPage,
     },
     guards: (screen) => {

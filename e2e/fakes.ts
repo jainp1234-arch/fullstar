@@ -26,6 +26,8 @@ export interface FakeOptions {
   readonly staffRole?: FakeStaffRole;
   /** Studio: FEATURE_AI_DRAFTS on (default off, as in trial). */
   readonly aiDrafts?: boolean;
+  /** Studio: FEATURE_AI_CHECK on (default off, as in trial). */
+  readonly aiCheck?: boolean;
 }
 
 export type FakeStaffRole = 'content_admin' | 'super_admin';
@@ -433,7 +435,7 @@ function studio(
       id: me.id,
       display_name: me.display_name,
       role: me.role,
-      features: { ai_drafts: !!options.aiDrafts, ai_check: false },
+      features: { ai_drafts: !!options.aiDrafts, ai_check: !!options.aiCheck },
     });
   }
   if (path.startsWith('/studio/ai/')) {
@@ -488,7 +490,8 @@ function studio(
       return envelope(route, 200, member);
     }
   }
-  return studioContent(route, server.content, path, method, newId);
+  const checked = studioChecks(route, server.content, path, method, newId, !!options.aiCheck);
+  return checked ?? studioContent(route, server.content, path, method, newId);
 }
 
 export interface FakeTopic {
@@ -528,6 +531,27 @@ export interface FakeItem {
   published_version_id: string | null;
   updated_at: string;
   versions: FakeVersion[];
+  /** Content checks of this item's versions, newest last (Plan 4.4). */
+  checks?: FakeCheck[];
+}
+
+export interface FakeFlag {
+  id: string;
+  severity: string;
+  category: string;
+  location: string;
+  reason: string;
+  resolution: string;
+  resolution_note: string | null;
+  resolved_at: string | null;
+}
+
+export interface FakeCheck {
+  id: string;
+  version_id: string;
+  status: string;
+  model: string;
+  flags: FakeFlag[];
 }
 
 export interface FakeContent {
@@ -611,6 +635,7 @@ function detail(item: FakeItem) {
   return {
     item: summary(item),
     current_version: current ? versionView(item, current) : null,
+    latest_check: latestCheck(item),
     versions: [...item.versions].reverse().map((v) => ({
       id: v.id,
       version_no: v.version_no,
@@ -700,7 +725,12 @@ function studioContent(
   }
   if (path === '/studio/content-items' && method === 'GET') {
     const topicId = url.searchParams.get('topic_id');
-    const items = content.items.filter((i) => i.topic_id === topicId).map(summary);
+    const status = url.searchParams.get('status');
+    const items = content.items
+      .filter(
+        (i) => (topicId ? i.topic_id === topicId : true) && (status ? i.status === status : true),
+      )
+      .map(summary);
     return envelope(route, 200, { items, next_cursor: null });
   }
   if (path === '/studio/content-items' && method === 'POST') {
@@ -823,4 +853,150 @@ function studioDrafts(route: Route, path: string, aiDrafts: boolean): Promise<vo
         )
       : [draftItem(type, node)];
   return envelope(route, 200, { type, source: pasted ? 'pasted' : 'claude', items });
+}
+
+function checkView(item: FakeItem, check: FakeCheck) {
+  const critical = check.flags.filter((f) => f.severity === 'critical').length;
+  const open = check.flags.filter((f) => f.resolution === 'open').length;
+  const version = item.versions.find((v) => v.id === check.version_id);
+  return {
+    id: check.id,
+    version_id: check.version_id,
+    item_id: item.id,
+    version_no: version?.version_no ?? 0,
+    status: check.status,
+    model: check.model,
+    critical_count: critical,
+    warning_count: check.flags.length - critical,
+    open_flags: open,
+    publishable: check.status === 'passed' && open === 0,
+    error_message: null,
+    started_at: '2026-10-21T09:00:00Z',
+    finished_at: check.status === 'running' ? null : '2026-10-21T09:00:01Z',
+    flags: check.flags,
+  };
+}
+
+function latestCheck(item: FakeItem) {
+  const checks = (item.checks ?? []).filter((c) => c.version_id === item.current_version_id);
+  const last = checks[checks.length - 1];
+  if (!last) {
+    return null;
+  }
+  const view: Partial<ReturnType<typeof checkView>> = checkView(item, last);
+  delete view.flags;
+  return view;
+}
+
+/** Content checks, flags and publishing (Plan 4.4); null when the path is not one of them. */
+function studioChecks(
+  route: Route,
+  content: FakeContent,
+  path: string,
+  method: string,
+  newId: () => string,
+  aiCheck: boolean,
+): Promise<void> | null {
+  const body = (method === 'GET' ? {} : (route.request().postDataJSON() ?? {})) as Record<
+    string,
+    unknown
+  >;
+  for (const item of content.items) {
+    const checks = (item.checks ??= []);
+    for (const version of item.versions) {
+      const base = `/studio/content-versions/${version.id}`;
+      if (path === `${base}/manual-check` && method === 'POST') {
+        if (version.id !== item.current_version_id) {
+          return envelope(route, 409, null, 'CONFLICT');
+        }
+        const checklist = (body['checklist'] ?? {}) as Record<string, boolean>;
+        const given = (body['flags'] ?? []) as Record<string, string>[];
+        const errors: Record<string, string> = {};
+        given.forEach((flag, i) => {
+          if (!flag['location']) errors[`flags[${i}].location`] = 'REQUIRED';
+          if (!flag['reason']) errors[`flags[${i}].reason`] = 'REQUIRED';
+        });
+        if (Object.keys(errors).length) {
+          return envelope(route, 400, null, 'VALIDATION_FAILED', { fields: errors });
+        }
+        const flags: FakeFlag[] = given.map((flag) => ({
+          id: `f-${newId()}`,
+          severity: flag['severity'],
+          category: flag['category'],
+          location: flag['location'],
+          reason: flag['reason'],
+          resolution: 'open',
+          resolution_note: null,
+          resolved_at: null,
+        }));
+        const allTrue =
+          Object.values(checklist).length === 7 && Object.values(checklist).every(Boolean);
+        const check: FakeCheck = {
+          id: `k-${newId()}`,
+          version_id: version.id,
+          status: allTrue && !flags.some((f) => f.severity === 'critical') ? 'passed' : 'failed',
+          model: 'manual',
+          flags,
+        };
+        checks.push(check);
+        if (item.status === 'draft') {
+          item.status = 'in_check';
+        }
+        return envelope(route, 201, checkView(item, check));
+      }
+      if (path === `${base}/checks` && method === 'POST') {
+        if (!aiCheck) {
+          return envelope(route, 503, null, 'FEATURE_DISABLED');
+        }
+        const check: FakeCheck = {
+          id: `k-${newId()}`,
+          version_id: version.id,
+          status: 'passed',
+          model: 'claude-sonnet-5-5',
+          flags: [
+            {
+              id: `f-${newId()}`,
+              severity: 'warning',
+              category: 'difficulty',
+              location: 'body.scenes[0].text',
+              reason: 'A little easy for Class 3.',
+              resolution: 'open',
+              resolution_note: null,
+              resolved_at: null,
+            },
+          ],
+        };
+        checks.push(check);
+        return envelope(route, 202, { ...checkView(item, check), status: 'running', flags: [] });
+      }
+    }
+    for (const check of checks) {
+      if (path === `/studio/content-checks/${check.id}` && method === 'GET') {
+        return envelope(route, 200, checkView(item, check));
+      }
+      const flag = check.flags.find((f) => path === `/studio/content-check-flags/${f.id}`);
+      if (flag && method === 'PATCH') {
+        if (flag.severity !== 'warning') {
+          return envelope(route, 409, null, 'CONFLICT');
+        }
+        flag.resolution = 'accepted';
+        flag.resolution_note = String(body['note']);
+        flag.resolved_at = new Date().toISOString();
+        return envelope(route, 200, checkView(item, check));
+      }
+    }
+    if (path === `/studio/content-items/${item.id}/publish` && method === 'POST') {
+      if (!latestCheck(item)?.publishable) {
+        return envelope(route, 409, null, 'CHECK_NOT_PASSED');
+      }
+      item.status = 'published';
+      item.published_version_id = item.current_version_id;
+      return envelope(route, 200, detail(item));
+    }
+    if (path === `/studio/content-items/${item.id}/unpublish` && method === 'POST') {
+      item.status = 'archived';
+      return envelope(route, 200, detail(item));
+    }
+  }
+  return null;
 }
