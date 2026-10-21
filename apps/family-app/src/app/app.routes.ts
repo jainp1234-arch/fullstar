@@ -15,6 +15,10 @@ import { WelcomePage } from './auth/welcome.page';
 import { ForgotPinPage } from './parent/forgot-pin.page';
 import { ParentPinPage } from './parent/parent-pin.page';
 import { FAMILY_SCREENS } from './screens';
+import { EditChildPage } from './settings/edit-child.page';
+import { HelpPage } from './settings/help.page';
+import { PrivacyPage } from './settings/privacy.page';
+import { SettingsPage } from './settings/settings.page';
 import { SetupBooksPage } from './setup/setup-books.page';
 import { SetupChildPage } from './setup/setup-child.page';
 import { SetupDonePage } from './setup/setup-done.page';
@@ -97,6 +101,10 @@ export const routes: Routes = [
         B5: SetupDonePage,
         C1: WhoPage,
         P0: ParentPinPage,
+        P14: SettingsPage,
+        P15: EditChildPage,
+        P16: HelpPage,
+        P17: PrivacyPage,
       },
       guards: guardsFor,
     },

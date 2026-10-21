@@ -14,7 +14,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiError, FamilyApi } from '@fullstar/core';
 import {
   AVATAR_KEYS,
@@ -245,6 +245,10 @@ export class SetupChildPage {
 
   private readonly family = inject(FamilyApi);
   private readonly router = inject(Router);
+  /** From Settings (P14 "Add a child"): back there instead of on to B3. */
+  private readonly returnTo = settingsReturn(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('next'),
+  );
   private readonly destroyRef = inject(DestroyRef);
   private readonly config = toSignal(this.family.publicConfig(), { initialValue: null });
   private readonly classLevelValue = toSignal(this.form.controls.classLevel.valueChanges, {
@@ -363,13 +367,17 @@ export class SetupChildPage {
   }
 
   protected next(): void {
-    void this.router.navigateByUrl('/setup/books');
+    void this.router.navigateByUrl(this.returnTo ?? '/setup/books');
   }
 
   private resetForm(): void {
     this.submitted.set(false);
     this.form.reset({ firstName: '', age: '', classLevel: null, avatarKey: null });
   }
+}
+
+function settingsReturn(next: string | null): string | null {
+  return next === '/parent/settings' ? next : null;
 }
 
 function notBlank(control: AbstractControl<string>): { blank: true } | null {

@@ -197,6 +197,95 @@ export const EN = {
     start: 'Start',
   },
 
+  /** Settings and Edit child (App Flow P14, P15). */
+  settings: {
+    children: 'Children',
+    childSummary: (classLevel: number, age: number) => `Class ${classLevel} · ${age} years`,
+    addChild: 'Add a child',
+    timeLimit: 'Daily time limit',
+    soundAndCelebrations: 'Sound and celebrations',
+    sound: 'Sound',
+    celebrations: 'Celebrations',
+    saved: 'Saved',
+    parentPin: 'Parent PIN',
+    changePin: 'Change PIN',
+    help: 'Help',
+    privacy: 'Privacy',
+    editIntro: 'Change the name, age or picture.',
+    save: 'Save changes',
+    nextClass: (classLevel: number) => `Move to Class ${classLevel}`,
+    nextClassNote: 'For a new school year. Subjects change with the class.',
+    eraseBody: (classLevel: number) =>
+      `This will erase all progress for Class ${classLevel}. Continue?`,
+    moved: (name: string, classLevel: number) => `${name} is now in Class ${classLevel}.`,
+    highestClass: 'This is the highest class we support for now.',
+    removeChild: 'Remove child',
+    removeTitle: (name: string) => `Remove ${name}?`,
+    removeBody: "Their progress, worksheets and readings will be deleted. This can't be undone.",
+    keepChild: 'Keep',
+    removed: (name: string) => `${name} is removed.`,
+    childMissing: "We couldn't find this child.",
+  },
+
+  /** Help (App Flow P16). Answers restate the PRD and App Flow; edit freely. */
+  help: {
+    faqTitle: 'Questions',
+    faqs: [
+      {
+        q: 'How many children can I add?',
+        a: 'Up to 2. Each child taps their own picture on Who is learning?; children have no PIN.',
+      },
+      {
+        q: "What if I haven't uploaded my child's book?",
+        a: 'Your child still has class practice: grammar for English and Hindi, practice for Maths and general concepts for EVS.',
+      },
+      {
+        q: 'What happens when the daily time is up?',
+        a: 'The time bar turns red as a reminder. The app never locks your child out.',
+      },
+      {
+        q: 'I forgot my parent PIN.',
+        a: 'Tap Forgot PIN on the PIN screen. We email a code to you, then you choose a new PIN.',
+      },
+      {
+        q: 'Does FullStar work offline?',
+        a: 'Saved lessons, worksheets and tables practice work offline, and progress saves when you are back online. Reading tests and uploads need the internet.',
+      },
+      {
+        q: 'What happens when my child moves to the next class?',
+        a: "In Settings, open your child and choose Move to next class. This erases the old class's progress, and the subjects change to the new class.",
+      },
+      {
+        q: 'How do I delete our data?',
+        a: 'In Settings, open Privacy and tap Request data deletion. Our team completes it within 30 days.',
+      },
+    ],
+    contactTitle: 'Contact us',
+    subject: 'Subject',
+    message: 'Message',
+    send: 'Send',
+    contactSoon: 'Sending messages opens in a later update. Replies will appear in your messages.',
+  },
+
+  /** Privacy (App Flow P17; Schema §13 retention). Facts only; the full notice is linked. */
+  privacy: {
+    keepTitle: 'What we keep',
+    keep: "Your email, your child's first name, age, class and picture, and their learning progress.",
+    recordings: 'Reading test recordings are deleted after 7 days.',
+    deletionTitle: 'Delete your data',
+    deletion:
+      'You can ask us to delete your family and everything under it. Our team completes it within 30 days.',
+    fullNotice: 'Read the full privacy notice',
+    request: 'Request data deletion',
+    confirmTitle: 'Request data deletion?',
+    confirmBody:
+      'Our team will delete your family, children and their progress within 30 days. You can keep using FullStar until then.',
+    confirm: 'Request deletion',
+    cancel: 'Cancel',
+    requested: (date: string) =>
+      `Deletion requested on ${date}. Our team completes it within 30 days.`,
+  },
+
   /** Parent PIN and Forgot PIN (App Flow P0, A4; Schema §8.2). */
   pin: {
     enter: 'Enter your parent PIN.',

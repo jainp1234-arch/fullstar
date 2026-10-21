@@ -13,6 +13,8 @@ export interface FamilyMe {
     readonly sound_enabled: boolean;
     readonly celebrations_enabled: boolean;
     readonly pin_set: boolean;
+    /** Set once the parent asked for data deletion (App Flow P17). */
+    readonly deletion_requested_at?: string | null;
   };
   readonly children: readonly FamilyChild[];
 }
@@ -48,6 +50,8 @@ export interface PublicConfig {
     readonly default_minutes: number;
   };
   readonly consent_version: string;
+  /** The full privacy notice (P17); null until it is published. */
+  readonly privacy_notice_url?: string | null;
 }
 
 /** POST /family/parent/children (App Flow B2). */
@@ -56,6 +60,15 @@ export interface NewChild {
   readonly age: number;
   readonly class_level: number;
   readonly avatar_key: string;
+}
+
+/** PATCH /family/parent/children/{id} (App Flow P15); the class changes only by moving up. */
+export type ChildChanges = Partial<Pick<NewChild, 'first_name' | 'age' | 'avatar_key'>>;
+
+/** POST /family/parent/deletion-request (App Flow P17). */
+export interface DeletionRequest {
+  readonly requested_at: string;
+  readonly due_by: string;
 }
 
 /** GET · PATCH /family/parent/settings (App Flow B4, P14). */
@@ -149,6 +162,40 @@ export class FamilyApi {
     );
   }
 
+  /** P15: name, age, picture. */
+  updateChild(id: string, changes: ChildChanges): Observable<FamilyChild> {
+    return this.api
+      .patch<FamilyChild>(`/family/parent/children/${encodeURIComponent(id)}`, changes)
+      .pipe(tap((child) => this.replaceChild(child)));
+  }
+
+  /** P15: erases the class's progress, class + 1 (409 MAX_CLASS at Class 5). */
+  moveToNextClass(id: string): Observable<FamilyChild> {
+    return this.api
+      .post<FamilyChild>(`/family/parent/children/${encodeURIComponent(id)}/move-to-next-class`, {})
+      .pipe(tap((child) => this.replaceChild(child)));
+  }
+
+  /** P15: removes the child and their data. */
+  removeChild(id: string): Observable<void> {
+    return this.api.delete<unknown>(`/family/parent/children/${encodeURIComponent(id)}`).pipe(
+      tap(() => {
+        const me = this.me();
+        if (me) {
+          this.current.set({ ...me, children: me.children.filter((child) => child.id !== id) });
+        }
+      }),
+      map(() => undefined),
+    );
+  }
+
+  /** P17: once per family; a repeat answers with the first request. */
+  requestDeletion(): Observable<DeletionRequest> {
+    return this.api
+      .post<DeletionRequest>('/family/parent/deletion-request', {})
+      .pipe(tap((request) => this.patchFamily({ deletion_requested_at: request.requested_at })));
+  }
+
   settings(): Observable<FamilySettings> {
     return this.api.get<FamilySettings>('/family/parent/settings');
   }
@@ -161,6 +208,16 @@ export class FamilyApi {
 
   reset(): void {
     this.current.set(null);
+  }
+
+  private replaceChild(child: FamilyChild): void {
+    const me = this.me();
+    if (me) {
+      this.current.set({
+        ...me,
+        children: me.children.map((existing) => (existing.id === child.id ? child : existing)),
+      });
+    }
   }
 
   private patchFamily(changes: Partial<FamilyMe['family']>): void {

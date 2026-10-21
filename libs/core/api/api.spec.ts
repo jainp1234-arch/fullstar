@@ -237,4 +237,53 @@ describe('ApiClient with the interceptors', () => {
     await verify;
     expect(session.parentGrant()).toBe('grant-p0');
   });
+
+  it('FamilyApi keeps /family/me in step with child moves, removals and the deletion request', async () => {
+    const family = TestBed.inject(FamilyApi);
+    const child = (id: string, classLevel: number) => ({
+      id,
+      first_name: id,
+      age: 8,
+      class_level: classLevel,
+      avatar_key: 'cat',
+      stars_total: 4,
+    });
+    const loaded = firstValueFrom(family.loadMe());
+    (await expectOne('/api/v1/family/me')).flush(
+      ok({
+        family: {
+          id: 'f1',
+          consent_version: 'v1',
+          daily_limit_minutes: 30,
+          sound_enabled: true,
+          celebrations_enabled: true,
+          pin_set: true,
+          deletion_requested_at: null,
+        },
+        children: [child('a', 3), child('b', 2)],
+      }),
+    );
+    await loaded;
+
+    const moved = firstValueFrom(family.moveToNextClass('a'));
+    const move = await expectOne('/api/v1/family/parent/children/a/move-to-next-class');
+    expect(move.request.headers.get('Idempotency-Key')).toMatch(/^[0-9a-f-]{36}$/);
+    move.flush(ok({ ...child('a', 4), stars_total: 0 }));
+    await moved;
+
+    const removed = firstValueFrom(family.removeChild('b'));
+    (await expectOne('/api/v1/family/parent/children/b')).flush(ok({ id: 'b' }));
+    await removed;
+
+    const requested = firstValueFrom(family.requestDeletion());
+    (await expectOne('/api/v1/family/parent/deletion-request')).flush(
+      ok({ requested_at: '2026-10-21T06:00:00Z', due_by: '2026-11-20T06:00:00Z' }),
+    );
+    await requested;
+
+    expect(family.me()?.children.map((c) => [c.id, c.class_level, c.stars_total])).toEqual([
+      ['a', 4, 0],
+    ]);
+    expect(family.me()?.family.deletion_requested_at).toBe('2026-10-21T06:00:00Z');
+  });
 });

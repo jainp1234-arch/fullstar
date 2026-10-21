@@ -45,6 +45,15 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       await enterPin(page);
       await expect(page).toHaveURL(/\/parent\/progress$/);
       await walk(page, [], seen);
+      // P14 opens these with buttons, not links
+      for (const path of [
+        '/parent/settings/children/child-asha',
+        '/parent/settings/help',
+        '/parent/settings/privacy',
+      ]) {
+        await navigateInApp(page, path);
+        await walk(page, [], seen);
+      }
       // Setup and sign-up screens need only a family; B4 also asks for the PIN
       await walk(page, ['/sign-up', '/parent/forgot-pin', '/setup/pin', '/setup/child'], seen);
       await walk(page, ['/setup/books', '/setup/done'], seen);
