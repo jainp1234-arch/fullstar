@@ -66,7 +66,7 @@ public class FamilyAccountService {
 	}
 
 	public record Family(UUID id, String consentVersion, int dailyLimitMinutes, boolean soundEnabled,
-			boolean celebrationsEnabled, boolean pinSet) {
+			boolean celebrationsEnabled, boolean pinSet, Instant deletionRequestedAt) {
 	}
 
 	public record Child(UUID id, String firstName, int age, int classLevel, String avatarKey, int starsTotal) {
@@ -79,11 +79,12 @@ public class FamilyAccountService {
 		UUID familyId = requireFamily(actor);
 		List<Family> families = jdbc.query("""
 				SELECT id, consent_version, daily_limit_minutes, sound_enabled, celebrations_enabled,
-				       pin_hash IS NOT NULL AS pin_set
+				       pin_hash IS NOT NULL AS pin_set, deletion_requested_at
 				  FROM app.families WHERE id = ?""",
 				(rs, n) -> new Family(rs.getObject("id", UUID.class), rs.getString("consent_version"),
 						rs.getInt("daily_limit_minutes"), rs.getBoolean("sound_enabled"),
-						rs.getBoolean("celebrations_enabled"), rs.getBoolean("pin_set")),
+						rs.getBoolean("celebrations_enabled"), rs.getBoolean("pin_set"),
+						toInstant(rs.getTimestamp("deletion_requested_at"))),
 				familyId);
 		if (families.isEmpty()) {
 			throw new ApiException(ErrorCode.FAMILY_NOT_FOUND, "Please finish signing up first");

@@ -10,6 +10,10 @@ export interface FakeChild {
   readonly id: string;
   readonly first_name: string;
   readonly avatar_key: string;
+  readonly age?: number;
+  readonly class_level?: number;
+  /** Progress rows the fake keeps, to show that moving class erases them. */
+  readonly progress?: number;
 }
 
 export interface FakeOptions {
@@ -29,6 +33,8 @@ export interface FakeServer {
   readonly family: {
     children: FakeChild[];
     dailyLimitMinutes: number;
+    deletionRequests: number;
+    deletionRequestedAt: string | null;
   };
 }
 
@@ -59,6 +65,7 @@ const CONFIG = {
     photos_per_upload: 50,
   },
   time_limits: { options_minutes: [20, 30, 45, 60], default_minutes: 30 },
+  privacy_notice_url: 'https://fullstar.example/privacy',
 };
 
 function base64url(value: object): string {
@@ -117,7 +124,12 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
   const server: FakeServer = {
     apiRequests: [],
     createdFamilies: [],
-    family: { children: [...(initial ?? [])], dailyLimitMinutes: 30 },
+    family: {
+      children: [...(initial ?? [])],
+      dailyLimitMinutes: 30,
+      deletionRequests: 0,
+      deletionRequestedAt: null,
+    },
   };
   let hasFamily = initial !== null;
   let pin: string | null = (options.pinSet ?? true) ? FAKE_PIN : null;
@@ -247,9 +259,47 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
         id: `child-new-${nextChild++}`,
         first_name: String(body['first_name']),
         avatar_key: String(body['avatar_key']),
+        age: Number(body['age']),
+        class_level: Number(body['class_level']),
       };
       server.family.children.push(child);
       return envelope(route, 201, wireChild(child));
+    }
+    const childPath = /^\/family\/parent\/children\/([^/]+)(\/move-to-next-class)?$/.exec(path);
+    if (childPath) {
+      const index = server.family.children.findIndex((child) => child.id === childPath[1]);
+      const child = server.family.children[index];
+      if (!child) {
+        return envelope(route, 404, null, 'NOT_FOUND');
+      }
+      if (childPath[2] && method === 'POST') {
+        const classLevel = child.class_level ?? 3;
+        if (classLevel >= 5) {
+          return envelope(route, 409, null, 'MAX_CLASS');
+        }
+        server.family.children[index] = { ...child, class_level: classLevel + 1, progress: 0 };
+      } else if (method === 'PATCH') {
+        server.family.children[index] = {
+          ...child,
+          ...(typeof body['first_name'] === 'string' ? { first_name: body['first_name'] } : {}),
+          ...(typeof body['age'] === 'number' ? { age: body['age'] } : {}),
+          ...(typeof body['avatar_key'] === 'string' ? { avatar_key: body['avatar_key'] } : {}),
+        };
+      } else if (method === 'DELETE') {
+        server.family.children.splice(index, 1);
+        return envelope(route, 200, { id: child.id });
+      }
+      return envelope(route, 200, wireChild(server.family.children[index]));
+    }
+    if (path === '/family/parent/deletion-request' && method === 'POST') {
+      const first = server.family.deletionRequestedAt === null;
+      if (first) {
+        server.family.deletionRequests += 1;
+        server.family.deletionRequestedAt = new Date().toISOString();
+      }
+      const requestedAt = server.family.deletionRequestedAt ?? '';
+      const dueBy = new Date(Date.parse(requestedAt) + 30 * 24 * 3600 * 1000).toISOString();
+      return envelope(route, first ? 201 : 200, { requested_at: requestedAt, due_by: dueBy });
     }
     if (path === '/family/parent/settings') {
       if (typeof body['daily_limit_minutes'] === 'number') {
@@ -290,7 +340,14 @@ function defaultChildren(): FakeChild[] {
 }
 
 function wireChild(child: FakeChild) {
-  return { ...child, age: 8, class_level: 3, stars_total: 0 };
+  return {
+    id: child.id,
+    first_name: child.first_name,
+    avatar_key: child.avatar_key,
+    age: child.age ?? 8,
+    class_level: child.class_level ?? 3,
+    stars_total: child.progress ?? 0,
+  };
 }
 
 function settings(server: FakeServer) {
@@ -303,7 +360,13 @@ function settings(server: FakeServer) {
 
 function me(server: FakeServer, pinSet: boolean) {
   return {
-    family: { id: 'family-1', consent_version: CONSENT, ...settings(server), pin_set: pinSet },
+    family: {
+      id: 'family-1',
+      consent_version: CONSENT,
+      ...settings(server),
+      pin_set: pinSet,
+      deletion_requested_at: server.family.deletionRequestedAt,
+    },
     children: server.family.children.map(wireChild),
   };
 }

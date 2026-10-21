@@ -43,7 +43,7 @@ public class PublicConfigService {
 	}
 
 	public record PublicConfig(List<String> avatars, List<ClassSubjects> classes, UploadLimits uploadLimits,
-			TimeLimits timeLimits, String consentVersion) {
+			TimeLimits timeLimits, String consentVersion, String privacyNoticeUrl) {
 	}
 
 	public PublicConfig current() {
@@ -51,7 +51,8 @@ public class PublicConfigService {
 		return new PublicConfig(AVATARS, classSubjects(),
 				new UploadLimits(uploads.pdfMaxBytes(), uploads.pdfMaxPages(), uploads.photoMaxBytes(),
 						uploads.photosPerUpload()),
-				new TimeLimits(TIME_LIMIT_MINUTES, DEFAULT_TIME_LIMIT_MINUTES), properties.consent().version());
+				new TimeLimits(TIME_LIMIT_MINUTES, DEFAULT_TIME_LIMIT_MINUTES), properties.consent().version(),
+				properties.privacy().noticeUrl());
 	}
 
 	private List<ClassSubjects> classSubjects() {
