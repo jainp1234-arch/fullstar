@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-match.solution",
+  "title": "One [left id, right id] pair per left item",
+  "type": "object",
+  "required": ["pairs", "explanation"],
+  "additionalProperties": false,
+  "properties": {
+    "pairs": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 5,
+      "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "string", "pattern": "^[a-z0-9]{1,4}$" } }
+    },
+    "explanation": { "type": "string", "minLength": 1, "maxLength": 500 }
+  }
+}

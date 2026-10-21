@@ -43,3 +43,28 @@ export type IllustrationKey =
 export function illustrationUrl(key: IllustrationKey): string {
   return `ui/illustrations/${key}.webp`;
 }
+
+/** Every illustration key, e.g. for lesson scene visuals (Schema §5 lesson.body.schema.json). */
+export const ILLUSTRATION_KEYS: readonly IllustrationKey[] = [
+  'subject-english',
+  'subject-hindi',
+  'subject-maths',
+  'subject-evs',
+  'act-lesson',
+  'act-readalong',
+  'act-worksheet',
+  'act-tables',
+  'act-grammar',
+  'act-quiz',
+  'act-mistakes',
+  'act-reading',
+  'reward-star',
+  'celebrate',
+  'empty-books',
+  'empty-done',
+  'state-offline',
+  'state-retry',
+  'state-wait',
+  'mascot-owl',
+  ...AVATAR_KEYS.map((animal) => `avatar-${animal}` as const),
+];

@@ -14,4 +14,5 @@ export * from './auth/guards';
 export * from './family/family-session';
 export * from './family/family-api';
 export * from './studio/studio-api';
+export * from './studio/content-api';
 export * from './provide';

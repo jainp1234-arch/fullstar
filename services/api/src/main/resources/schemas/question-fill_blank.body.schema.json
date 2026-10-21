@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-fill_blank.body",
+  "title": "The prompt marks the blank with ___",
+  "type": "object",
+  "required": ["prompt", "choices"],
+  "additionalProperties": false,
+  "properties": {
+    "prompt": { "type": "string", "minLength": 1, "maxLength": 300, "pattern": "___" },
+    "choices": { "type": "array", "minItems": 2, "maxItems": 4, "items": { "type": "string", "minLength": 1, "maxLength": 60 } }
+  }
+}

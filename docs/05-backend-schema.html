@@ -669,6 +669,14 @@ CREATE TABLE app.processed_jobs (
 
 // kind = passage
 { "text": "Ravi has a red kite...", "word_count": 112, "level": 2 }</pre>
+  <h3>Implemented in Plan 4.2 (decided 21 Oct 2026)</h3>
+  <ul>
+    <li>The schema files are <code>lesson.body</code>, <code>passage.body</code> and <code>question-&lt;type&gt;.body</code> / <code>.solution</code> (<code>*.schema.json</code>, draft 2020-12). They are checked by a small in-house validator (<code>common/jsonschema</code>; no extra dependency) that supports type, required, properties, additionalProperties, items, enum, const, minimum/maximum, minLength/maxLength, minItems/maxItems and pattern, and refuses any other keyword when it loads.</li>
+    <li>Errors are <code>400 VALIDATION_FAILED</code> with one field code per path, e.g. <code>"body.scenes[2].text": "REQUIRED"</code>, <code>"solution.correct[0]": "INVALID"</code>. Codes: REQUIRED (missing, null or blank), INVALID (wrong type, value or rule), INVALID_LENGTH, OUT_OF_RANGE, INVALID_FORMAT.</li>
+    <li>Lesson: 1–40 scenes. <code>id</code> matches <code>^[a-z0-9_-]{1,20}$</code> and is unique; <code>duration_ms</code> 0–60000. Each scene has exactly one of <code>text</code> (1–500 characters, narration) or <code>quiz</code> (a <em>published</em> question's id). <code>visual</code> is null or <code>{illustration, animation}</code>: illustration is a vendored key from Guidelines §9 (the list is kept equal to <code>libs/ui/assets/manifest.json</code> by <code>scripts/check-assets.mjs</code>), animation is one of <code>fade-up</code>, <code>slide-in</code>, <code>pop</code>, <code>none</code> (reduced motion shows none). <code>duration_seconds</code> is the scenes' total, rounded up.</li>
+    <li>Questions: prompt 1–300 characters, explanation 1–500 (required). mcq: 2–4 options with ids <code>a</code>–<code>d</code> (answer buttons A–D), exactly one correct id among them. fill_blank: the prompt contains <code>___</code>, 2–4 different choices, correct is one of them. match: 2–5 items per side with ids <code>^[a-z0-9]{1,4}$</code>, one pair per left item, every id used once. Lessons and passages have no solution.</li>
+    <li>Passage: text 1–5000 characters, <code>word_count</code> must equal the number of space-separated words in text (the editor fills it in), <code>level</code> 1 (easy) to 3 (hard).</li>
+  </ul>
 </section>
 
 <section id="fn">
@@ -1183,10 +1191,11 @@ sequenceDiagram
       <tr><td class="m">POST</td><td class="p">/studio/catalog-books · /catalog-books/{id}/chapters</td><td>CA</td><td>Create prepared book and chapters</td><td>S9</td></tr>
       <tr><td class="m">POST</td><td class="p">/studio/prep-tasks/{id}/link</td><td>CA</td><td>{catalog_chapter_id} link family chapter (instant if chapter is ready)</td><td>S9</td></tr>
       <tr><td class="m">PATCH</td><td class="p">/studio/catalog-chapters/{id}</td><td>CA</td><td>{status: ready} when all its content is published</td><td>S9</td></tr>
-      <tr><td class="m">GET · POST · PATCH</td><td class="p">/studio/topics</td><td>CA</td><td>Topic tree per class and subject</td><td>S3</td></tr>
-      <tr><td class="m">GET</td><td class="p">/studio/content-items?kind=&amp;topic_id=&amp;catalog_chapter_id=&amp;status=&amp;q=</td><td>CA</td><td>Library and question bank search</td><td>S3, S10</td></tr>
-      <tr><td class="m">POST</td><td class="p">/studio/content-items</td><td>CA</td><td>Create item + first version</td><td>S4, S5</td></tr>
-      <tr><td class="m">POST</td><td class="p">/studio/content-items/{id}/versions</td><td>CA</td><td>Save a new version (edits never overwrite)</td><td>S5</td></tr>
+      <tr><td class="m">GET · POST · PATCH</td><td class="p">/studio/topics</td><td>CA</td><td>Topic tree per class and subject: <code>GET ?class=&amp;subject=</code> (flat list with <code>parent_id</code>, <code>archived</code>, <code>item_count</code>); <code>POST {class_level, subject, parent_id?, name, sort_order?}</code> (parent in the same class and subject; same name under one parent → 409 <code>CONFLICT</code>); <code>PATCH /{id} {name?, sort_order?, archived?}</code></td><td>S3</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/content-items?kind=&amp;topic_id=&amp;catalog_chapter_id=&amp;status=&amp;q=</td><td>CA</td><td>Library and question bank search, also <code>class=&amp;subject=</code>; cursor pages newest first; archived items only with <code>status=archived</code></td><td>S3, S10</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/content-items</td><td>CA</td><td>Create item + first version: <code>{kind, class_level, subject, topic_id, question_type?, difficulty?, lang, title, body, solution?}</code>, library scope (chapter content comes with S9); body checked per §5</td><td>S4, S5</td></tr>
+      <tr><td class="m">POST</td><td class="p">/studio/content-items/{id}/versions</td><td>CA</td><td>Save a new version (edits never overwrite): <code>{base_version_id, title, body, solution?}</code>; a base that is not the current version → 409 <code>CONFLICT</code>; an item in check goes back to draft</td><td>S5</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/content-items/{id} · /studio/content-versions/{id}</td><td>CA</td><td>Added in Plan 4.2: item with its current version and version list · any saved version, <code>read_only</code> unless it is the current one</td><td>S5</td></tr>
       <tr><td class="m">POST</td><td class="p">/studio/ai/drafts</td><td>CA</td><td>{type: lesson | question_bank | passage, class, subject, topic_id | family_chapter_id, count?} → Claude draft (not saved until the admin saves it)</td><td>S4, S9</td></tr>
       <tr><td class="m">POST</td><td class="p">/studio/content-versions/{id}/checks</td><td>CA</td><td>Run content-check agent (async; returns check id)</td><td>S11</td></tr>
       <tr><td class="m">GET</td><td class="p">/studio/content-checks/{id}</td><td>CA</td><td>Status, counts, flags</td><td>S11</td></tr>

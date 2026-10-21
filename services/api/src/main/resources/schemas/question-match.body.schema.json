@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-match.body",
+  "type": "object",
+  "required": ["prompt", "left", "right"],
+  "additionalProperties": false,
+  "properties": { "prompt": { "type": "string", "minLength": 1, "maxLength": 300 }, "left": { "type": "array", "minItems": 2, "maxItems": 5, "items": { "type": "object", "required": ["id", "text"], "additionalProperties": false, "properties": { "id": { "type": "string", "pattern": "^[a-z0-9]{1,4}$" }, "text": { "type": "string", "minLength": 1, "maxLength": 80 } } } }, "right": { "type": "array", "minItems": 2, "maxItems": 5, "items": { "type": "object", "required": ["id", "text"], "additionalProperties": false, "properties": { "id": { "type": "string", "pattern": "^[a-z0-9]{1,4}$" }, "text": { "type": "string", "minLength": 1, "maxLength": 80 } } } } }
+}

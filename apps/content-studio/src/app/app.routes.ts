@@ -3,6 +3,8 @@ import { staffGuard, superAdminGuard } from '@fullstar/core';
 import { PlaceholderPage, StudioShell, screenRoutes } from '@fullstar/ui';
 import { StaffSignInPage } from './auth/staff-sign-in.page';
 import { DashboardPage } from './dashboard/dashboard.page';
+import { ContentEditPage } from './editor/content-edit.page';
+import { LibraryPage } from './library/library.page';
 import { STUDIO_SCREENS } from './screens';
 import { StaffPage } from './staff/staff.page';
 
@@ -10,7 +12,13 @@ import { StaffPage } from './staff/staff.page';
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   ...screenRoutes(STUDIO_SCREENS, { studio: StudioShell }, PlaceholderPage, {
-    pages: { S1: StaffSignInPage, S2: DashboardPage, S13: StaffPage },
+    pages: {
+      S1: StaffSignInPage,
+      S2: DashboardPage,
+      S3: LibraryPage,
+      S5: ContentEditPage,
+      S13: StaffPage,
+    },
     guards: (screen) => {
       if (screen.id === 'S1') {
         return [];
