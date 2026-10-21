@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lesson.body",
+  "title": "Lesson body (Schema §5): a narration scene has text, a quiz scene has quiz",
+  "type": "object",
+  "required": ["scenes"],
+  "additionalProperties": false,
+  "properties": {
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 40,
+      "items": {
+        "type": "object",
+        "required": ["id", "duration_ms"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_-]{1,20}$" },
+          "duration_ms": { "type": "integer", "minimum": 0, "maximum": 60000 },
+          "text": { "type": ["string", "null"], "minLength": 1, "maxLength": 500 },
+          "visual": {
+            "type": ["object", "null"],
+            "required": ["illustration", "animation"],
+            "additionalProperties": false,
+            "properties": {
+              "illustration": { "enum": ["subject-english","subject-hindi","subject-maths","subject-evs","act-lesson","act-readalong","act-worksheet","act-tables","act-grammar","act-quiz","act-mistakes","act-reading","reward-star","celebrate","empty-books","empty-done","state-offline","state-retry","state-wait","mascot-owl","avatar-cat","avatar-dog","avatar-lion","avatar-panda","avatar-rabbit","avatar-tiger","avatar-fox","avatar-koala","avatar-monkey","avatar-penguin","avatar-frog","avatar-unicorn"] },
+              "animation": { "enum": ["fade-up", "slide-in", "pop", "none"] }
+            }
+          },
+          "quiz": {
+            "type": ["object", "null"],
+            "required": ["question_item_id"],
+            "additionalProperties": false,
+            "properties": {
+              "question_item_id": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

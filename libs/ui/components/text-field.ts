@@ -25,22 +25,41 @@ let nextId = 0;
   ],
   template: `
     <label class="field__label" [for]="id">{{ label() }}</label>
-    <input
-      class="field__input"
-      [class.field__input--error]="!!error()"
-      [id]="id"
-      [attr.type]="type()"
-      [attr.inputmode]="inputMode()"
-      [attr.autocomplete]="autocomplete()"
-      [attr.maxlength]="maxLength()"
-      [attr.aria-invalid]="!!error() || null"
-      [attr.aria-describedby]="describedBy()"
-      [required]="required()"
-      [disabled]="disabled()"
-      [value]="value()"
-      (input)="onInput($event)"
-      (blur)="onTouched()"
-    />
+    @if (rows() > 1) {
+      <textarea
+        class="field__input field__input--multi"
+        [class.field__input--error]="!!error()"
+        [id]="id"
+        [rows]="rows()"
+        [attr.maxlength]="maxLength()"
+        [attr.aria-invalid]="!!error() || null"
+        [attr.aria-describedby]="describedBy()"
+        [attr.lang]="lang()"
+        [required]="required()"
+        [disabled]="disabled()"
+        [value]="value()"
+        (input)="onInput($event)"
+        (blur)="onTouched()"
+      ></textarea>
+    } @else {
+      <input
+        class="field__input"
+        [class.field__input--error]="!!error()"
+        [id]="id"
+        [attr.type]="type()"
+        [attr.inputmode]="inputMode()"
+        [attr.autocomplete]="autocomplete()"
+        [attr.maxlength]="maxLength()"
+        [attr.aria-invalid]="!!error() || null"
+        [attr.aria-describedby]="describedBy()"
+        [required]="required()"
+        [disabled]="disabled()"
+        [value]="value()"
+        (input)="onInput($event)"
+        (blur)="onTouched()"
+        [attr.lang]="lang()"
+      />
+    }
     @if (error(); as message) {
       <p class="field__error" [id]="id + '-error'">
         <span class="ui-icon field__error-icon" aria-hidden="true">{{ errorGlyph }}</span>
@@ -69,6 +88,16 @@ let nextId = 0;
       background: var(--color-surface);
       font: var(--type-body);
       color: var(--color-text);
+    }
+    .field__input--multi {
+      height: auto;
+      min-height: 104px;
+      padding: var(--space-3) var(--space-4);
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .field__input.field__input--multi:focus {
+      padding: calc(var(--space-3) - 0.5px) calc(var(--space-4) - 0.5px);
     }
     .field__input:focus {
       border: 2px solid var(--color-primary-600);
@@ -116,6 +145,10 @@ export class TextField implements ControlValueAccessor {
   readonly inputMode = input<string | null>(null);
   readonly maxLength = input<number | null>(null);
   readonly required = input(false);
+  /** More than 1: a multi-line text area with that many visible rows. */
+  readonly rows = input(1);
+  /** "hi" for Hindi text (Guidelines §14). */
+  readonly lang = input<string | null>(null);
 
   protected readonly id = `app-text-field-${nextId++}`;
   protected readonly errorGlyph = iconGlyph('error');
@@ -148,7 +181,7 @@ export class TextField implements ControlValueAccessor {
   }
 
   protected onInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
+    const value = (event.target as HTMLInputElement | HTMLTextAreaElement).value;
     this.value.set(value);
     this.onChange(value);
   }

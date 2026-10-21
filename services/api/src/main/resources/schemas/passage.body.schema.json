@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "passage.body",
+  "title": "Reading passage; word_count must equal the words in text, level 1 (easy) to 3 (hard)",
+  "type": "object",
+  "required": ["text", "word_count", "level"],
+  "additionalProperties": false,
+  "properties": {
+    "text": { "type": "string", "minLength": 1, "maxLength": 5000 },
+    "word_count": { "type": "integer", "minimum": 1, "maximum": 1000 },
+    "level": { "type": "integer", "minimum": 1, "maximum": 3 }
+  }
+}

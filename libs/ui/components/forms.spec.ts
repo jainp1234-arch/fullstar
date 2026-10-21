@@ -6,6 +6,7 @@ import { PageThumb } from './page-thumb';
 import { PinPad } from './pin-pad';
 import { StatusChip } from './status-chip';
 import { all, el, render } from './testing';
+import { SelectField } from './select-field';
 import { TextField } from './text-field';
 import { UploadZone } from './upload-zone';
 
@@ -192,5 +193,49 @@ describe('app-status-chip', () => {
     expect(el(fixture, '.chip').className).toContain(tone);
     expect(el(fixture, '.chip__icon').getAttribute('aria-hidden')).toBe('true');
     expect(el(fixture, '.chip').textContent).toContain(label);
+  });
+});
+
+@Component({
+  imports: [ReactiveFormsModule, SelectField, TextField],
+  template: `
+    <app-text-field label="Story" [rows]="4" lang="hi" [formControl]="story" />
+    <app-select-field label="Level" [options]="options" [formControl]="level" />
+  `,
+})
+class MoreFieldsHost {
+  readonly story = new FormControl('Once', { nonNullable: true });
+  readonly level = new FormControl('2', { nonNullable: true });
+  readonly options = [
+    { value: '1', label: 'Easy' },
+    { value: '2', label: 'Medium' },
+  ];
+}
+
+describe('app-text-field with rows', () => {
+  it('is a labelled text area that writes to the form control', async () => {
+    const fixture = await render(MoreFieldsHost);
+    const area = el(fixture, 'app-text-field textarea') as HTMLTextAreaElement;
+    expect(area.rows).toBe(4);
+    expect(area.getAttribute('lang')).toBe('hi');
+    expect(el(fixture, 'app-text-field label').getAttribute('for')).toBe(area.id);
+    type(area, 'Once upon a time');
+    expect(fixture.componentInstance.story.value).toBe('Once upon a time');
+  });
+});
+
+describe('app-select-field', () => {
+  it('shows the options, the current value, and writes the choice', async () => {
+    const fixture = await render(MoreFieldsHost);
+    const select = el(fixture, 'app-select-field select') as HTMLSelectElement;
+    expect(el(fixture, 'app-select-field label').getAttribute('for')).toBe(select.id);
+    expect(all(fixture, 'option').map((o) => o.textContent?.trim())).toEqual(['Easy', 'Medium']);
+    expect(select.value).toBe('2');
+    select.value = '1';
+    select.dispatchEvent(new Event('change'));
+    expect(fixture.componentInstance.level.value).toBe('1');
+    fixture.componentInstance.level.disable();
+    await fixture.whenStable();
+    expect(select.disabled).toBe(true);
   });
 });

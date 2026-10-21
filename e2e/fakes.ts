@@ -50,6 +50,8 @@ export interface FakeServer {
   };
   /** Studio staff list as the fake API holds it (s1 is the signed-in member). */
   readonly staff: FakeStaffMember[];
+  /** Studio topics, content items and versions (Plan 4.2). */
+  readonly content: FakeContent;
 }
 
 const CONSENT = '2026-10-v1';
@@ -153,6 +155,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
         created_at: '2026-10-01T09:00:00Z',
       },
     ],
+    content: sampleContent(),
   };
   let nextStaff = 2;
   let hasFamily = initial !== null;
@@ -473,6 +476,274 @@ function studio(
       }
       Object.assign(member, body);
       return envelope(route, 200, member);
+    }
+  }
+  return studioContent(route, server.content, path, method, newId);
+}
+
+export interface FakeTopic {
+  id: string;
+  class_level: number;
+  subject: string;
+  parent_id: string | null;
+  name: string;
+  sort_order: number;
+  archived: boolean;
+  item_count: number;
+}
+
+export interface FakeVersion {
+  id: string;
+  item_id: string;
+  version_no: number;
+  title: string;
+  body: unknown;
+  solution: unknown;
+  duration_seconds: number | null;
+  created_at: string;
+  created_by_name: string;
+}
+
+export interface FakeItem {
+  id: string;
+  kind: string;
+  question_type: string | null;
+  class_level: number;
+  subject: string;
+  topic_id: string;
+  difficulty: number;
+  lang: string;
+  status: string;
+  current_version_id: string;
+  published_version_id: string | null;
+  updated_at: string;
+  versions: FakeVersion[];
+}
+
+export interface FakeContent {
+  topics: FakeTopic[];
+  items: FakeItem[];
+}
+
+const SAMPLE_SCENES = [
+  {
+    id: 's1',
+    duration_ms: 8000,
+    text: 'A bird builds a nest.',
+    visual: { illustration: 'subject-evs', animation: 'fade-up' },
+  },
+  { id: 's2', duration_ms: 6000, text: 'It uses twigs and grass.', visual: null },
+];
+
+/** Class 3 EVS: Water with a sub-topic, and one lesson ("sample", the S5 route sample) in 2 versions. */
+function sampleContent(): FakeContent {
+  const topic = (id: string, name: string, parent: string | null): FakeTopic => ({
+    id,
+    class_level: 3,
+    subject: 'evs',
+    parent_id: parent,
+    name,
+    sort_order: 0,
+    archived: false,
+    item_count: id === 't1' ? 1 : 0,
+  });
+  const version = (no: number, text: string): FakeVersion => ({
+    id: `v${no}`,
+    item_id: 'sample',
+    version_no: no,
+    title: no === 1 ? 'Birds' : 'Birds and nests',
+    body: { scenes: [{ ...SAMPLE_SCENES[0], text }, SAMPLE_SCENES[1]] },
+    solution: null,
+    duration_seconds: 14,
+    created_at: `2026-10-0${no}T09:00:00Z`,
+    created_by_name: 'Meera',
+  });
+  return {
+    topics: [topic('t1', 'Water', null), topic('t2', 'Saving water', 't1')],
+    items: [
+      {
+        id: 'sample',
+        kind: 'lesson',
+        question_type: null,
+        class_level: 3,
+        subject: 'evs',
+        topic_id: 't1',
+        difficulty: 2,
+        lang: 'en',
+        status: 'draft',
+        current_version_id: 'v2',
+        published_version_id: null,
+        updated_at: '2026-10-02T09:00:00Z',
+        versions: [version(1, 'A bird makes a nest.'), version(2, 'A bird builds a nest.')],
+      },
+    ],
+  };
+}
+
+function summary(item: FakeItem) {
+  const { versions, ...rest } = item;
+  const current = versions.find((v) => v.id === item.current_version_id);
+  return { ...rest, title: current?.title ?? '', version_no: current?.version_no ?? 0 };
+}
+
+function versionView(item: FakeItem, version: FakeVersion) {
+  const current = version.id === item.current_version_id;
+  return {
+    ...version,
+    current,
+    published: version.id === item.published_version_id,
+    read_only: !current,
+  };
+}
+
+function detail(item: FakeItem) {
+  const current = item.versions.find((v) => v.id === item.current_version_id);
+  return {
+    item: summary(item),
+    current_version: current ? versionView(item, current) : null,
+    versions: [...item.versions].reverse().map((v) => ({
+      id: v.id,
+      version_no: v.version_no,
+      title: v.title,
+      created_at: v.created_at,
+      created_by_name: v.created_by_name,
+      current: v.id === item.current_version_id,
+      published: v.id === item.published_version_id,
+    })),
+  };
+}
+
+/** Field errors the real API would give for the cases the e2e tests use. */
+function contentErrors(body: Record<string, unknown>): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!String(body['title'] ?? '').trim()) {
+    errors['title'] = 'REQUIRED';
+  }
+  const lesson = body['body'] as { scenes?: { text?: string | null; quiz?: unknown }[] } | null;
+  lesson?.scenes?.forEach((scene, i) => {
+    if (!scene.quiz && !scene.text?.trim()) {
+      errors[`body.scenes[${i}].text`] = 'REQUIRED';
+    }
+  });
+  return errors;
+}
+
+function newVersion(item: FakeItem, body: Record<string, unknown>, now: string): FakeVersion {
+  const no = item.versions.length + 1;
+  return {
+    id: `${item.id}-v${no}`,
+    item_id: item.id,
+    version_no: no,
+    title: String(body['title']),
+    body: body['body'],
+    solution: body['solution'] ?? null,
+    duration_seconds: null,
+    created_at: now,
+    created_by_name: 'Meera',
+  };
+}
+
+/** Topics, content items and versions of Schema §11 (Plan 4.2), kept in memory. */
+function studioContent(
+  route: Route,
+  content: FakeContent,
+  path: string,
+  method: string,
+  newId: () => string,
+): Promise<void> {
+  const url = new URL(route.request().url());
+  const body = (method === 'GET' ? {} : (route.request().postDataJSON() ?? {})) as Record<
+    string,
+    unknown
+  >;
+  const now = new Date().toISOString();
+  if (path === '/studio/topics' && method === 'GET') {
+    const classLevel = Number(url.searchParams.get('class'));
+    const subject = url.searchParams.get('subject');
+    const topics = content.topics.filter(
+      (t) => t.class_level === classLevel && t.subject === subject,
+    );
+    return envelope(route, 200, topics);
+  }
+  if (path === '/studio/topics' && method === 'POST') {
+    const parent = (body['parent_id'] as string | null | undefined) ?? null;
+    if (content.topics.some((t) => t.parent_id === parent && t.name === body['name'])) {
+      return envelope(route, 409, null, 'CONFLICT');
+    }
+    const topic: FakeTopic = {
+      id: `t-${newId()}`,
+      class_level: Number(body['class_level']),
+      subject: String(body['subject']),
+      parent_id: parent,
+      name: String(body['name']),
+      sort_order: 0,
+      archived: false,
+      item_count: 0,
+    };
+    content.topics.push(topic);
+    return envelope(route, 201, topic);
+  }
+  const topic = content.topics.find((t) => path === `/studio/topics/${t.id}`);
+  if (topic && method === 'PATCH') {
+    Object.assign(topic, body);
+    return envelope(route, 200, topic);
+  }
+  if (path === '/studio/content-items' && method === 'GET') {
+    const topicId = url.searchParams.get('topic_id');
+    const items = content.items.filter((i) => i.topic_id === topicId).map(summary);
+    return envelope(route, 200, { items, next_cursor: null });
+  }
+  if (path === '/studio/content-items' && method === 'POST') {
+    const errors = contentErrors(body);
+    if (Object.keys(errors).length) {
+      return envelope(route, 400, null, 'VALIDATION_FAILED', { fields: errors });
+    }
+    const item: FakeItem = {
+      id: `c-${newId()}`,
+      kind: String(body['kind']),
+      question_type: (body['question_type'] as string | undefined) ?? null,
+      class_level: Number(body['class_level']),
+      subject: String(body['subject']),
+      topic_id: String(body['topic_id']),
+      difficulty: Number(body['difficulty']),
+      lang: String(body['lang']),
+      status: 'draft',
+      current_version_id: '',
+      published_version_id: null,
+      updated_at: now,
+      versions: [],
+    };
+    const first = newVersion(item, body, now);
+    item.versions.push(first);
+    item.current_version_id = first.id;
+    content.items.push(item);
+    const parent = content.topics.find((t) => t.id === item.topic_id);
+    if (parent) {
+      parent.item_count++;
+    }
+    return envelope(route, 201, detail(item));
+  }
+  for (const item of content.items) {
+    if (path === `/studio/content-items/${item.id}` && method === 'GET') {
+      return envelope(route, 200, detail(item));
+    }
+    if (path === `/studio/content-items/${item.id}/versions` && method === 'POST') {
+      if (body['base_version_id'] !== item.current_version_id) {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      const errors = contentErrors(body);
+      if (Object.keys(errors).length) {
+        return envelope(route, 400, null, 'VALIDATION_FAILED', { fields: errors });
+      }
+      const version = newVersion(item, body, now);
+      item.versions.push(version);
+      item.current_version_id = version.id;
+      item.updated_at = now;
+      return envelope(route, 201, detail(item));
+    }
+    const version = item.versions.find((v) => path === `/studio/content-versions/${v.id}`);
+    if (version && method === 'GET') {
+      return envelope(route, 200, versionView(item, version));
     }
   }
   return envelope(route, 404, null, 'NOT_FOUND');

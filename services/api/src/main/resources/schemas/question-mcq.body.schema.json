@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-mcq.body",
+  "title": "Multiple choice: 2 to 4 options (answer buttons A to D)",
+  "type": "object",
+  "required": ["prompt", "options"],
+  "additionalProperties": false,
+  "properties": {
+    "prompt": { "type": "string", "minLength": 1, "maxLength": 300 },
+    "image_key": { "type": ["string", "null"], "minLength": 1, "maxLength": 300 },
+    "options": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["id", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "enum": ["a", "b", "c", "d"] },
+          "text": { "type": "string", "minLength": 1, "maxLength": 120 }
+        }
+      }
+    }
+  }
+}

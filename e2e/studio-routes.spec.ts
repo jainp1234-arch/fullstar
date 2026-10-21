@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { installFakes, signInStudio } from './fakes';
-import { WIDTHS, WidthName, walk } from './routes';
+import { WIDTHS, WidthName, navigateInApp, walk } from './routes';
 
 /** App Flow §7 screen IDs; all in shell E (Guidelines §10). S1 is covered below. */
 const EXPECTED = ['S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9', 'S10', 'S11', 'S12'];
@@ -18,6 +18,9 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       await signInStudio(page);
       await expect(page).toHaveURL(/\/studio\/dashboard$/);
       const seen = await walk(page);
+      // S5 opens from a library row; the fake API has a lesson with id "sample"
+      await navigateInApp(page, '/studio/library/sample/edit');
+      await walk(page, [], seen);
       expect([...seen.keys()].sort()).toEqual([...EXPECTED].sort());
       for (const id of EXPECTED) {
         const visit = seen.get(id);
@@ -57,8 +60,10 @@ test('Back goes to the parent screen and the mode is studio', async ({ page }) =
   await expect(page.locator('html')).toHaveAttribute('data-mode', 'studio');
   const nav = page.getByRole('navigation', { name: 'Studio' });
   await nav.getByRole('link', { name: 'Library' }).click();
-  await page.getByRole('link', { name: 'S5 · Edit and preview' }).click();
-  await page.getByRole('link', { name: 'S6 · Publish' }).click();
+  await page.getByRole('combobox', { name: 'Subject' }).selectOption('evs');
+  await page.getByRole('button', { name: /^Water/ }).click();
+  await page.getByRole('button', { name: 'Open Birds and nests' }).click();
+  await page.getByRole('button', { name: 'Publish' }).click();
   await page.getByRole('button', { name: 'Back' }).click();
   await expect(page).toHaveURL(/\/studio\/library\/sample\/edit$/);
   await expect(nav.getByRole('link', { name: 'Library' })).toHaveAttribute('aria-current', 'page');

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question-mcq.solution",
+  "title": "One correct option id",
+  "type": "object",
+  "required": ["correct", "explanation"],
+  "additionalProperties": false,
+  "properties": {
+    "correct": { "type": "array", "minItems": 1, "maxItems": 1, "items": { "enum": ["a", "b", "c", "d"] } },
+    "explanation": { "type": "string", "minLength": 1, "maxLength": 500 }
+  }
+}
