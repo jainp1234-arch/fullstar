@@ -4,6 +4,7 @@ import com.fullstar.api.common.jsonschema.JsonSchemaValidator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -35,6 +36,8 @@ public class ContentFormats {
 	private static final JsonMapper JSON = JsonMapper.builder().build();
 
 	private final Map<String, JsonSchemaValidator> schemas = new HashMap<>();
+
+	private final List<String> illustrations = new ArrayList<>();
 
 	public ContentFormats() {
 		load("lesson.body");
@@ -83,6 +86,11 @@ public class ContentFormats {
 			}
 		}
 		return new Checked(errors, quizzes);
+	}
+
+	/** The picture keys a lesson scene may use (lesson.body.schema.json). */
+	public List<String> illustrations() {
+		return List.copyOf(illustrations);
 	}
 
 	/** Words in a passage: runs of non-space characters (works for Hindi too). */
@@ -186,7 +194,12 @@ public class ContentFormats {
 
 	private void load(String name) {
 		try (InputStream in = new ClassPathResource("schemas/" + name + ".schema.json").getInputStream()) {
-			schemas.put(name, JsonSchemaValidator.of(JSON.readTree(in)));
+			JsonNode schema = JSON.readTree(in);
+			schemas.put(name, JsonSchemaValidator.of(schema));
+			if ("lesson.body".equals(name)) {
+				schema.at("/properties/scenes/items/properties/visual/properties/illustration/enum")
+					.forEach(key -> illustrations.add(key.stringValue()));
+			}
 		}
 		catch (IOException ex) {
 			throw new UncheckedIOException("Missing content schema " + name, ex);

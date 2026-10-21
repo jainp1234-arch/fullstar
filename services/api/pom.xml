@@ -17,6 +17,7 @@
 		<!-- Not Boot-managed (Tech Stack §6) -->
 		<resilience4j.version>2.4.0</resilience4j.version>
 		<springdoc.version>3.1.1</springdoc.version>
+		<anthropic-java.version>2.68.0</anthropic-java.version>
 		<awssdk.version>2.55.11</awssdk.version>
 	</properties>
 	<dependencyManagement>
@@ -74,6 +75,12 @@
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>${springdoc.version}</version>
+		</dependency>
+		<!-- Claude API: Studio drafts and the content-check agent (Tech Stack §6, §9), Plan 4.3 -->
+		<dependency>
+			<groupId>com.anthropic</groupId>
+			<artifactId>anthropic-java</artifactId>
+			<version>${anthropic-java.version}</version>
 		</dependency>
 		<!-- Cloudflare R2 (trial: SeaweedFS) and AWS SQS (trial: ElasticMQ), Tech Stack §6, §8a -->
 		<dependency>

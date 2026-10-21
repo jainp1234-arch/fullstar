@@ -4,11 +4,19 @@ import { ApiClient } from '../api/api-client';
 
 export type StaffRole = 'content_admin' | 'super_admin';
 
+/** Claude features (Tech Stack §8a); off means the trial paths: Paste draft and the manual check. */
+export interface StudioFeatures {
+  readonly ai_drafts: boolean;
+  readonly ai_check: boolean;
+}
+
 /** GET /studio/me (Schema §11). */
 export interface StaffProfile {
   readonly id: string;
   readonly display_name: string;
   readonly role: StaffRole;
+  /** Absent in older responses: treated as all off. */
+  readonly features?: StudioFeatures;
 }
 
 /** GET /studio/dashboard (Schema §11, S2). */

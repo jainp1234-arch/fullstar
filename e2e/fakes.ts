@@ -24,6 +24,8 @@ export interface FakeOptions {
   readonly staffDenied?: boolean;
   /** Studio: the signed-in staff role (default content_admin). */
   readonly staffRole?: FakeStaffRole;
+  /** Studio: FEATURE_AI_DRAFTS on (default off, as in trial). */
+  readonly aiDrafts?: boolean;
 }
 
 export type FakeStaffRole = 'content_admin' | 'super_admin';
@@ -427,7 +429,15 @@ function studio(
   }
   const me = server.staff[0];
   if (path === '/studio/me') {
-    return envelope(route, 200, { id: me.id, display_name: me.display_name, role: me.role });
+    return envelope(route, 200, {
+      id: me.id,
+      display_name: me.display_name,
+      role: me.role,
+      features: { ai_drafts: !!options.aiDrafts, ai_check: false },
+    });
+  }
+  if (path.startsWith('/studio/ai/')) {
+    return studioDrafts(route, path, !!options.aiDrafts);
   }
   if (path === '/studio/dashboard') {
     return envelope(route, 200, {
@@ -747,4 +757,70 @@ function studioContent(
     }
   }
   return envelope(route, 404, null, 'NOT_FOUND');
+}
+
+/** The drafted lesson the fake "Claude" returns when AI drafts are on. */
+export const FAKE_CLAUDE_LESSON = {
+  title: 'Clouds',
+  difficulty: 1,
+  body: {
+    scenes: [
+      { id: 's1', duration_ms: 6000, text: 'Clouds are tiny drops of water.', visual: null },
+      { id: 's2', duration_ms: 5000, text: 'Big grey clouds bring rain.', visual: null },
+    ],
+  },
+};
+
+function draftItem(kind: string, node: Record<string, unknown>) {
+  const errors: Record<string, string> = {};
+  if (!String(node['title'] ?? '').trim()) {
+    errors['title'] = 'REQUIRED';
+  }
+  if (!node['body']) {
+    errors['body'] = 'REQUIRED';
+  }
+  return {
+    kind,
+    question_type: (node['question_type'] as string | undefined) ?? null,
+    title: String(node['title'] ?? ''),
+    difficulty: Number(node['difficulty'] ?? 2),
+    body: node['body'] ?? null,
+    solution: node['solution'] ?? null,
+    errors,
+  };
+}
+
+/** POST /studio/ai/drafts and /draft-prompt (Plan 4.3): pasted drafts are read; Claude only when on. */
+function studioDrafts(route: Route, path: string, aiDrafts: boolean): Promise<void> {
+  const body = (route.request().postDataJSON() ?? {}) as Record<string, unknown>;
+  const type = String(body['type']);
+  if (path === '/studio/ai/draft-prompt') {
+    return envelope(route, 200, {
+      system: 'You write learning content for FullStar.',
+      user: `Write a ${type} for Class ${String(body['class_level'])}.`,
+    });
+  }
+  const pasted = body['pasted'] as string | undefined;
+  let json: unknown = FAKE_CLAUDE_LESSON;
+  if (pasted) {
+    const start = pasted.indexOf('{');
+    const end = pasted.lastIndexOf('}');
+    try {
+      json = JSON.parse(pasted.slice(start, end + 1));
+    } catch {
+      return envelope(route, 400, null, 'VALIDATION_FAILED', {
+        fields: { pasted: 'INVALID_FORMAT' },
+      });
+    }
+  } else if (!aiDrafts) {
+    return envelope(route, 503, null, 'FEATURE_DISABLED');
+  }
+  const node = json as Record<string, unknown>;
+  const items =
+    type === 'question_bank'
+      ? ((node['questions'] as Record<string, unknown>[] | undefined) ?? []).map((q) =>
+          draftItem('question', q),
+        )
+      : [draftItem(type, node)];
+  return envelope(route, 200, { type, source: pasted ? 'pasted' : 'claude', items });
 }

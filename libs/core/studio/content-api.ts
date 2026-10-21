@@ -171,3 +171,54 @@ export class ContentApi {
     );
   }
 }
+
+export type DraftType = 'lesson' | 'question_bank' | 'passage';
+
+/** POST /studio/ai/drafts and /studio/ai/draft-prompt (Schema §11, S4; Plan 4.3). */
+export interface DraftRequest {
+  readonly type: DraftType;
+  readonly class_level: number;
+  readonly subject: SubjectCode;
+  readonly topic_id: string;
+  /** Questions in a question bank, 1–30. */
+  readonly count?: number;
+  readonly lang?: ContentLang;
+  /** A draft pasted from a Claude chat; without it the API asks Claude (FEATURE_AI_DRAFTS). */
+  readonly pasted?: string;
+}
+
+/** One drafted item; errors are Schema §5 problems by field path (empty = ready to save). */
+export interface DraftItem {
+  readonly kind: ContentKind;
+  readonly question_type: QuestionType | null;
+  readonly title: string;
+  readonly difficulty: number;
+  readonly body: unknown;
+  readonly solution: unknown;
+  readonly errors: Readonly<Record<string, string>>;
+}
+
+export interface Draft {
+  readonly type: DraftType;
+  readonly source: 'claude' | 'pasted';
+  readonly items: readonly DraftItem[];
+}
+
+export interface DraftPrompt {
+  readonly system: string;
+  readonly user: string;
+}
+
+/** Content drafts: never saved until the admin saves them (S4 → S5). */
+@Injectable({ providedIn: 'root' })
+export class DraftApi {
+  private readonly api = inject(ApiClient);
+
+  draft(request: DraftRequest): Observable<Draft> {
+    return this.api.post<Draft>('/studio/ai/drafts', request, { idempotent: false });
+  }
+
+  prompt(request: DraftRequest): Observable<DraftPrompt> {
+    return this.api.post<DraftPrompt>('/studio/ai/draft-prompt', request, { idempotent: false });
+  }
+}

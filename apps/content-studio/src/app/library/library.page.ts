@@ -102,7 +102,7 @@ function flatten(topics: readonly Topic[]): readonly TreeRow[] {
         variant="secondary"
         [label]="text.draftWithAi"
         [attr.data-screen-link]="link('/library/draft')"
-        (pressed)="go('/library/draft')"
+        (pressed)="openDraft()"
       />
     </div>
 
@@ -413,8 +413,15 @@ export class LibraryPage {
     return this.location.prepareExternalUrl(path);
   }
 
-  protected go(path: string): void {
-    void this.router.navigateByUrl(path);
+  /** S4 for the class, subject and topic chosen here. */
+  protected openDraft(): void {
+    void this.router.navigate(['/library/draft'], {
+      queryParams: {
+        class: this.classControl.value,
+        subject: this.subjectControl.value,
+        topic: this.selectedId() ?? undefined,
+      },
+    });
   }
 
   protected select(id: string): void {
