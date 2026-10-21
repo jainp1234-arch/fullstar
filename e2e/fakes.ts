@@ -22,6 +22,18 @@ export interface FakeOptions {
   readonly pinSet?: boolean;
   /** Studio: 403 FORBIDDEN from /studio/me. */
   readonly staffDenied?: boolean;
+  /** Studio: the signed-in staff role (default content_admin). */
+  readonly staffRole?: FakeStaffRole;
+}
+
+export type FakeStaffRole = 'content_admin' | 'super_admin';
+
+export interface FakeStaffMember {
+  id: string;
+  display_name: string;
+  role: FakeStaffRole;
+  active: boolean;
+  created_at: string;
 }
 
 export interface FakeServer {
@@ -36,6 +48,8 @@ export interface FakeServer {
     deletionRequests: number;
     deletionRequestedAt: string | null;
   };
+  /** Studio staff list as the fake API holds it (s1 is the signed-in member). */
+  readonly staff: FakeStaffMember[];
 }
 
 const CONSENT = '2026-10-v1';
@@ -130,7 +144,17 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       deletionRequests: 0,
       deletionRequestedAt: null,
     },
+    staff: [
+      {
+        id: 's1',
+        display_name: 'Meera',
+        role: options.staffRole ?? 'content_admin',
+        active: true,
+        created_at: '2026-10-01T09:00:00Z',
+      },
+    ],
   };
+  let nextStaff = 2;
   let hasFamily = initial !== null;
   let pin: string | null = (options.pinSet ?? true) ? FAKE_PIN : null;
   let pinFailures = 0;
@@ -189,10 +213,8 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
     if (!request.headers()['authorization']?.startsWith('Bearer ')) {
       return envelope(route, 401, null, 'UNAUTHENTICATED');
     }
-    if (path === '/studio/me') {
-      return options.staffDenied
-        ? envelope(route, 403, null, 'FORBIDDEN')
-        : envelope(route, 200, { id: 's1', display_name: 'Meera', role: 'content_admin' });
+    if (path.startsWith('/studio/')) {
+      return studio(route, server, path, method, options, () => `s${nextStaff++}`);
     }
     if (path === '/family/me' && method === 'POST') {
       server.createdFamilies.push(request.postDataJSON());
@@ -386,4 +408,72 @@ export async function signInStudio(page: Page, options: FakeOptions = {}): Promi
   await page.goto('sign-in');
   await page.getByRole('button', { name: 'Sign in' }).click();
   return server;
+}
+
+/** The /studio/** endpoints of Schema §11 that exist so far (Plan 4.1). */
+function studio(
+  route: Route,
+  server: FakeServer,
+  path: string,
+  method: string,
+  options: FakeOptions,
+  newId: () => string,
+): Promise<void> {
+  if (options.staffDenied) {
+    return envelope(route, 403, null, 'FORBIDDEN');
+  }
+  const me = server.staff[0];
+  if (path === '/studio/me') {
+    return envelope(route, 200, { id: me.id, display_name: me.display_name, role: me.role });
+  }
+  if (path === '/studio/dashboard') {
+    return envelope(route, 200, {
+      uploads_waiting: 3,
+      drafts: 1,
+      recently_published: 4,
+      open_reports: 2,
+      open_tickets: 1,
+    });
+  }
+  if (path.startsWith('/studio/staff')) {
+    if (me.role !== 'super_admin') {
+      return envelope(route, 403, null, 'FORBIDDEN');
+    }
+    const body = (method === 'GET' ? {} : (route.request().postDataJSON() ?? {})) as Record<
+      string,
+      unknown
+    >;
+    if (path === '/studio/staff' && method === 'GET') {
+      return envelope(route, 200, server.staff);
+    }
+    if (path === '/studio/staff' && method === 'POST') {
+      const email = String(body['email'] ?? '');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return envelope(route, 400, null, 'VALIDATION_FAILED', {
+          fields: { email: 'INVALID_FORMAT' },
+        });
+      }
+      if (email === 'meera@example.com') {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      const member: FakeStaffMember = {
+        id: newId(),
+        display_name: String(body['display_name']),
+        role: body['role'] as FakeStaffRole,
+        active: true,
+        created_at: new Date().toISOString(),
+      };
+      server.staff.push(member);
+      return envelope(route, 201, member);
+    }
+    const member = server.staff.find((row) => path === `/studio/staff/${row.id}`);
+    if (method === 'PATCH' && member) {
+      if (member.id === me.id && ('role' in body || 'active' in body)) {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      Object.assign(member, body);
+      return envelope(route, 200, member);
+    }
+  }
+  return envelope(route, 404, null, 'NOT_FOUND');
 }

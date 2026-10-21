@@ -104,6 +104,23 @@ class RealmExportTest {
 	}
 
 	@Test
+	void apiAdminClientIsAServiceAccountThatOnlyManagesUsers() {
+		ClientRepresentation admin = client("fullstar-api-admin");
+		assertThat(admin.isPublicClient()).isFalse();
+		assertThat(admin.isServiceAccountsEnabled()).isTrue();
+		assertThat(admin.isStandardFlowEnabled()).isFalse();
+		assertThat(admin.isDirectAccessGrantsEnabled()).isFalse();
+		assertThat(admin.getSecret()).isEqualTo("${KEYCLOAK_API_ADMIN_SECRET}");
+		assertThat(realm.getUsers()).singleElement().satisfies(user -> {
+			assertThat(user.getServiceAccountClientId()).isEqualTo("fullstar-api-admin");
+			assertThat(user.getRealmRoles()).isNullOrEmpty();
+			assertThat(user.getClientRoles()).containsOnlyKeys("realm-management");
+			assertThat(user.getClientRoles().get("realm-management")).containsExactlyInAnyOrder("manage-users",
+					"view-users");
+		});
+	}
+
+	@Test
 	void userProfileAsksOnlyForEmail() {
 		String profile = realm.getComponents()
 			.get("org.keycloak.userprofile.UserProfileProvider")

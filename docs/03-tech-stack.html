@@ -339,7 +339,7 @@ flowchart LR
       <tr><td class="hi">REST API</td><td>Versioned under <code>/api/v1</code>. Every response uses <code>{ "status", "data", "error" }</code>. Correct HTTP status codes. Validation with Bean Validation on every request body.</td></tr>
       <tr><td class="hi">Errors</td><td>Custom exceptions mapped in one <code>@RestControllerAdvice</code>. No stack traces in responses.</td></tr>
       <tr><td class="hi">Security</td><td>Keycloak JWTs checked by Spring Security resource server. Deny by default. Every query checks the family ID (stops one family seeing another's data). OWASP Top 10 checklist in code review.</td></tr>
-      <tr><td class="hi">Resilience</td><td>Resilience4j on every outside call (Claude, R2, SQS, Gotenberg): retry with exponential backoff, circuit breaker, timeout.</td></tr>
+      <tr><td class="hi">Resilience</td><td>Resilience4j on every outside call (Claude, R2, SQS, Gotenberg, Keycloak admin API): retry with exponential backoff, circuit breaker, timeout.</td></tr>
       <tr><td class="hi">Queues</td><td>Each job carries an idempotency key; workers skip jobs already done. Max 3 receives, then the dead-letter queue. DLQ depth raises an alert.</td></tr>
       <tr><td class="hi">Logging</td><td>Structured JSON logs through SLF4J. Never log names, phone numbers, recordings or book text.</td></tr>
       <tr><td class="hi">Frontend</td><td>Standalone components, reactive forms, strong typing (no <code>any</code>). UI components separate from services holding business logic.</td></tr>

@@ -65,14 +65,24 @@ export async function walk(
     const here = await readScreen(page);
     seen.set(here.id, here);
     seenPaths.add(here.path);
+    // Placeholder links, navigation, and built screens' cards that carry data-screen-link
     const hrefs = await page
-      .locator('a.ph__link:visible, nav a:visible')
-      .evaluateAll((links) => links.map((link) => (link as HTMLAnchorElement).pathname));
+      .locator('a.ph__link:visible, nav a:visible, [data-screen-link]:visible')
+      .evaluateAll((links) =>
+        links.map((link) =>
+          link instanceof HTMLAnchorElement
+            ? link.pathname
+            : (link.getAttribute('data-screen-link') ?? ''),
+        ),
+      );
     for (const href of [...new Set(hrefs)]) {
       if (seenPaths.has(href)) {
         continue;
       }
-      await page.locator(`a[href$="${href}"]:visible`).first().click();
+      await page
+        .locator(`a[href$="${href}"]:visible, [data-screen-link="${href}"]:visible`)
+        .first()
+        .click();
       await expect(page).toHaveURL((url) => url.pathname === href);
       // Links always lead to another screen; wait until it has rendered
       await expect(page.locator(SCREEN)).not.toHaveAttribute('data-screen', here.id);

@@ -16,6 +16,8 @@ export interface NavItem {
   readonly icon: IconName;
   /** The tab's first screen. */
   readonly screen: ScreenId;
+  /** Shown only when NAV_ACCESS allows it, e.g. "super_admin" for Studio Staff (S13). */
+  readonly requires?: string;
 }
 
 export interface ScreenDef {
@@ -55,6 +57,15 @@ export interface ScreenConfig {
 }
 
 export const SCREEN_CONFIG = new InjectionToken<ScreenConfig>('SCREEN_CONFIG');
+
+/**
+ * Decides whether a navigation item with `requires` is shown; may read signals (it runs inside a
+ * computed). UX only: the API checks every call. Default: such items are hidden.
+ */
+export const NAV_ACCESS = new InjectionToken<(requirement: string) => boolean>('NAV_ACCESS', {
+  providedIn: 'root',
+  factory: () => () => false,
+});
 
 /** Route data key holding the ScreenDef. */
 export const SCREEN_DATA = 'screen';

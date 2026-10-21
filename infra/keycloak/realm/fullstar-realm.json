@@ -276,6 +276,37 @@
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": false,
       "publicClient": false
+    },
+    {
+      "clientId": "fullstar-api-admin",
+      "name": "API staff management (service account)",
+      "description": "Plan 4.1: the API creates staff accounts and keeps their realm role equal to staff_users.role.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${KEYCLOAK_API_ADMIN_SECRET}",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "access.token.lifespan": "300"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-fullstar-api-admin",
+      "enabled": true,
+      "serviceAccountClientId": "fullstar-api-admin",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users"
+        ]
+      }
     }
   ],
   "components": {

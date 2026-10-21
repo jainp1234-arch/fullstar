@@ -83,6 +83,9 @@ Fonts, icons and illustrations are vendored into `libs/ui/assets` at the commits
 2. `make db-bootstrap`: creates the roles `app_owner`, `app_api` and `app_system` with new random passwords and writes the `DB_*` settings into `.env`. Passwords are never printed. Re-running it rotates the passwords.
 3. `make db-migrate`: runs the Flyway migrations (`services/api/src/main/resources/db/migration`) as `app_owner` over the direct connection.
 4. `make bootstrap`: creates the queues and their DLQs in ElasticMQ and (trial) the `S3_BUCKET` bucket in SeaweedFS, whose S3 keys come from `.env`. Safe to run again.
+5. `make bootstrap-admin EMAIL=you@example.com NAME="Your Name"`: makes that person the first Content Studio super admin (Keycloak account with authenticator set-up required, realm role `super_admin`, `staff_users` row). Needs `KEYCLOAK_API_ADMIN_SECRET` in `.env` and Keycloak running (`make up`). Safe to run again. Everyone else is added in the Studio under Staff (S13).
+
+   Keycloak imports the realm only when it does not exist yet. A realm imported before Plan 4.1 has no `fullstar-api-admin` client: either recreate the local Keycloak (`make down`, `docker volume rm fullstar_keycloak-db`, `make up`; this deletes local Keycloak accounts) or add the client by hand in the admin console (confidential, service accounts only, secret = `KEYCLOAK_API_ADMIN_SECRET`, service-account roles `realm-management` → `manage-users`, `view-users`).
 
 Database tests (`make test`) use a throwaway PostgreSQL 18.6 container (Testcontainers), prepared the same way.
 

@@ -1,6 +1,6 @@
 import { EN, ScreenConfig, ScreenDef } from '@fullstar/ui';
 
-/** Every Content Studio screen (App Flow §7), all in shell E (Guidelines §10). */
+/** Every Content Studio screen (App Flow §7), all in shell E (Guidelines §10). S13 is super admin only. */
 const SCREENS: readonly ScreenDef[] = [
   { id: 'S1', path: 'sign-in', shell: 'studio', mode: 'studio', nav: false, links: ['S2'] },
   {
@@ -51,6 +51,7 @@ const SCREENS: readonly ScreenDef[] = [
   },
   { id: 'S7', path: 'reports', shell: 'studio', mode: 'studio', tab: 'reports' },
   { id: 'S12', path: 'support', shell: 'studio', mode: 'studio', parent: 'S2' },
+  { id: 'S13', path: 'staff', shell: 'studio', mode: 'studio', tab: 'staff' },
 ];
 
 export const STUDIO_SCREENS: ScreenConfig = {
@@ -64,6 +65,14 @@ export const STUDIO_SCREENS: ScreenConfig = {
       { tab: 'questionBank', label: EN.nav.studio.questionBank, icon: 'quiz', screen: 'S10' },
       { tab: 'contentCheck', label: EN.nav.studio.contentCheck, icon: 'fact_check', screen: 'S11' },
       { tab: 'reports', label: EN.nav.studio.reports, icon: 'report', screen: 'S7' },
+      // Super admins only (Schema §9); the API refuses everyone else
+      {
+        tab: 'staff',
+        label: EN.nav.studio.staff,
+        icon: 'school',
+        screen: 'S13',
+        requires: 'super_admin',
+      },
     ],
   },
 };

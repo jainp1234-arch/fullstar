@@ -1027,6 +1027,7 @@ sequenceDiagram
     <li>Same realm, client <code>content-studio</code>; login flow = email code <strong>and</strong> TOTP (required action on first login). Realm roles <code>content_admin</code>, <code>super_admin</code>.</li>
     <li>The API accepts audience <code>studio-api</code> only, then requires an active <code>staff_users</code> row with the same <code>keycloak_user_id</code>; the role in our table is the one enforced (Keycloak role must match, else <code>403 ROLE_MISMATCH</code>).</li>
     <li>Staff sessions: access 5 minutes, refresh 8 hours, no offline sessions. Implemented in Plan 1.4 (<code>infra/keycloak/realm/fullstar-realm.json</code>): the staff browser flow has no SSO-cookie step, so a session started in the family app never skips TOTP; the realm SSO idle timeout is 8 hours so the Studio client can keep 8-hour sessions. The parent flow creates the Keycloak account only after the emailed code is proven; the user profile asks for email only.</li>
+    <li>Implemented in Plan 4.1 (decided 21 Oct 2026): the API manages staff accounts through the confidential client <code>fullstar-api-admin</code> (client credentials; its service account has only <code>realm-management</code> <code>manage-users</code> and <code>view-users</code>; secret <code>KEYCLOAK_API_ADMIN_SECRET</code>, resolved at realm import). <code>POST /studio/staff {email, display_name, role}</code> finds or creates the Keycloak user (required action <code>CONFIGURE_TOTP</code>), sets exactly that staff realm role, then inserts the row (201; already staff → 409 <code>CONFLICT</code>). <code>PATCH /studio/staff/{id}</code> is partial (<code>display_name</code>, <code>role</code>, <code>active</code>); a role or access change updates Keycloak first (switched off = no staff realm role), and nobody can change their own role or switch themselves off (409 <code>CONFLICT</code>). Keycloak calls go through Resilience4j instance <code>keycloak</code>; down → 503 <code>DEPENDENCY_UNAVAILABLE</code> and nothing changes; no secret set → 503 <code>FEATURE_DISABLED</code>. Each change writes <code>audit_log</code> <code>staff.create</code> / <code>staff.update</code> (metadata: role, active, whether the name changed; never email or name). <code>make bootstrap-admin EMAIL=… NAME=…</code> creates or restores the first super admin the same way (audit <code>staff.bootstrap</code>, actor <code>system</code>).</li>
   </ul>
 
   <h3>8.4 Uploads and file access</h3>
@@ -1174,7 +1175,7 @@ sequenceDiagram
       <tr><td class="m">POST</td><td class="p">/family/parent/deletion-request</td><td>P</td><td>Request data deletion (once)</td><td>P17</td></tr>
 
       <tr class="grp"><td colspan="5">Studio</td></tr>
-      <tr><td class="m">GET</td><td class="p">/studio/me · /studio/dashboard</td><td>CA</td><td>Staff profile · counts: uploads waiting, drafts, open reports, open tickets</td><td>S2</td></tr>
+      <tr><td class="m">GET</td><td class="p">/studio/me · /studio/dashboard</td><td>CA</td><td>Staff profile · counts: <code>uploads_waiting</code> (open prep tasks), <code>drafts</code> (draft or in check), <code>recently_published</code> (last 7 days), <code>open_reports</code>, <code>open_tickets</code></td><td>S2</td></tr>
       <tr><td class="m">GET</td><td class="p">/studio/prep-tasks?status=open</td><td>CA</td><td>Uploaded chapters queue with waiting time</td><td>S8</td></tr>
       <tr><td class="m">POST</td><td class="p">/studio/prep-tasks/{id}/claim</td><td>CA</td><td>Assign to me, status in_progress</td><td>S8</td></tr>
       <tr><td class="m">GET</td><td class="p">/studio/family-chapters/{id}/pages</td><td>CA</td><td>Page images and text (writes audit_log upload.view)</td><td>S9</td></tr>
@@ -1193,7 +1194,7 @@ sequenceDiagram
       <tr><td class="m">POST</td><td class="p">/studio/content-items/{id}/publish · /unpublish</td><td>CA</td><td>Publish current version (409 CHECK_NOT_PASSED) · archive</td><td>S6</td></tr>
       <tr><td class="m">GET · PATCH</td><td class="p">/studio/problem-reports</td><td>CA</td><td>Queue · {status: fixed | dismissed} (fixed sends parent message)</td><td>S7</td></tr>
       <tr><td class="m">GET · POST</td><td class="p">/studio/support-tickets · /{id}/messages</td><td>CA</td><td>Support inbox · reply (sends parent message)</td><td>S12</td></tr>
-      <tr><td class="m">GET · POST · PATCH</td><td class="p">/studio/staff</td><td>SA</td><td>Manage staff users and roles</td><td>—</td></tr>
+      <tr><td class="m">GET · POST · PATCH</td><td class="p">/studio/staff</td><td>SA</td><td>Manage staff users and roles (Keycloak realm role kept equal, §8.3)</td><td>S13</td></tr>
       <tr><td class="m">GET · POST</td><td class="p">/studio/deletion-requests · /{id}/complete</td><td>SA</td><td>List by due date · delete R2 objects then call complete_family_deletion</td><td>—</td></tr>
       <tr><td class="m">GET</td><td class="p">/studio/audit-log</td><td>SA</td><td>Filter by actor, action, date</td><td>—</td></tr>
       <tr><td class="m">GET</td><td class="p">/studio/metrics</td><td>SA</td><td>PRD success measures from usage_events and prep_tasks</td><td>—</td></tr>

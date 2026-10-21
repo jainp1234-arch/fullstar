@@ -66,6 +66,8 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?set KEYCLOAK_DB_PASSWORD in .env}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME:?set KEYCLOAK_ADMIN_USERNAME in .env}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?set KEYCLOAK_ADMIN_PASSWORD in .env}
+      # Secret of the fullstar-api-admin client, resolved inside the realm import (Plan 4.1)
+      KEYCLOAK_API_ADMIN_SECRET: ${KEYCLOAK_API_ADMIN_SECRET:?set KEYCLOAK_API_ADMIN_SECRET in .env}
       # Served behind Caddy at /auth; hostname unset so the tunnel address also works (Schema §12a).
       KC_HTTP_RELATIVE_PATH: /auth
       KC_HTTP_ENABLED: "true"

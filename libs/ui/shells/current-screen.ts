@@ -4,7 +4,7 @@ import { ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { DisplayModeService } from '../mode/display-mode';
 import { EN } from '../strings/en';
-import { NavItem, SCREEN_CONFIG, SCREEN_DATA, ScreenDef, ScreenId } from './screen';
+import { NAV_ACCESS, NavItem, SCREEN_CONFIG, SCREEN_DATA, ScreenDef, ScreenId } from './screen';
 
 export interface ScreenLink {
   readonly id: ScreenId;
@@ -17,6 +17,7 @@ export interface ScreenLink {
 export class CurrentScreen {
   private readonly config = inject(SCREEN_CONFIG);
   private readonly router = inject(Router);
+  private readonly access = inject(NAV_ACCESS);
   private readonly byId = new Map(this.config.screens.map((screen) => [screen.id, screen]));
 
   readonly screen = toSignal(
@@ -54,7 +55,9 @@ export class CurrentScreen {
     ) {
       return [];
     }
-    return this.config.nav[screen.mode] ?? [];
+    return (this.config.nav[screen.mode] ?? []).filter(
+      (item) => !item.requires || this.access(item.requires),
+    );
   });
 
   readonly parentUrl = computed(() => {

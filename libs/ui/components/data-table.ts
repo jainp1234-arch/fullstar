@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
+import { Button } from './button';
 
 export interface DataColumn<T> {
   /** Unique within the table. */
@@ -9,11 +10,19 @@ export interface DataColumn<T> {
   readonly align?: 'start' | 'end';
 }
 
+/** One button per row, e.g. "Change" (Studio S13). */
+export interface DataRowAction<T> {
+  /** Column header for screen readers. */
+  readonly header: string;
+  /** Button label for the row; include the row name so each button is distinct. */
+  readonly label: (row: T) => string;
+}
+
 /** app-data-table (Guidelines §11): parent and Studio only. Angular Material table, restyled. */
 @Component({
   selector: 'app-data-table',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatTableModule],
+  imports: [Button, MatTableModule],
   template: `
     <table mat-table class="table" [dataSource]="rows()" [trackBy]="trackRow">
       <caption class="ui-visually-hidden">
@@ -28,6 +37,16 @@ export interface DataColumn<T> {
           </th>
           <td mat-cell *matCellDef="let row" [class.end]="column.align === 'end'">
             {{ column.cell(row) }}
+          </td>
+        </ng-container>
+      }
+      @if (action(); as act) {
+        <ng-container matColumnDef="__action">
+          <th mat-header-cell *matHeaderCellDef scope="col">
+            <span class="ui-visually-hidden">{{ act.header }}</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="end">
+            <app-button variant="ghost" [label]="act.label(row)" (pressed)="rowAction.emit(row)" />
           </td>
         </ng-container>
       }
@@ -88,7 +107,12 @@ export class DataTable<T> {
   /** Read by screen readers; not shown. */
   readonly caption = input.required<string>();
   readonly rowKey = input<(row: T) => unknown>((row) => row);
+  readonly action = input<DataRowAction<T> | null>(null);
+  readonly rowAction = output<T>();
 
-  protected readonly columnKeys = computed(() => this.columns().map((column) => column.key));
+  protected readonly columnKeys = computed(() => {
+    const keys = this.columns().map((column) => column.key);
+    return this.action() ? [...keys, '__action'] : keys;
+  });
   protected readonly trackRow = (_: number, row: T): unknown => this.rowKey()(row);
 }
