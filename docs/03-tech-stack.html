@@ -167,7 +167,7 @@ flowchart LR
       <tr><td class="tool">Node.js</td><td class="v">24.21.0</td><td>Runtime and build</td><td>LTS; moves to Maintenance on 20 Oct 2026, still supported to Apr 2028.</td></tr>
       <tr><td class="tool">npm</td><td class="v">11.19.0</td><td>Package manager</td><td>Bundled with Node 24.21.0.</td></tr>
       <tr><td class="tool">@angular/core, common, router, forms, platform-browser, animations</td><td class="v">22.2.1</td><td>Framework</td><td>Standalone components, reactive forms, signals.</td></tr>
-      <tr><td class="tool">@angular/cli, @angular/build</td><td class="v">22.2.1</td><td>Build</td><td></td></tr>
+      <tr><td class="tool">@angular/cli, @angular/build</td><td class="v">22.2.2</td><td>Build</td><td>21 Oct 2026: moved from 22.2.1 for high-severity npm advisories (CLI bundled @modelcontextprotocol/server 2.0; fixed in 2.3.1). Every 22.2.x build pins vite 8.3.0, so an npm override pins its vite at 8.3.3 (first fixed release). Framework packages stay at 22.2.1.</td></tr>
       <tr><td class="tool">@angular/compiler, @angular/compiler-cli</td><td class="v">22.2.1</td><td>Build</td><td>Core Angular packages required by every Angular build.</td></tr>
       <tr><td class="tool">tslib</td><td class="v">2.8.1</td><td>TypeScript runtime helpers</td><td>Required by Angular (<code>importHelpers</code>). Microsoft, 0BSD, since 2014.</td></tr>
       <tr><td class="tool">@angular/service-worker</td><td class="v">22.2.1</td><td>PWA and offline</td><td>Caches saved lessons, worksheets and tables practice.</td></tr>
