@@ -56,11 +56,17 @@ public class FamilyAccountController {
 		return ApiResponse.success(service.create(RequestActor.of(request), jwt.getSubject(), body.consentVersion()));
 	}
 
+	record PinSetResponse(boolean pinSet, String parentGrant, long expiresIn) {
+	}
+
 	@PostMapping("/pin")
-	@ResponseStatus(HttpStatus.CREATED)
-	ApiResponse<Map<String, Boolean>> setPin(HttpServletRequest request, @Valid @RequestBody PinRequest body) {
-		service.setFirstPin(RequestActor.of(request), body.pin());
-		return ApiResponse.success(Map.of("pin_set", true));
+	ResponseEntity<ApiResponse<PinSetResponse>> setPin(HttpServletRequest request, @AuthenticationPrincipal Jwt jwt,
+			@Valid @RequestBody PinRequest body) {
+		ParentGrantService.Grant grant = service.setFirstPin(RequestActor.of(request), jwt.getSubject(), body.pin());
+		// The setup grant (B2-B4) is a secret: never cached, never stored for Idempotency-Key replay
+		return ResponseEntity.status(HttpStatus.CREATED)
+			.cacheControl(CacheControl.noStore())
+			.body(ApiResponse.success(new PinSetResponse(true, grant.token(), grant.expiresInSeconds())));
 	}
 
 	@PostMapping("/pin/verify")

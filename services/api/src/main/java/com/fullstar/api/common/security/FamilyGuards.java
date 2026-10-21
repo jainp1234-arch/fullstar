@@ -23,6 +23,8 @@ public class FamilyGuards {
 
 	public static final String CHILD_ATTRIBUTE = FamilyGuards.class.getName() + ".childId";
 
+	private static final String CHILDREN_PATH = "/api/v1/family/parent/children";
+
 	private final JdbcTemplate jdbc;
 
 	private final ParentGrantService grants;
@@ -42,12 +44,25 @@ public class FamilyGuards {
 				Jwt jwt = JwtActorResolver.currentJwt();
 				if (jwt == null || !grants.isValid(request.getHeader(ParentGrantService.HEADER), jwt.getSubject(),
 						actor.familyId())) {
+					if (jwt != null && isFirstChildSetup(request)) {
+						return true;
+					}
 					throw new ApiException(ErrorCode.PIN_REQUIRED, "Please enter the parent PIN");
 				}
 				response.setHeader(ParentGrantService.HEADER, grants.issue(jwt.getSubject(), actor.familyId()).token());
 				return true;
 			}
 		};
+	}
+
+	/** Schema §11 "P (setup: T)": adding the first child (B2) needs only the token. */
+	private boolean isFirstChildSetup(HttpServletRequest request) {
+		if (!"POST".equals(request.getMethod()) || !CHILDREN_PATH.equals(request.getRequestURI())) {
+			return false;
+		}
+		// RLS limits app.children to this family
+		Integer children = jdbc.queryForObject("SELECT count(*)::int FROM app.children", Integer.class);
+		return children != null && children == 0;
 	}
 
 	/** /family/kid/**: X-Child-Id must be a child of this family. */

@@ -25,9 +25,41 @@ export interface FakeServer {
   readonly apiRequests: Request[];
   /** Bodies of POST /family/me. */
   readonly createdFamilies: unknown[];
+  /** The family's children and settings as the fake API holds them now. */
+  readonly family: {
+    children: FakeChild[];
+    dailyLimitMinutes: number;
+  };
 }
 
 const CONSENT = '2026-10-v1';
+/** The parent PIN of the default family. */
+export const FAKE_PIN = '1234';
+const GRANT = 'fake-parent-grant';
+/** Schema §8.2: 5 wrong PINs lock parent mode for 1 minute. */
+const MAX_PIN_FAILURES = 5;
+const PIN_LOCK_S = 60;
+
+const CONFIG = {
+  consent_version: CONSENT,
+  avatars: ['cat', 'dog', 'lion', 'panda', 'rabbit', 'tiger'],
+  classes: [1, 2, 3, 4, 5].map((classLevel) => ({
+    class_level: classLevel,
+    subjects: [
+      { id: 1, code: 'english', name: 'English' },
+      { id: 2, code: 'hindi', name: 'Hindi' },
+      { id: 3, code: 'maths', name: 'Maths' },
+      { id: 4, code: 'evs', name: 'EVS' },
+    ],
+  })),
+  upload_limits: {
+    pdf_max_bytes: 52428800,
+    pdf_max_pages: 300,
+    photo_max_bytes: 10485760,
+    photos_per_upload: 50,
+  },
+  time_limits: { options_minutes: [20, 30, 45, 60], default_minutes: 30 },
+};
 
 function base64url(value: object): string {
   return Buffer.from(JSON.stringify(value)).toString('base64url');
@@ -62,21 +94,36 @@ function tokens(nonce: string | null, clientId: string) {
   };
 }
 
-function envelope(route: Route, status: number, data: unknown, code?: string): Promise<void> {
+function envelope(
+  route: Route,
+  status: number,
+  data: unknown,
+  code?: string,
+  extra: { fields?: Record<string, string>; retry_after_s?: number } = {},
+): Promise<void> {
   return route.fulfill({
     status,
     contentType: 'application/json',
     body: JSON.stringify(
       code
-        ? { status: 'error', data: null, error: { code, message: code } }
+        ? { status: 'error', data: null, error: { code, message: code, ...extra } }
         : { status: 'success', data, error: null },
     ),
   });
 }
 
 export async function installFakes(page: Page, options: FakeOptions = {}): Promise<FakeServer> {
-  const server: FakeServer = { apiRequests: [], createdFamilies: [] };
-  let children = options.children === undefined ? defaultChildren() : options.children;
+  const initial = options.children === undefined ? defaultChildren() : options.children;
+  const server: FakeServer = {
+    apiRequests: [],
+    createdFamilies: [],
+    family: { children: [...(initial ?? [])], dailyLimitMinutes: 30 },
+  };
+  let hasFamily = initial !== null;
+  let pin: string | null = (options.pinSet ?? true) ? FAKE_PIN : null;
+  let pinFailures = 0;
+  let lockedUntil = 0;
+  let nextChild = 1;
   let nonce: string | null = null;
   let clientId = 'family-app';
 
@@ -123,31 +170,116 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
     const request = route.request();
     server.apiRequests.push(request);
     const path = new URL(request.url()).pathname.replace(/^.*\/api\/v1/, '');
+    const method = request.method();
     if (path === '/public/config') {
-      return envelope(route, 200, { consent_version: CONSENT, avatars: [], classes: [] });
+      return envelope(route, 200, CONFIG);
     }
     if (!request.headers()['authorization']?.startsWith('Bearer ')) {
       return envelope(route, 401, null, 'UNAUTHENTICATED');
-    }
-    if (path === '/family/me' && request.method() === 'GET') {
-      return children === null
-        ? envelope(route, 404, null, 'FAMILY_NOT_FOUND')
-        : envelope(route, 200, me(children, options.pinSet ?? true));
-    }
-    if (path === '/family/me' && request.method() === 'POST') {
-      server.createdFamilies.push(request.postDataJSON());
-      children = [];
-      return envelope(route, 201, me(children, false));
     }
     if (path === '/studio/me') {
       return options.staffDenied
         ? envelope(route, 403, null, 'FORBIDDEN')
         : envelope(route, 200, { id: 's1', display_name: 'Meera', role: 'content_admin' });
     }
+    if (path === '/family/me' && method === 'POST') {
+      server.createdFamilies.push(request.postDataJSON());
+      hasFamily = true;
+      pin = null;
+      return envelope(route, 201, me(server, pin !== null));
+    }
+    if (path.startsWith('/family/') && !hasFamily) {
+      return envelope(route, 404, null, 'FAMILY_NOT_FOUND');
+    }
+    if (path === '/family/me') {
+      return envelope(route, 200, me(server, pin !== null));
+    }
+    const body = (method === 'GET' ? {} : (request.postDataJSON() ?? {})) as Record<
+      string,
+      unknown
+    >;
+    if (path === '/family/pin' && method === 'POST') {
+      if (pin !== null) {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      pin = String(body['pin']);
+      return envelope(route, 201, { pin_set: true, parent_grant: GRANT, expires_in: 900 });
+    }
+    if (path === '/family/pin' && method === 'PUT') {
+      pin = String(body['pin']);
+      pinFailures = 0;
+      lockedUntil = 0;
+      return envelope(route, 200, { pin_set: true });
+    }
+    if (path === '/family/pin/verify') {
+      const now = Date.now();
+      if (lockedUntil > now) {
+        return envelope(route, 423, null, 'PIN_LOCKED', {
+          retry_after_s: Math.ceil((lockedUntil - now) / 1000),
+        });
+      }
+      if (body['pin'] === pin) {
+        pinFailures = 0;
+        return envelope(route, 200, { parent_grant: GRANT, expires_in: 900 });
+      }
+      pinFailures += 1;
+      if (pinFailures >= MAX_PIN_FAILURES) {
+        pinFailures = 0;
+        lockedUntil = now + PIN_LOCK_S * 1000;
+        return envelope(route, 423, null, 'PIN_LOCKED', { retry_after_s: PIN_LOCK_S });
+      }
+      return envelope(route, 401, null, 'PIN_REQUIRED', { fields: { pin: 'WRONG' } });
+    }
+    if (path.startsWith('/family/parent/')) {
+      const firstChild =
+        path === '/family/parent/children' &&
+        method === 'POST' &&
+        server.family.children.length === 0;
+      if (request.headers()['x-parent-grant'] !== GRANT && !firstChild) {
+        return envelope(route, 401, null, 'PIN_REQUIRED');
+      }
+    }
+    if (path === '/family/parent/children' && method === 'POST') {
+      if (server.family.children.length >= 2) {
+        return envelope(route, 409, null, 'MAX_CHILDREN');
+      }
+      const child: FakeChild = {
+        id: `child-new-${nextChild++}`,
+        first_name: String(body['first_name']),
+        avatar_key: String(body['avatar_key']),
+      };
+      server.family.children.push(child);
+      return envelope(route, 201, wireChild(child));
+    }
+    if (path === '/family/parent/settings') {
+      if (typeof body['daily_limit_minutes'] === 'number') {
+        server.family.dailyLimitMinutes = body['daily_limit_minutes'];
+      }
+      return envelope(route, 200, settings(server));
+    }
     return envelope(route, 200, {});
   });
 
   return server;
+}
+
+/** Opens a parent screen: the guard sends it to P0, the PIN brings it back. */
+export async function unlockParent(page: Page, path: string): Promise<void> {
+  await page.goto(path);
+  await expect(page).toHaveURL(/\/parent\/pin\?next=/);
+  await enterPin(page);
+  await expect(page).toHaveURL((url) => url.pathname === path);
+}
+
+/** Unlocks parent mode on P0 by typing the PIN on the pad. */
+export async function enterPin(page: Page, value: string = FAKE_PIN): Promise<void> {
+  // After a wrong PIN the pad shakes and ignores keys until it has cleared
+  await expect(page.getByRole('status').filter({ hasText: 'digits entered' })).toHaveText(
+    /^0 of 4/,
+  );
+  for (const digit of value) {
+    await page.getByRole('button', { name: digit, exact: true }).click();
+  }
 }
 
 function defaultChildren(): FakeChild[] {
@@ -157,17 +289,22 @@ function defaultChildren(): FakeChild[] {
   ];
 }
 
-function me(children: readonly FakeChild[], pinSet: boolean) {
+function wireChild(child: FakeChild) {
+  return { ...child, age: 8, class_level: 3, stars_total: 0 };
+}
+
+function settings(server: FakeServer) {
   return {
-    family: {
-      id: 'family-1',
-      consent_version: CONSENT,
-      daily_limit_minutes: 30,
-      sound_enabled: true,
-      celebrations_enabled: true,
-      pin_set: pinSet,
-    },
-    children: children.map((child) => ({ ...child, age: 8, class_level: 3, stars_total: 0 })),
+    daily_limit_minutes: server.family.dailyLimitMinutes,
+    sound_enabled: true,
+    celebrations_enabled: true,
+  };
+}
+
+function me(server: FakeServer, pinSet: boolean) {
+  return {
+    family: { id: 'family-1', consent_version: CONSENT, ...settings(server), pin_set: pinSet },
+    children: server.family.children.map(wireChild),
   };
 }
 
@@ -176,7 +313,7 @@ export async function signInFamily(page: Page, options: FakeOptions = {}): Promi
   const server = await installFakes(page, options);
   await page.goto('/welcome');
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/(who|setup\/pin|sign-up)$/);
+  await expect(page).toHaveURL(/\/(who|setup\/pin|setup\/child|sign-up)$/);
   return server;
 }
 

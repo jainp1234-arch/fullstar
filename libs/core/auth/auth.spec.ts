@@ -4,9 +4,10 @@ import type Keycloak from 'keycloak-js';
 import { Observable, firstValueFrom, isObservable, of, throwError } from 'rxjs';
 import { ApiError } from '../api/api-error';
 import { FamilyApi, FamilyState } from '../family/family-api';
+import { FamilySession } from '../family/family-session';
 import { AUTH_CONFIG, AuthConfig } from './auth-config';
 import { AuthService, KEYCLOAK_FACTORY } from './auth.service';
-import { familyGuard, signedInGuard, signedOutGuard } from './guards';
+import { familyGuard, kidGuard, parentGuard, signedInGuard, signedOutGuard } from './guards';
 import { StoredTokens, TokenStore } from './token-store';
 
 const CONFIG: AuthConfig = {
@@ -202,4 +203,56 @@ describe('guards', () => {
     );
     expect(await run(() => familyGuard('/sign-up')({} as never, {} as never))).toBe(true);
   });
+
+  it('with setup paths, an unfinished setup continues at B1, then B2', async () => {
+    const { auth } = setup({ token: 'old', refreshToken: 'refresh-old' });
+    await auth.init();
+    const family = TestBed.inject(FamilyApi);
+    const load = vi.spyOn(family, 'loadMe');
+    const setupPaths = { pin: '/setup/pin', child: '/setup/child' };
+    const guard = () => familyGuard('/sign-up', setupPaths)({} as never, {} as never);
+
+    load.mockReturnValue(of<FamilyState>(familyMe(false, 0)));
+    expect(serialize(await run(guard))).toBe('/setup/pin');
+    load.mockReturnValue(of<FamilyState>(familyMe(true, 0)));
+    expect(serialize(await run(guard))).toBe('/setup/child');
+    load.mockReturnValue(of<FamilyState>(familyMe(true, 1)));
+    expect(serialize(await run(guard))).toBe(true);
+  });
+
+  it('parent screens need the grant, kid screens a child of this family', async () => {
+    setup();
+    const session = TestBed.inject(FamilySession);
+    const state = { url: '/parent/settings' } as never;
+    expect(serialize(await run(() => parentGuard('/parent/pin')({} as never, state)))).toBe(
+      '/parent/pin?next=%2Fparent%2Fsettings',
+    );
+    session.setParentGrant('grant-1', 900);
+    expect(await run(() => parentGuard('/parent/pin')({} as never, state))).toBe(true);
+
+    expect(serialize(await run(() => kidGuard('/who')({} as never, {} as never)))).toBe('/who');
+    session.selectChild('child-1');
+    expect(await run(() => kidGuard('/who')({} as never, {} as never))).toBe(true);
+  });
 });
+
+function familyMe(pinSet: boolean, children: number): FamilyState {
+  return {
+    family: {
+      id: 'family-1',
+      consent_version: 'v1',
+      daily_limit_minutes: 30,
+      sound_enabled: true,
+      celebrations_enabled: true,
+      pin_set: pinSet,
+    },
+    children: Array.from({ length: children }, (_, i) => ({
+      id: `child-${i + 1}`,
+      first_name: `Child ${i + 1}`,
+      age: 8,
+      class_level: 3,
+      avatar_key: 'cat',
+      stars_total: 0,
+    })),
+  };
+}

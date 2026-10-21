@@ -1,5 +1,5 @@
 import { CanActivateFn, Routes } from '@angular/router';
-import { familyGuard, signedInGuard, signedOutGuard } from '@fullstar/core';
+import { familyGuard, kidGuard, parentGuard, signedOutGuard } from '@fullstar/core';
 import {
   CelebrationShell,
   FocusShell,
@@ -12,12 +12,25 @@ import {
 import { ConsentPage } from './auth/consent.page';
 import { SignInReturnPage } from './auth/sign-in-return.page';
 import { WelcomePage } from './auth/welcome.page';
+import { ForgotPinPage } from './parent/forgot-pin.page';
+import { ParentPinPage } from './parent/parent-pin.page';
 import { FAMILY_SCREENS } from './screens';
+import { SetupBooksPage } from './setup/setup-books.page';
+import { SetupChildPage } from './setup/setup-child.page';
+import { SetupDonePage } from './setup/setup-done.page';
+import { SetupPinPage } from './setup/setup-pin.page';
+import { SetupTimeLimitPage } from './setup/setup-time-limit.page';
 import { WhoPage } from './who/who.page';
+
+const CONSENT = '/sign-up';
+const PIN = '/parent/pin';
+const SETUP = { pin: '/setup/pin', child: '/setup/child' };
 
 /**
  * UX only; the API checks every call. A1 is for signed-out visitors; A2 and A3 handle both
- * states; setup (B1–B5) needs a sign-in; everything else needs a family.
+ * states. Setup (B1–B5) and A4 need a family; B4 also the parent grant B1 returns (B2 may add
+ * the first child without one). Everything else needs a finished setup; kid screens a picked
+ * child, parent screens the PIN.
  */
 function guardsFor(screen: ScreenDef): CanActivateFn[] {
   switch (screen.id) {
@@ -26,8 +39,21 @@ function guardsFor(screen: ScreenDef): CanActivateFn[] {
     case 'A2':
     case 'A3':
       return [];
+    case 'A4':
+    case 'B1':
+    case 'B2':
+    case 'B3':
+    case 'B5':
+      return [familyGuard(CONSENT)];
+    case 'B4':
+      return [familyGuard(CONSENT), parentGuard(PIN)];
+    case 'C1':
+    case 'P0':
+      return [familyGuard(CONSENT, SETUP)];
     default:
-      return screen.id.startsWith('B') ? [signedInGuard] : [familyGuard('/sign-up')];
+      return screen.mode === 'kid'
+        ? [familyGuard(CONSENT, SETUP), kidGuard('/who')]
+        : [familyGuard(CONSENT, SETUP), parentGuard(PIN)];
   }
 }
 
@@ -59,7 +85,19 @@ export const routes: Routes = [
     },
     PlaceholderPage,
     {
-      pages: { A1: WelcomePage, A2: ConsentPage, A3: SignInReturnPage, C1: WhoPage },
+      pages: {
+        A1: WelcomePage,
+        A2: ConsentPage,
+        A3: SignInReturnPage,
+        A4: ForgotPinPage,
+        B1: SetupPinPage,
+        B2: SetupChildPage,
+        B3: SetupBooksPage,
+        B4: SetupTimeLimitPage,
+        B5: SetupDonePage,
+        C1: WhoPage,
+        P0: ParentPinPage,
+      },
       guards: guardsFor,
     },
   ),

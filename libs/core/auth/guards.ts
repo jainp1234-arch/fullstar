@@ -1,7 +1,8 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { Observable, catchError, map, of } from 'rxjs';
-import { FamilyApi } from '../family/family-api';
+import { FamilyApi, FamilyState } from '../family/family-api';
+import { FamilySession } from '../family/family-session';
 import { StudioApi } from '../studio/studio-api';
 import { AUTH_CONFIG } from './auth-config';
 import { AuthService } from './auth.service';
@@ -19,25 +20,69 @@ export function signedOutGuard(signedInPath: string): CanActivateFn {
   return () => (inject(AuthService).authenticated() ? inject(Router).parseUrl(signedInPath) : true);
 }
 
+/** Where an unfinished setup continues (App Flow §4): no PIN → B1, no child yet → B2. */
+export interface SetupPaths {
+  readonly pin: string;
+  readonly child: string;
+}
+
 /**
- * Family screens need a family: no family yet → consent (App Flow A2). Errors other than
- * FAMILY_NOT_FOUND let the screen load and show its own error.
+ * Family screens need a family: no family yet → consent (App Flow A2). With setup paths, the
+ * family must also have finished setup. Errors other than FAMILY_NOT_FOUND let the screen load
+ * and show its own error.
  */
-export function familyGuard(consentPath: string): CanActivateFn {
+export function familyGuard(consentPath: string, setup?: SetupPaths): CanActivateFn {
   return (): boolean | UrlTree | Observable<boolean | UrlTree> => {
     const router = inject(Router);
     if (!inject(AuthService).authenticated()) {
       return router.parseUrl(inject(AUTH_CONFIG).signedOutPath);
     }
     const family = inject(FamilyApi);
+    const decide = (state: FamilyState): boolean | UrlTree => {
+      if (state === 'new') {
+        return router.parseUrl(consentPath);
+      }
+      if (!setup || !state) {
+        return true;
+      }
+      if (!state.family.pin_set) {
+        return router.parseUrl(setup.pin);
+      }
+      return state.children.length ? true : router.parseUrl(setup.child);
+    };
     const known = family.state();
     if (known && known !== 'new') {
-      return true;
+      return decide(known);
     }
     return family.loadMe().pipe(
-      map((state) => (state === 'new' ? router.parseUrl(consentPath) : true)),
+      map(decide),
       catchError(() => of(true)),
     );
+  };
+}
+
+/**
+ * Parent mode needs a parent grant (Schema §8.2): without one → the PIN screen, which returns
+ * to the requested URL. UX only: the API answers 401 PIN_REQUIRED anyway.
+ */
+export function parentGuard(pinPath: string): CanActivateFn {
+  return (_route, state): boolean | UrlTree => {
+    if (inject(FamilySession).parentGrant()) {
+      return true;
+    }
+    return inject(Router).createUrlTree([pinPath], { queryParams: { next: state.url } });
+  };
+}
+
+/** Kid mode needs the child picked on Who is learning? (X-Child-Id); otherwise → C1. */
+export function kidGuard(whoPath: string): CanActivateFn {
+  return (): boolean | UrlTree => {
+    const childId = inject(FamilySession).activeChildId();
+    const me = inject(FamilyApi).me();
+    if (childId && (!me || me.children.some((child) => child.id === childId))) {
+      return true;
+    }
+    return inject(Router).parseUrl(whoPath);
   };
 }
 

@@ -114,14 +114,15 @@ public class FamilyAccountService {
 		return me(parent);
 	}
 
-	/** POST /family/pin: only when no PIN is set yet (B1). */
-	public void setFirstPin(RequestActor actor, String pin) {
+	/** POST /family/pin: only when no PIN is set yet (B1). Returns a parent grant for setup (B2-B4). */
+	public ParentGrantService.Grant setFirstPin(RequestActor actor, String keycloakUserId, String pin) {
 		UUID familyId = requireFamily(actor);
 		int updated = jdbc.update("UPDATE app.families SET pin_hash = ? WHERE id = ? AND pin_hash IS NULL",
 				bcrypt.encode(pin), familyId);
 		if (updated == 0) {
 			throw new ApiException(ErrorCode.CONFLICT, "A parent PIN is already set");
 		}
+		return grants.issue(keycloakUserId, familyId);
 	}
 
 	/** POST /family/pin/verify: PIN → parent grant; 5 wrong tries lock for 1 minute (423). */

@@ -13,11 +13,11 @@ import org.springframework.stereotype.Service;
 public class PublicConfigService {
 
 	/** Same list as the children.avatar_key check (Schema §4.1). */
-	static final List<String> AVATARS = List.of("cat", "dog", "lion", "panda", "rabbit", "tiger", "fox", "koala",
+	public static final List<String> AVATARS = List.of("cat", "dog", "lion", "panda", "rabbit", "tiger", "fox", "koala",
 			"monkey", "penguin", "frog", "unicorn");
 
 	/** Same list as the families.daily_limit_minutes check (Schema §4.1). */
-	static final List<Integer> TIME_LIMIT_MINUTES = List.of(20, 30, 45, 60);
+	public static final List<Integer> TIME_LIMIT_MINUTES = List.of(20, 30, 45, 60);
 
 	static final int DEFAULT_TIME_LIMIT_MINUTES = 30;
 

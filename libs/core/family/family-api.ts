@@ -1,7 +1,8 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, catchError, of, tap, throwError } from 'rxjs';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { ApiClient } from '../api/api-client';
 import { ApiError } from '../api/api-error';
+import { FamilySession } from './family-session';
 
 /** GET /family/me (Schema §11), wire format: snake_case. */
 export interface FamilyMe {
@@ -49,15 +50,42 @@ export interface PublicConfig {
   readonly consent_version: string;
 }
 
+/** POST /family/parent/children (App Flow B2). */
+export interface NewChild {
+  readonly first_name: string;
+  readonly age: number;
+  readonly class_level: number;
+  readonly avatar_key: string;
+}
+
+/** GET · PATCH /family/parent/settings (App Flow B4, P14). */
+export interface FamilySettings {
+  readonly daily_limit_minutes: number;
+  readonly sound_enabled: boolean;
+  readonly celebrations_enabled: boolean;
+}
+
+/** A parent grant from POST /family/pin or /family/pin/verify (Schema §8.2). */
+interface GrantResponse {
+  readonly parent_grant: string;
+  readonly expires_in: number;
+}
+
 /** The signed-in family: null before loading, 'new' when no family exists yet (A2 consent). */
 export type FamilyState = FamilyMe | 'new' | null;
 
 @Injectable({ providedIn: 'root' })
 export class FamilyApi {
   private readonly api = inject(ApiClient);
+  private readonly session = inject(FamilySession);
   private readonly current = signal<FamilyState>(null);
 
   readonly state = this.current.asReadonly();
+  /** The loaded family, or null before loading and for a new account. */
+  readonly me = computed(() => {
+    const state = this.current();
+    return state && state !== 'new' ? state : null;
+  });
 
   /** Loads /family/me; FAMILY_NOT_FOUND becomes 'new' (Schema §8.1). */
   loadMe(): Observable<FamilyState> {
@@ -82,7 +110,63 @@ export class FamilyApi {
     return this.api.get<PublicConfig>('/public/config');
   }
 
+  /** B1: the first PIN; the answer also unlocks parent mode for setup (B2–B4). */
+  setFirstPin(pin: string): Observable<void> {
+    return this.api.post<GrantResponse>('/family/pin', { pin }).pipe(
+      tap((grant) => {
+        this.session.setParentGrant(grant.parent_grant, grant.expires_in);
+        this.patchFamily({ pin_set: true });
+      }),
+      map(() => undefined),
+    );
+  }
+
+  /** P0: PIN → parent grant. Not retried with a key: each try counts towards the lock. */
+  verifyPin(pin: string): Observable<void> {
+    return this.api.post<GrantResponse>('/family/pin/verify', { pin }, { idempotent: false }).pipe(
+      tap((grant) => this.session.setParentGrant(grant.parent_grant, grant.expires_in)),
+      map(() => undefined),
+    );
+  }
+
+  /** A4: a new PIN after a fresh sign-in (RECENT_LOGIN_REQUIRED otherwise). */
+  resetPin(pin: string): Observable<void> {
+    return this.api.put<unknown>('/family/pin', { pin }).pipe(
+      tap(() => this.patchFamily({ pin_set: true })),
+      map(() => undefined),
+    );
+  }
+
+  /** B2, P15: at most two children (409 MAX_CHILDREN). */
+  addChild(child: NewChild): Observable<FamilyChild> {
+    return this.api.post<FamilyChild>('/family/parent/children', child).pipe(
+      tap((added) => {
+        const me = this.me();
+        if (me) {
+          this.current.set({ ...me, children: [...me.children, added] });
+        }
+      }),
+    );
+  }
+
+  settings(): Observable<FamilySettings> {
+    return this.api.get<FamilySettings>('/family/parent/settings');
+  }
+
+  updateSettings(changes: Partial<FamilySettings>): Observable<FamilySettings> {
+    return this.api
+      .patch<FamilySettings>('/family/parent/settings', changes)
+      .pipe(tap((settings) => this.patchFamily(settings)));
+  }
+
   reset(): void {
     this.current.set(null);
+  }
+
+  private patchFamily(changes: Partial<FamilyMe['family']>): void {
+    const me = this.me();
+    if (me) {
+      this.current.set({ ...me, family: { ...me.family, ...changes } });
+    }
   }
 }
