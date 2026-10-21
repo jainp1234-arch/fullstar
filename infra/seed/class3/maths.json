@@ -1,0 +1,161 @@
+{
+  "class_level": 3,
+  "subject": "maths",
+  "topics": [
+    {
+      "name": "Numbers up to 1000",
+      "lessons": [
+        {
+          "title": "Hundreds, tens and ones",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Numbers can be big! Let us learn numbers up to one thousand.", "visual": { "illustration": "subject-maths", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "Ten ones make one ten. Ten tens make one hundred.", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "In 345, the 3 is in the hundreds place. It means three hundred.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "The 4 is in the tens place. It means forty. The 5 is in the ones place. It means five.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "So 345 is 300 plus 40 plus 5. We read it as three hundred forty-five.", "visual": null },
+              { "id": "s6", "duration_ms": 7000, "text": "Ten hundreds make one thousand. We write it as 1000.", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Hundreds place", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "In 472, which digit is in the hundreds place?", "image_key": null, "options": [{ "id": "a", "text": "4" }, { "id": "b", "text": "7" }, { "id": "c", "text": "2" }] }, "solution": { "correct": ["a"], "explanation": "472 is 4 hundreds, 7 tens and 2 ones." } },
+        { "title": "Value of a digit", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What is the value of 6 in 563?", "image_key": null, "options": [{ "id": "a", "text": "6" }, { "id": "b", "text": "60" }, { "id": "c", "text": "600" }] }, "solution": { "correct": ["b"], "explanation": "6 is in the tens place, so its value is 60." } },
+        { "title": "Expanded form", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which number is 800 + 20 + 9?", "image_key": null, "options": [{ "id": "a", "text": "892" }, { "id": "b", "text": "829" }, { "id": "c", "text": "928" }, { "id": "d", "text": "289" }] }, "solution": { "correct": ["b"], "explanation": "8 hundreds, 2 tens and 9 ones make 829." } },
+        { "title": "Biggest number", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which number is the biggest?", "image_key": null, "options": [{ "id": "a", "text": "699" }, { "id": "b", "text": "701" }, { "id": "c", "text": "689" }] }, "solution": { "correct": ["b"], "explanation": "701 has 7 hundreds; the others have only 6." } },
+        { "title": "Number after 999", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which number comes just after 999?", "image_key": null, "options": [{ "id": "a", "text": "998" }, { "id": "b", "text": "1000" }, { "id": "c", "text": "9999" }] }, "solution": { "correct": ["b"], "explanation": "999 + 1 = 1000." } },
+        { "title": "Ten tens", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "Ten tens make one hundred." }, "solution": { "correct": true, "explanation": "10 tens = 100." } },
+        { "title": "Comparing numbers", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "350 is smaller than 305." }, "solution": { "correct": false, "explanation": "Both have 3 hundreds; 350 has 5 tens and 305 has 0 tens, so 350 is bigger." } },
+        { "title": "Tens digit", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "In 246, the digit in the tens place is ___.", "choices": ["4", "2", "6"] }, "solution": { "correct": "4", "explanation": "246 is 2 hundreds, 4 tens and 6 ones." } },
+        { "title": "Number name", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "Five hundred seven is written as ___.", "choices": ["507", "570", "57"] }, "solution": { "correct": "507", "explanation": "5 hundreds, 0 tens and 7 ones make 507." } },
+        { "title": "Numbers and names", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match the number to its name.", "left": [{ "id": "l1", "text": "120" }, { "id": "l2", "text": "210" }, { "id": "l3", "text": "102" }], "right": [{ "id": "r1", "text": "One hundred two" }, { "id": "r2", "text": "One hundred twenty" }, { "id": "r3", "text": "Two hundred ten" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "Look at the hundreds, tens and ones of each number." } }
+      ]
+    },
+    {
+      "name": "Addition",
+      "lessons": [
+        {
+          "title": "Adding with carrying",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Adding means putting things together. Let us add 247 and 136.", "visual": { "illustration": "subject-maths", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "Write the numbers one below the other. Ones under ones, tens under tens.", "visual": null },
+              { "id": "s3", "duration_ms": 8000, "text": "Add the ones first: 7 plus 6 is 13. Write 3 and carry 1 ten.", "visual": null },
+              { "id": "s4", "duration_ms": 8000, "text": "Add the tens: 4 plus 3 is 7, and the carried 1 makes 8.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "Add the hundreds: 2 plus 1 is 3.", "visual": null },
+              { "id": "s6", "duration_ms": 7000, "text": "So 247 plus 136 is 383. Well done!", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Add tens", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What is 40 + 30?", "image_key": null, "options": [{ "id": "a", "text": "70" }, { "id": "b", "text": "60" }, { "id": "c", "text": "700" }] }, "solution": { "correct": ["a"], "explanation": "4 tens + 3 tens = 7 tens = 70." } },
+        { "title": "Add with carrying", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What is 58 + 27?", "image_key": null, "options": [{ "id": "a", "text": "75" }, { "id": "b", "text": "85" }, { "id": "c", "text": "86" }] }, "solution": { "correct": ["b"], "explanation": "8 + 7 = 15: write 5, carry 1. 5 + 2 + 1 = 8. So 85." } },
+        { "title": "Three-digit addition", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What is 325 + 214?", "image_key": null, "options": [{ "id": "a", "text": "539" }, { "id": "b", "text": "549" }, { "id": "c", "text": "439" }, { "id": "d", "text": "529" }] }, "solution": { "correct": ["a"], "explanation": "5 + 4 = 9, 2 + 1 = 3, 3 + 2 = 5. So 539." } },
+        { "title": "Marbles", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Riya has 126 marbles. Sam gives her 48 more. How many marbles does Riya have now?", "image_key": null, "options": [{ "id": "a", "text": "164" }, { "id": "b", "text": "174" }, { "id": "c", "text": "184" }] }, "solution": { "correct": ["b"], "explanation": "6 + 8 = 14: write 4, carry 1. 2 + 4 + 1 = 7 tens. 1 hundred stays. So 174." } },
+        { "title": "Adding zero", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What is 365 + 0?", "image_key": null, "options": [{ "id": "a", "text": "0" }, { "id": "b", "text": "365" }, { "id": "c", "text": "366" }] }, "solution": { "correct": ["b"], "explanation": "Adding zero does not change a number." } },
+        { "title": "Order of adding", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "25 + 40 gives the same answer as 40 + 25." }, "solution": { "correct": true, "explanation": "We can add numbers in any order; both are 65." } },
+        { "title": "Check a sum", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "199 + 1 = 190." }, "solution": { "correct": false, "explanation": "199 + 1 = 200." } },
+        { "title": "Missing sum", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "150 + 50 = ___", "choices": ["200", "100", "250"] }, "solution": { "correct": "200", "explanation": "150 is 1 hundred and 5 tens. Adding 5 more tens makes 10 tens, which is another hundred: 200." } },
+        { "title": "Carry the ten", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "36 + 46 = ___", "choices": ["82", "72", "712"] }, "solution": { "correct": "82", "explanation": "6 + 6 = 12: write 2, carry 1. 3 + 4 + 1 = 8. So 82." } },
+        { "title": "Sums", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each sum to its answer.", "left": [{ "id": "l1", "text": "20 + 30" }, { "id": "l2", "text": "45 + 15" }, { "id": "l3", "text": "100 + 100" }], "right": [{ "id": "r1", "text": "200" }, { "id": "r2", "text": "50" }, { "id": "r3", "text": "60" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "20 + 30 = 50, 45 + 15 = 60, 100 + 100 = 200." } }
+      ]
+    },
+    {
+      "name": "Subtraction",
+      "lessons": [
+        {
+          "title": "Subtracting with borrowing",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Subtracting means taking away. Let us find 52 minus 27.", "visual": { "illustration": "subject-maths", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "Start with the ones. We cannot take 7 from 2.", "visual": null },
+              { "id": "s3", "duration_ms": 8000, "text": "Borrow 1 ten from the 5 tens. Now we have 4 tens and 12 ones.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "12 minus 7 is 5. Write 5 in the ones place.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "Now the tens: 4 minus 2 is 2.", "visual": null },
+              { "id": "s6", "duration_ms": 7000, "text": "So 52 minus 27 is 25. Check: 25 plus 27 is 52.", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Take away tens", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What is 90 - 40?", "image_key": null, "options": [{ "id": "a", "text": "50" }, { "id": "b", "text": "40" }, { "id": "c", "text": "130" }] }, "solution": { "correct": ["a"], "explanation": "9 tens - 4 tens = 5 tens = 50." } },
+        { "title": "Borrowing", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What is 61 - 28?", "image_key": null, "options": [{ "id": "a", "text": "43" }, { "id": "b", "text": "33" }, { "id": "c", "text": "37" }] }, "solution": { "correct": ["b"], "explanation": "Borrow a ten: 11 - 8 = 3, 5 - 2 = 3. So 33." } },
+        { "title": "Three-digit subtraction", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What is 468 - 235?", "image_key": null, "options": [{ "id": "a", "text": "233" }, { "id": "b", "text": "223" }, { "id": "c", "text": "243" }, { "id": "d", "text": "333" }] }, "solution": { "correct": ["a"], "explanation": "8 - 5 = 3, 6 - 3 = 3, 4 - 2 = 2. So 233." } },
+        { "title": "Laddoos left", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "A shop had 75 laddoos. It sold 38. How many are left?", "image_key": null, "options": [{ "id": "a", "text": "47" }, { "id": "b", "text": "37" }, { "id": "c", "text": "43" }] }, "solution": { "correct": ["b"], "explanation": "75 - 38: borrow a ten, 15 - 8 = 7, 6 - 3 = 3. So 37." } },
+        { "title": "Subtract zero", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What is 254 - 0?", "image_key": null, "options": [{ "id": "a", "text": "0" }, { "id": "b", "text": "254" }, { "id": "c", "text": "253" }] }, "solution": { "correct": ["b"], "explanation": "Taking away zero leaves the number the same." } },
+        { "title": "Same numbers", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "45 - 45 = 0." }, "solution": { "correct": true, "explanation": "A number minus itself is zero." } },
+        { "title": "Check by adding", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "If 80 - 35 = 45, then 45 + 35 = 80." }, "solution": { "correct": true, "explanation": "We can check a subtraction by adding back." } },
+        { "title": "Missing difference", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "100 - 30 = ___", "choices": ["70", "130", "60"] }, "solution": { "correct": "70", "explanation": "10 tens - 3 tens = 7 tens = 70." } },
+        { "title": "Borrow a ten", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "42 - 19 = ___", "choices": ["23", "33", "27"] }, "solution": { "correct": "23", "explanation": "Borrow a ten: 12 - 9 = 3, 3 - 1 = 2. So 23." } },
+        { "title": "Differences", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each subtraction to its answer.", "left": [{ "id": "l1", "text": "50 - 20" }, { "id": "l2", "text": "75 - 25" }, { "id": "l3", "text": "200 - 100" }], "right": [{ "id": "r1", "text": "100" }, { "id": "r2", "text": "30" }, { "id": "r3", "text": "50" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "50 - 20 = 30, 75 - 25 = 50, 200 - 100 = 100." } }
+      ]
+    },
+    {
+      "name": "Multiplication",
+      "lessons": [
+        {
+          "title": "Multiplication is repeated adding",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "There are 3 plates. Each plate has 4 oranges. How many oranges are there?", "visual": { "illustration": "subject-maths", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "We can add: 4 plus 4 plus 4 is 12.", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "We can also multiply: 3 times 4 is 12. We write it as 3 × 4 = 12.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "Multiplication is a quick way of adding the same number again and again.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "3 × 4 and 4 × 3 give the same answer, 12.", "visual": null },
+              { "id": "s6", "duration_ms": 7000, "text": "Learn your tables. They make multiplying fast and easy.", "visual": { "illustration": "act-tables", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Repeated adding", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "5 + 5 + 5 is the same as which multiplication?", "image_key": null, "options": [{ "id": "a", "text": "3 × 5" }, { "id": "b", "text": "5 × 5" }, { "id": "c", "text": "3 + 5" }] }, "solution": { "correct": ["a"], "explanation": "5 added 3 times is 3 × 5 = 15." } },
+        { "title": "Table of 2", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What is 2 × 6?", "image_key": null, "options": [{ "id": "a", "text": "8" }, { "id": "b", "text": "12" }, { "id": "c", "text": "26" }] }, "solution": { "correct": ["b"], "explanation": "6 + 6 = 12." } },
+        { "title": "Table of 5", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What is 5 × 4?", "image_key": null, "options": [{ "id": "a", "text": "9" }, { "id": "b", "text": "20" }, { "id": "c", "text": "25" }, { "id": "d", "text": "15" }] }, "solution": { "correct": ["b"], "explanation": "5, 10, 15, 20: four fives make 20." } },
+        { "title": "Wheels on cycles", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "A cycle has 2 wheels. How many wheels do 7 cycles have?", "image_key": null, "options": [{ "id": "a", "text": "9" }, { "id": "b", "text": "14" }, { "id": "c", "text": "16" }] }, "solution": { "correct": ["b"], "explanation": "7 × 2 = 14." } },
+        { "title": "Table of 10", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What is 10 × 8?", "image_key": null, "options": [{ "id": "a", "text": "18" }, { "id": "b", "text": "80" }, { "id": "c", "text": "108" }] }, "solution": { "correct": ["b"], "explanation": "Multiplying by 10 puts a zero after the number: 80." } },
+        { "title": "Order in multiplying", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "4 × 3 gives the same answer as 3 × 4." }, "solution": { "correct": true, "explanation": "Both are 12; the order does not change the answer." } },
+        { "title": "Times one", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "9 × 1 = 1." }, "solution": { "correct": false, "explanation": "Any number times 1 is the number itself: 9 × 1 = 9." } },
+        { "title": "Table of 3", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "3 × 5 = ___", "choices": ["15", "8", "35"] }, "solution": { "correct": "15", "explanation": "3, 6, 9, 12, 15." } },
+        { "title": "Table of 4", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "4 × 6 = ___", "choices": ["24", "20", "10"] }, "solution": { "correct": "24", "explanation": "4, 8, 12, 16, 20, 24." } },
+        { "title": "Products", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each multiplication to its answer.", "left": [{ "id": "l1", "text": "2 × 5" }, { "id": "l2", "text": "3 × 3" }, { "id": "l3", "text": "4 × 2" }, { "id": "l4", "text": "6 × 2" }], "right": [{ "id": "r1", "text": "8" }, { "id": "r2", "text": "12" }, { "id": "r3", "text": "10" }, { "id": "r4", "text": "9" }] }, "solution": { "pairs": [["l1", "r3"], ["l2", "r4"], ["l3", "r1"], ["l4", "r2"]], "explanation": "2 × 5 = 10, 3 × 3 = 9, 4 × 2 = 8, 6 × 2 = 12." } }
+      ]
+    },
+    {
+      "name": "Shapes",
+      "lessons": [
+        {
+          "title": "Shapes around us",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Shapes are everywhere. Let us look at some flat shapes.", "visual": { "illustration": "subject-maths", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "A triangle has 3 sides and 3 corners. A slice of watermelon looks like a triangle.", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "A square has 4 sides. All 4 sides are equal, like a carrom board.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "A rectangle also has 4 sides. Its opposite sides are equal, like a door.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "A circle is round. It has no corners and no straight sides, like a bangle.", "visual": null },
+              { "id": "s6", "duration_ms": 6000, "text": "Look around your room. How many shapes can you find?", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Sides of a triangle", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "How many sides does a triangle have?", "image_key": null, "options": [{ "id": "a", "text": "2" }, { "id": "b", "text": "3" }, { "id": "c", "text": "4" }] }, "solution": { "correct": ["b"], "explanation": "A triangle has 3 sides and 3 corners." } },
+        { "title": "Round shape", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which shape has no corners?", "image_key": null, "options": [{ "id": "a", "text": "Square" }, { "id": "b", "text": "Triangle" }, { "id": "c", "text": "Circle" }] }, "solution": { "correct": ["c"], "explanation": "A circle is round and has no corners." } },
+        { "title": "Equal sides", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which shape has 4 equal sides?", "image_key": null, "options": [{ "id": "a", "text": "Square" }, { "id": "b", "text": "Circle" }, { "id": "c", "text": "Triangle" }] }, "solution": { "correct": ["a"], "explanation": "All 4 sides of a square are equal." } },
+        { "title": "Shape of a door", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "A door is usually shaped like a ___. Which word fits?", "image_key": null, "options": [{ "id": "a", "text": "Circle" }, { "id": "b", "text": "Rectangle" }, { "id": "c", "text": "Triangle" }] }, "solution": { "correct": ["b"], "explanation": "A door has 4 sides; its opposite sides are equal, like a rectangle." } },
+        { "title": "Round things", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which of these is round like a circle?", "image_key": null, "options": [{ "id": "a", "text": "A book" }, { "id": "b", "text": "A bangle" }, { "id": "c", "text": "A door" }, { "id": "d", "text": "A brick" }] }, "solution": { "correct": ["b"], "explanation": "A bangle is round." } },
+        { "title": "Corners of a square", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "A square has 4 corners." }, "solution": { "correct": true, "explanation": "A square has 4 sides and 4 corners." } },
+        { "title": "Circle sides", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "A circle has 4 straight sides." }, "solution": { "correct": false, "explanation": "A circle has no straight sides." } },
+        { "title": "Rectangle sides", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "A rectangle has ___ sides.", "choices": ["4", "3", "5"] }, "solution": { "correct": "4", "explanation": "A rectangle has 4 sides." } },
+        { "title": "Watermelon slice", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "A slice of watermelon looks like a ___.", "choices": ["triangle", "square", "circle"] }, "solution": { "correct": "triangle", "explanation": "A watermelon slice has three sides, like a triangle." } },
+        { "title": "Shapes and things", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each shape to a thing with that shape.", "left": [{ "id": "l1", "text": "Circle" }, { "id": "l2", "text": "Square" }, { "id": "l3", "text": "Rectangle" }], "right": [{ "id": "r1", "text": "Carrom board" }, { "id": "r2", "text": "Coin" }, { "id": "r3", "text": "Door" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r1"], ["l3", "r3"]], "explanation": "A coin is round, a carrom board is square and a door is a rectangle." } }
+      ]
+    }
+  ]
+}

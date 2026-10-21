@@ -1,0 +1,169 @@
+{
+  "class_level": 3,
+  "subject": "hindi",
+  "topics": [
+    {
+      "name": "संज्ञा",
+      "lessons": [
+        {
+          "title": "नाम बताने वाले शब्द",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "हर व्यक्ति, जगह, जानवर और चीज़ का एक नाम होता है।", "visual": { "illustration": "subject-hindi", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 6000, "text": "किसी का नाम बताने वाले शब्द को संज्ञा कहते हैं।", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "सीता, राम और अध्यापक व्यक्तियों के नाम हैं। ये संज्ञा हैं।", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "दिल्ली, स्कूल और बाज़ार जगहों के नाम हैं।", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "गाय, तोता और शेर जानवरों के नाम हैं। किताब और कुर्सी चीज़ों के नाम हैं।", "visual": { "illustration": "avatar-lion", "animation": "slide-in" } },
+              { "id": "s6", "duration_ms": 7000, "text": "'मोहन आम खाता है।' इस वाक्य में मोहन और आम संज्ञा हैं।", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "संज्ञा पहचानो", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "इनमें से संज्ञा शब्द कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "दौड़ना" }, { "id": "b", "text": "किताब" }, { "id": "c", "text": "सुंदर" }] }, "solution": { "correct": ["b"], "explanation": "किताब एक चीज़ का नाम है, इसलिए यह संज्ञा है।" } },
+        { "title": "जगह का नाम", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "इनमें से किसी जगह का नाम कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "मुंबई" }, { "id": "b", "text": "खेलना" }, { "id": "c", "text": "लाल" }] }, "solution": { "correct": ["a"], "explanation": "मुंबई एक शहर का नाम है।" } },
+        { "title": "जानवर का नाम", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "इनमें से किस जानवर का नाम है?", "image_key": null, "options": [{ "id": "a", "text": "मेज़" }, { "id": "b", "text": "हाथी" }, { "id": "c", "text": "गाना" }] }, "solution": { "correct": ["b"], "explanation": "हाथी एक जानवर है, इसलिए यह संज्ञा है।" } },
+        { "title": "वाक्य में संज्ञा", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "'गीता पत्र लिखती है।' इसमें संज्ञा कौन-सी है?", "image_key": null, "options": [{ "id": "a", "text": "लिखती" }, { "id": "b", "text": "है" }, { "id": "c", "text": "गीता" }] }, "solution": { "correct": ["c"], "explanation": "गीता एक व्यक्ति का नाम है। 'पत्र' भी संज्ञा है।" } },
+        { "title": "संज्ञा नहीं", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "इनमें से कौन-सा शब्द संज्ञा नहीं है?", "image_key": null, "options": [{ "id": "a", "text": "पेड़" }, { "id": "b", "text": "नदी" }, { "id": "c", "text": "हँसना" }, { "id": "d", "text": "बिल्ली" }] }, "solution": { "correct": ["c"], "explanation": "हँसना एक काम है, किसी का नाम नहीं।" } },
+        { "title": "चीज़ का नाम", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'कुर्सी' संज्ञा है।" }, "solution": { "correct": true, "explanation": "कुर्सी एक चीज़ का नाम है।" } },
+        { "title": "काम या नाम", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "'सोना' (नींद लेना) एक संज्ञा है।" }, "solution": { "correct": false, "explanation": "नींद लेने के अर्थ में 'सोना' एक काम है, संज्ञा नहीं।" } },
+        { "title": "खाली जगह भरो", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "आसमान में ___ उड़ रही है।", "choices": ["पतंग", "धीरे", "हरी"] }, "solution": { "correct": "पतंग", "explanation": "पतंग एक चीज़ का नाम है जो आसमान में उड़ती है।" } },
+        { "title": "नाम बताने वाला शब्द", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "नाम बताने वाले शब्द को ___ कहते हैं।", "choices": ["संज्ञा", "क्रिया", "अक्षर"] }, "solution": { "correct": "संज्ञा", "explanation": "किसी का नाम बताने वाला शब्द संज्ञा कहलाता है।" } },
+        { "title": "संज्ञा के प्रकार", "question_type": "match", "difficulty": 2, "body": { "prompt": "शब्द को सही जोड़ी से मिलाओ।", "left": [{ "id": "l1", "text": "डॉक्टर" }, { "id": "l2", "text": "बगीचा" }, { "id": "l3", "text": "तोता" }], "right": [{ "id": "r1", "text": "जानवर का नाम" }, { "id": "r2", "text": "व्यक्ति का नाम" }, { "id": "r3", "text": "जगह का नाम" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "डॉक्टर व्यक्ति है, बगीचा जगह है और तोता जानवर है।" } }
+      ],
+      "passages": [
+        { "title": "मेरा गाँव", "difficulty": 1, "body": { "text": "मेरा गाँव बहुत सुंदर है। गाँव के पास एक छोटी नदी बहती है। नदी के किनारे बड़े-बड़े पेड़ हैं। सुबह चिड़ियाँ मीठे गीत गाती हैं। किसान खेतों में काम करते हैं। बच्चे पेड़ के नीचे खेलते हैं। शाम को सब लोग चौपाल पर बैठकर बातें करते हैं। मुझे अपना गाँव बहुत प्यारा लगता है।", "word_count": 0, "level": 1 } }
+      ]
+    },
+    {
+      "name": "सर्वनाम",
+      "lessons": [
+        {
+          "title": "नाम की जगह आने वाले शब्द",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 7000, "text": "सुनो: 'राधा स्कूल जाती है। राधा पढ़ती है। राधा खेलती है।' बार-बार राधा अच्छा नहीं लगता।", "visual": { "illustration": "subject-hindi", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 6000, "text": "हम कह सकते हैं: 'राधा स्कूल जाती है। वह पढ़ती है।'", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "संज्ञा की जगह आने वाले शब्द को सर्वनाम कहते हैं।", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "मैं, तुम, आप, वह, यह, हम और वे सर्वनाम हैं।", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "'मोहन आया। उसने खाना खाया।' यहाँ 'उसने' मोहन की जगह आया है।", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "सर्वनाम पहचानो", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "इनमें से सर्वनाम कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "वह" }, { "id": "b", "text": "घर" }, { "id": "c", "text": "चलना" }] }, "solution": { "correct": ["a"], "explanation": "'वह' किसी संज्ञा की जगह आता है, इसलिए सर्वनाम है।" } },
+        { "title": "मैं", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "अपने लिए हम कौन-सा सर्वनाम बोलते हैं?", "image_key": null, "options": [{ "id": "a", "text": "वे" }, { "id": "b", "text": "मैं" }, { "id": "c", "text": "तुम" }] }, "solution": { "correct": ["b"], "explanation": "अपने लिए हम 'मैं' बोलते हैं।" } },
+        { "title": "सही सर्वनाम", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "'सीमा गाना गाती है। ___ बहुत अच्छा गाती है।' खाली जगह में क्या आएगा?", "image_key": null, "options": [{ "id": "a", "text": "वह" }, { "id": "b", "text": "हम" }, { "id": "c", "text": "तुम" }] }, "solution": { "correct": ["a"], "explanation": "सीमा की जगह 'वह' आएगा।" } },
+        { "title": "बहुत लोग", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "कई लोगों के लिए कौन-सा सर्वनाम आता है?", "image_key": null, "options": [{ "id": "a", "text": "मैं" }, { "id": "b", "text": "वह" }, { "id": "c", "text": "वे" }] }, "solution": { "correct": ["c"], "explanation": "कई लोगों के लिए 'वे' बोलते हैं।" } },
+        { "title": "सर्वनाम नहीं", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "इनमें से कौन-सा सर्वनाम नहीं है?", "image_key": null, "options": [{ "id": "a", "text": "हम" }, { "id": "b", "text": "आप" }, { "id": "c", "text": "किताब" }, { "id": "d", "text": "यह" }] }, "solution": { "correct": ["c"], "explanation": "किताब एक चीज़ का नाम है, यानी संज्ञा।" } },
+        { "title": "तुम", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'तुम' एक सर्वनाम है।" }, "solution": { "correct": true, "explanation": "'तुम' उस व्यक्ति के लिए आता है जिससे हम बात करते हैं।" } },
+        { "title": "पेड़", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'पेड़' एक सर्वनाम है।" }, "solution": { "correct": false, "explanation": "पेड़ एक चीज़ का नाम है, यानी संज्ञा।" } },
+        { "title": "हम सब", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "___ सब मिलकर खेलते हैं।", "choices": ["हम", "पेड़", "मीठा"] }, "solution": { "correct": "हम", "explanation": "'हम' सर्वनाम है, जो अपने और दूसरों के लिए आता है।" } },
+        { "title": "बड़ों के लिए", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "दादी जी, ___ क्या खाएँगी?", "choices": ["आप", "मैं", "वे"] }, "solution": { "correct": "आप", "explanation": "बड़ों से बात करते समय हम 'आप' कहते हैं।" } },
+        { "title": "किसके लिए", "question_type": "match", "difficulty": 2, "body": { "prompt": "सर्वनाम को सही अर्थ से मिलाओ।", "left": [{ "id": "l1", "text": "मैं" }, { "id": "l2", "text": "हम" }, { "id": "l3", "text": "वे" }], "right": [{ "id": "r1", "text": "बहुत-से दूसरे लोग" }, { "id": "r2", "text": "मैं अकेला" }, { "id": "r3", "text": "मैं और मेरे साथी" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "मैं: खुद, हम: मैं और साथी, वे: दूसरे कई लोग।" } }
+      ],
+      "passages": [
+        { "title": "प्यासा कौआ", "difficulty": 2, "body": { "text": "गर्मी का दिन था। एक कौआ बहुत प्यासा था। वह पानी ढूँढते-ढूँढते एक बगीचे में पहुँचा। वहाँ उसे एक घड़ा दिखा। घड़े में पानी बहुत नीचे था। कौए ने एक उपाय सोचा। उसने छोटे-छोटे कंकड़ घड़े में डाले। धीरे-धीरे पानी ऊपर आ गया। कौए ने पानी पिया और खुश होकर उड़ गया।", "word_count": 0, "level": 2 } }
+      ]
+    },
+    {
+      "name": "विशेषण",
+      "lessons": [
+        {
+          "title": "विशेषता बताने वाले शब्द",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "कुछ शब्द संज्ञा के बारे में और बताते हैं।", "visual": { "illustration": "subject-hindi", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "ये शब्द रंग, आकार, स्वाद या गिनती बताते हैं। इन्हें विशेषण कहते हैं।", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "लाल गुलाब। यहाँ 'लाल' गुलाब का रंग बताता है।", "visual": null },
+              { "id": "s4", "duration_ms": 6000, "text": "मीठा आम। यहाँ 'मीठा' आम का स्वाद बताता है।", "visual": null },
+              { "id": "s5", "duration_ms": 6000, "text": "दो बिल्लियाँ। यहाँ 'दो' बिल्लियों की गिनती बताता है।", "visual": { "illustration": "avatar-cat", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "विशेषण पहचानो", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "इनमें से विशेषण कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "सुंदर" }, { "id": "b", "text": "पेड़" }, { "id": "c", "text": "दौड़ना" }] }, "solution": { "correct": ["a"], "explanation": "'सुंदर' किसी की विशेषता बताता है।" } },
+        { "title": "रंग बताने वाला शब्द", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "'हरा तोता' में विशेषण कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "तोता" }, { "id": "b", "text": "हरा" }] }, "solution": { "correct": ["b"], "explanation": "'हरा' तोते का रंग बताता है।" } },
+        { "title": "स्वाद", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "इनमें से स्वाद बताने वाला शब्द कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "खट्टा" }, { "id": "b", "text": "लंबा" }, { "id": "c", "text": "नीला" }] }, "solution": { "correct": ["a"], "explanation": "'खट्टा' स्वाद बताता है, जैसे खट्टा नींबू।" } },
+        { "title": "गिनती", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "'पाँच केले' में विशेषण कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "केले" }, { "id": "b", "text": "पाँच" }] }, "solution": { "correct": ["b"], "explanation": "'पाँच' केलों की गिनती बताता है।" } },
+        { "title": "उलटा शब्द", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "'बड़ा' का उलटा क्या है?", "image_key": null, "options": [{ "id": "a", "text": "छोटा" }, { "id": "b", "text": "मोटा" }, { "id": "c", "text": "ऊँचा" }, { "id": "d", "text": "गोल" }] }, "solution": { "correct": ["a"], "explanation": "'बड़ा' का उलटा 'छोटा' है।" } },
+        { "title": "मीठा", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'मीठी खीर' में 'मीठी' विशेषण है।" }, "solution": { "correct": true, "explanation": "'मीठी' खीर का स्वाद बताता है।" } },
+        { "title": "खेलना", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "'खेलना' एक विशेषण है।" }, "solution": { "correct": false, "explanation": "'खेलना' एक काम है, विशेषता नहीं।" } },
+        { "title": "ऊँचा पहाड़", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "हिमालय एक ___ पहाड़ है।", "choices": ["ऊँचा", "छोटा", "मीठा"] }, "solution": { "correct": "ऊँचा", "explanation": "हिमालय बहुत ऊँचा पहाड़ है।" } },
+        { "title": "ठंडा पानी", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "गर्मी में ___ पानी अच्छा लगता है।", "choices": ["ठंडा", "गरम", "खट्टा"] }, "solution": { "correct": "ठंडा", "explanation": "गर्मी में ठंडा पानी अच्छा लगता है।" } },
+        { "title": "उलटे शब्द", "question_type": "match", "difficulty": 2, "body": { "prompt": "शब्द को उसके उलटे शब्द से मिलाओ।", "left": [{ "id": "l1", "text": "मोटा" }, { "id": "l2", "text": "गरम" }, { "id": "l3", "text": "अच्छा" }], "right": [{ "id": "r1", "text": "बुरा" }, { "id": "r2", "text": "पतला" }, { "id": "r3", "text": "ठंडा" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "मोटा–पतला, गरम–ठंडा, अच्छा–बुरा।" } }
+      ],
+      "passages": [
+        { "title": "बारिश का दिन", "difficulty": 1, "body": { "text": "आसमान में काले बादल छा गए। ठंडी हवा चलने लगी। फिर ज़ोर से बारिश होने लगी। बच्चे खुश होकर बाहर आ गए। उन्होंने कागज़ की नावें बनाईं। छोटी-छोटी नावें पानी में तैरने लगीं। माँ ने गरम-गरम पकौड़े बनाए। सबने मिलकर पकौड़े खाए।", "word_count": 0, "level": 1 } }
+      ]
+    },
+    {
+      "name": "वचन",
+      "lessons": [
+        {
+          "title": "एक और अनेक",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "एक केला। दो केले। क्या तुमने अंतर देखा?", "visual": { "illustration": "subject-hindi", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "जो शब्द एक चीज़ बताए, वह एकवचन है। जो अनेक चीज़ें बताए, वह बहुवचन है।", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "लड़का एकवचन है। लड़के बहुवचन है।", "visual": null },
+              { "id": "s4", "duration_ms": 6000, "text": "किताब एकवचन है। किताबें बहुवचन है।", "visual": null },
+              { "id": "s5", "duration_ms": 6000, "text": "चिड़िया एकवचन है। चिड़ियाँ बहुवचन है।", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "लड़का का बहुवचन", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "'लड़का' का बहुवचन क्या है?", "image_key": null, "options": [{ "id": "a", "text": "लड़के" }, { "id": "b", "text": "लड़की" }, { "id": "c", "text": "लड़का" }] }, "solution": { "correct": ["a"], "explanation": "एक लड़का, बहुत-से लड़के।" } },
+        { "title": "किताब का बहुवचन", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "'किताब' का बहुवचन क्या है?", "image_key": null, "options": [{ "id": "a", "text": "किताबा" }, { "id": "b", "text": "किताबें" }, { "id": "c", "text": "किताबो" }] }, "solution": { "correct": ["b"], "explanation": "एक किताब, कई किताबें।" } },
+        { "title": "चिड़िया का बहुवचन", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "'चिड़िया' का बहुवचन क्या है?", "image_key": null, "options": [{ "id": "a", "text": "चिड़ियाँ" }, { "id": "b", "text": "चिड़िये" }, { "id": "c", "text": "चिड़ियों" }] }, "solution": { "correct": ["a"], "explanation": "एक चिड़िया, बहुत-सी चिड़ियाँ।" } },
+        { "title": "एकवचन शब्द", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "इनमें से एकवचन शब्द कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "घोड़े" }, { "id": "b", "text": "कुर्सी" }, { "id": "c", "text": "पत्ते" }] }, "solution": { "correct": ["b"], "explanation": "'कुर्सी' एक चीज़ बताता है।" } },
+        { "title": "कमरा", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "'कमरा' का बहुवचन क्या है?", "image_key": null, "options": [{ "id": "a", "text": "कमरें" }, { "id": "b", "text": "कमरे" }, { "id": "c", "text": "कमरी" }, { "id": "d", "text": "कमरा" }] }, "solution": { "correct": ["b"], "explanation": "एक कमरा, दो कमरे।" } },
+        { "title": "बहुवचन", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'नदियाँ' बहुवचन है।" }, "solution": { "correct": true, "explanation": "'नदियाँ' कई नदियों को बताता है।" } },
+        { "title": "पेड़", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "'पेड़' शब्द केवल बहुवचन में आता है।" }, "solution": { "correct": false, "explanation": "'पेड़' एकवचन और बहुवचन दोनों में एक जैसा रहता है: एक पेड़, कई पेड़।" } },
+        { "title": "बहुत-से केले", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "टोकरी में बहुत-से ___ हैं।", "choices": ["केले", "केला", "केलो"] }, "solution": { "correct": "केले", "explanation": "बहुत-से के साथ बहुवचन 'केले' आता है।" } },
+        { "title": "एक गाय", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "खेत में एक ___ चर रही है।", "choices": ["गाय", "गायें", "गायों"] }, "solution": { "correct": "गाय", "explanation": "'एक' के साथ एकवचन 'गाय' आता है।" } },
+        { "title": "एकवचन और बहुवचन", "question_type": "match", "difficulty": 2, "body": { "prompt": "एकवचन को उसके बहुवचन से मिलाओ।", "left": [{ "id": "l1", "text": "बच्चा" }, { "id": "l2", "text": "रात" }, { "id": "l3", "text": "बहन" }], "right": [{ "id": "r1", "text": "बहनें" }, { "id": "r2", "text": "बच्चे" }, { "id": "r3", "text": "रातें" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "बच्चा–बच्चे, रात–रातें, बहन–बहनें।" } }
+      ],
+      "passages": [
+        { "title": "मेरी दादी", "difficulty": 2, "body": { "text": "मेरी दादी बहुत प्यारी हैं। वे रोज़ सुबह जल्दी उठती हैं। वे बगीचे में फूलों को पानी देती हैं। दादी मुझे रात को कहानियाँ सुनाती हैं। उनकी कहानियों में राजा, रानी और जानवर होते हैं। जब मैं बीमार होता हूँ, तो दादी मेरा बहुत ध्यान रखती हैं। मुझे अपनी दादी से बहुत प्यार है।", "word_count": 0, "level": 2 } }
+      ]
+    },
+    {
+      "name": "लिंग",
+      "lessons": [
+        {
+          "title": "पुल्लिंग और स्त्रीलिंग",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "कुछ शब्द पुरुष जाति के लिए होते हैं, कुछ स्त्री जाति के लिए।", "visual": { "illustration": "subject-hindi", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 6000, "text": "पुरुष जाति बताने वाले शब्द पुल्लिंग होते हैं, जैसे लड़का, शेर।", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "स्त्री जाति बताने वाले शब्द स्त्रीलिंग होते हैं, जैसे लड़की, शेरनी।", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "दादा और दादी, राजा और रानी, घोड़ा और घोड़ी।", "visual": null },
+              { "id": "s5", "duration_ms": 6000, "text": "चीज़ों के भी लिंग होते हैं: कुर्सी स्त्रीलिंग है, पंखा पुल्लिंग है।", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "लड़का का स्त्रीलिंग", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "'लड़का' का स्त्रीलिंग क्या है?", "image_key": null, "options": [{ "id": "a", "text": "लड़के" }, { "id": "b", "text": "लड़की" }, { "id": "c", "text": "लड़कियाँ" }] }, "solution": { "correct": ["b"], "explanation": "लड़का–लड़की।" } },
+        { "title": "राजा का स्त्रीलिंग", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "'राजा' का स्त्रीलिंग क्या है?", "image_key": null, "options": [{ "id": "a", "text": "रानी" }, { "id": "b", "text": "राजी" }, { "id": "c", "text": "राज" }] }, "solution": { "correct": ["a"], "explanation": "राजा–रानी।" } },
+        { "title": "शेर का स्त्रीलिंग", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "'शेर' का स्त्रीलिंग क्या है?", "image_key": null, "options": [{ "id": "a", "text": "शेरा" }, { "id": "b", "text": "शेरनी" }, { "id": "c", "text": "शेरी" }] }, "solution": { "correct": ["b"], "explanation": "शेर–शेरनी।" } },
+        { "title": "पुल्लिंग शब्द", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "इनमें से पुल्लिंग शब्द कौन-सा है?", "image_key": null, "options": [{ "id": "a", "text": "बहन" }, { "id": "b", "text": "माता" }, { "id": "c", "text": "भाई" }] }, "solution": { "correct": ["c"], "explanation": "'भाई' पुरुष जाति बताता है।" } },
+        { "title": "दादा", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "'दादा' का स्त्रीलिंग क्या है?", "image_key": null, "options": [{ "id": "a", "text": "दादी" }, { "id": "b", "text": "नानी" }, { "id": "c", "text": "मामी" }, { "id": "d", "text": "चाची" }] }, "solution": { "correct": ["a"], "explanation": "दादा–दादी।" } },
+        { "title": "घोड़ी", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'घोड़ी' स्त्रीलिंग है।" }, "solution": { "correct": true, "explanation": "घोड़ा पुल्लिंग है और घोड़ी स्त्रीलिंग।" } },
+        { "title": "माली", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "'माली' का स्त्रीलिंग 'माला' है।" }, "solution": { "correct": false, "explanation": "'माली' का स्त्रीलिंग 'मालिन' है। 'माला' फूलों का हार होता है।" } },
+        { "title": "मोर", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "मोर का स्त्रीलिंग ___ है।", "choices": ["मोरनी", "मोरी", "मोरा"] }, "solution": { "correct": "मोरनी", "explanation": "मोर–मोरनी।" } },
+        { "title": "बेटा", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "बेटा का स्त्रीलिंग ___ है।", "choices": ["बेटी", "बेटे", "बेटों"] }, "solution": { "correct": "बेटी", "explanation": "बेटा–बेटी।" } },
+        { "title": "पुल्लिंग और स्त्रीलिंग जोड़ियाँ", "question_type": "match", "difficulty": 2, "body": { "prompt": "पुल्लिंग को उसके स्त्रीलिंग से मिलाओ।", "left": [{ "id": "l1", "text": "नाना" }, { "id": "l2", "text": "मामा" }, { "id": "l3", "text": "चाचा" }], "right": [{ "id": "r1", "text": "चाची" }, { "id": "r2", "text": "नानी" }, { "id": "r3", "text": "मामी" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "नाना–नानी, मामा–मामी, चाचा–चाची।" } }
+      ]
+    }
+  ]
+}
