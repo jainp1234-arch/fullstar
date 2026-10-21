@@ -86,6 +86,7 @@ Fonts, icons and illustrations are vendored into `libs/ui/assets` at the commits
 5. `make bootstrap-admin EMAIL=you@example.com NAME="Your Name"`: makes that person the first Content Studio super admin (Keycloak account with authenticator set-up required, realm role `super_admin`, `staff_users` row). Needs `KEYCLOAK_API_ADMIN_SECRET` in `.env` and Keycloak running (`make up`). Safe to run again. Everyone else is added in the Studio under Staff (S13).
 
    Keycloak imports the realm only when it does not exist yet. A realm imported before Plan 4.1 has no `fullstar-api-admin` client: either recreate the local Keycloak (`make down`, `docker volume rm fullstar_keycloak-db`, `make up`; this deletes local Keycloak accounts) or add the client by hand in the admin console (confidential, service accounts only, secret = `KEYCLOAK_API_ADMIN_SECRET`, service-account roles `realm-management` → `manage-users`, `view-users`).
+6. `make seed-content`: loads the Class 3 starter content from `infra/seed/class3/*.json` (Plan 4.5: 5 topics each for English, Hindi, Maths and EVS, one lesson and 10 questions per topic, 10 reading passages) through the Studio services, as the first super admin: each item is checked against Schema §5, gets a manual check and is published. Every seeded item has an audit row `content.seed`. Safe to run again (existing items are skipped). `SeedFilesTest` checks the files without a database.
 
 Database tests (`make test`) use a throwaway PostgreSQL 18.6 container (Testcontainers), prepared the same way.
 

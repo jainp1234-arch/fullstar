@@ -1,0 +1,164 @@
+{
+  "class_level": 3,
+  "subject": "evs",
+  "topics": [
+    {
+      "name": "Plants around us",
+      "lessons": [
+        {
+          "title": "Parts of a plant",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Look around you. Trees, bushes and grass are all plants.", "visual": { "illustration": "subject-evs", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "The roots grow under the soil. They hold the plant firmly and take in water.", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "The stem holds the plant up. It carries water from the roots to the leaves.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "Leaves are the kitchen of the plant. They make food using sunlight, air and water.", "visual": { "illustration": "subject-evs", "animation": "pop" } },
+              { "id": "s5", "duration_ms": 6000, "text": "Flowers make the plant beautiful. Later, flowers turn into fruits.", "visual": null },
+              { "id": "s6", "duration_ms": 6000, "text": "Fruits keep the seeds safe. A seed can grow into a new plant.", "visual": null },
+              { "id": "s7", "duration_ms": 6000, "text": "Plants need water, air and sunlight to grow. Let us take care of them.", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Part under the soil", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which part of a plant grows under the soil?", "image_key": null, "options": [{ "id": "a", "text": "Leaf" }, { "id": "b", "text": "Root" }, { "id": "c", "text": "Flower" }] }, "solution": { "correct": ["b"], "explanation": "Roots grow under the soil and take in water." } },
+        { "title": "Kitchen of the plant", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which part of a plant makes its food?", "image_key": null, "options": [{ "id": "a", "text": "Leaf" }, { "id": "b", "text": "Stem" }, { "id": "c", "text": "Root" }] }, "solution": { "correct": ["a"], "explanation": "Leaves make food using sunlight, air and water." } },
+        { "title": "What holds the plant up", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which part holds the plant up and carries water to the leaves?", "image_key": null, "options": [{ "id": "a", "text": "Flower" }, { "id": "b", "text": "Seed" }, { "id": "c", "text": "Stem" }] }, "solution": { "correct": ["c"], "explanation": "The stem holds the plant up and carries water." } },
+        { "title": "What plants need", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What does a plant need to grow?", "image_key": null, "options": [{ "id": "a", "text": "Water, air and sunlight" }, { "id": "b", "text": "Only darkness" }, { "id": "c", "text": "Only sand" }, { "id": "d", "text": "Sugar and salt" }] }, "solution": { "correct": ["a"], "explanation": "Plants need water, air and sunlight to grow well." } },
+        { "title": "From flower to fruit", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What does a flower later turn into?", "image_key": null, "options": [{ "id": "a", "text": "A root" }, { "id": "b", "text": "A fruit" }, { "id": "c", "text": "A stem" }] }, "solution": { "correct": ["b"], "explanation": "Flowers turn into fruits, and fruits keep the seeds." } },
+        { "title": "Seeds grow", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "A seed can grow into a new plant." }, "solution": { "correct": true, "explanation": "When a seed gets water, air and warmth, it grows into a new plant." } },
+        { "title": "Roots and soil", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "Roots grow above the soil, high in the air." }, "solution": { "correct": false, "explanation": "Roots usually grow under the soil." } },
+        { "title": "Leaves are green", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "Most leaves are ___ in colour.", "choices": ["green", "blue", "black"] }, "solution": { "correct": "green", "explanation": "Most leaves are green." } },
+        { "title": "Fruits keep seeds", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "Fruits keep the ___ safe inside them.", "choices": ["seeds", "roots", "stones"] }, "solution": { "correct": "seeds", "explanation": "Seeds are inside fruits, like in a mango or an apple." } },
+        { "title": "Plant parts and jobs", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each part of the plant to its job.", "left": [{ "id": "l1", "text": "Root" }, { "id": "l2", "text": "Leaf" }, { "id": "l3", "text": "Stem" }], "right": [{ "id": "r1", "text": "Makes food" }, { "id": "r2", "text": "Carries water up" }, { "id": "r3", "text": "Takes in water from soil" }] }, "solution": { "pairs": [["l1", "r3"], ["l2", "r1"], ["l3", "r2"]], "explanation": "Roots take in water, stems carry it up and leaves make food." } }
+      ]
+    },
+    {
+      "name": "Animals and their homes",
+      "lessons": [
+        {
+          "title": "Where do animals live?",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Just like us, animals need a home. A home keeps them safe from rain, heat and cold.", "visual": { "illustration": "subject-evs", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 6000, "text": "A bird builds a nest with twigs, grass and leaves.", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "Bees live together in a hive. They make honey there.", "visual": null },
+              { "id": "s4", "duration_ms": 6000, "text": "A rabbit lives in a burrow. A burrow is a hole under the ground.", "visual": { "illustration": "avatar-rabbit", "animation": "slide-in" } },
+              { "id": "s5", "duration_ms": 6000, "text": "A lion lives in a den. A spider spins a web.", "visual": { "illustration": "avatar-lion", "animation": "slide-in" } },
+              { "id": "s6", "duration_ms": 6000, "text": "Fish live in water, in ponds, rivers and the sea.", "visual": null },
+              { "id": "s7", "duration_ms": 6000, "text": "Some animals, like cows and dogs, live with people. We must be kind to all animals.", "visual": { "illustration": "avatar-dog", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Bird's home", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Where does a bird live?", "image_key": null, "options": [{ "id": "a", "text": "Nest" }, { "id": "b", "text": "Den" }, { "id": "c", "text": "Hive" }] }, "solution": { "correct": ["a"], "explanation": "A bird builds a nest with twigs and grass." } },
+        { "title": "Bee's home", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Bees live together in a ___. Which word fits?", "image_key": null, "options": [{ "id": "a", "text": "Burrow" }, { "id": "b", "text": "Hive" }, { "id": "c", "text": "Web" }] }, "solution": { "correct": ["b"], "explanation": "Bees live in a hive and make honey there." } },
+        { "title": "Rabbit's home", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "A rabbit lives in a hole under the ground. What is it called?", "image_key": null, "options": [{ "id": "a", "text": "Burrow" }, { "id": "b", "text": "Nest" }, { "id": "c", "text": "Kennel" }] }, "solution": { "correct": ["a"], "explanation": "A rabbit's home under the ground is a burrow." } },
+        { "title": "Lives in water", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which animal lives in water?", "image_key": null, "options": [{ "id": "a", "text": "Cow" }, { "id": "b", "text": "Fish" }, { "id": "c", "text": "Lion" }, { "id": "d", "text": "Parrot" }] }, "solution": { "correct": ["b"], "explanation": "Fish live in ponds, rivers and the sea." } },
+        { "title": "Why animals need homes", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Why do animals need a home?", "image_key": null, "options": [{ "id": "a", "text": "To stay safe from rain, heat and cold" }, { "id": "b", "text": "To watch television" }, { "id": "c", "text": "To go to school" }] }, "solution": { "correct": ["a"], "explanation": "A home keeps animals safe, just like our homes keep us safe." } },
+        { "title": "Spider's web", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "A spider spins a web." }, "solution": { "correct": true, "explanation": "A spider makes a web with fine threads." } },
+        { "title": "Lion's home", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "A lion lives in a nest on a tree." }, "solution": { "correct": false, "explanation": "A lion lives in a den, not in a nest." } },
+        { "title": "Nest material", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "A bird builds its nest with twigs and ___.", "choices": ["grass", "stones", "iron"] }, "solution": { "correct": "grass", "explanation": "Birds use twigs, grass and leaves to build nests." } },
+        { "title": "Honey makers", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "Bees make ___ in their hive.", "choices": ["honey", "milk", "bread"] }, "solution": { "correct": "honey", "explanation": "Bees make honey in their hive." } },
+        { "title": "Animals and homes", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match the animal to its home.", "left": [{ "id": "l1", "text": "Bird" }, { "id": "l2", "text": "Lion" }, { "id": "l3", "text": "Rabbit" }, { "id": "l4", "text": "Bee" }], "right": [{ "id": "r1", "text": "Burrow" }, { "id": "r2", "text": "Hive" }, { "id": "r3", "text": "Nest" }, { "id": "r4", "text": "Den" }] }, "solution": { "pairs": [["l1", "r3"], ["l2", "r4"], ["l3", "r1"], ["l4", "r2"]], "explanation": "Bird: nest, lion: den, rabbit: burrow, bee: hive." } }
+      ]
+    },
+    {
+      "name": "Water",
+      "lessons": [
+        {
+          "title": "We need water",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "All living things need water. People, animals and plants cannot live without it.", "visual": { "illustration": "subject-evs", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "We use water to drink, cook, bathe, wash clothes and clean our homes.", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "We get water from rain, rivers, lakes, wells and taps.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "Rain water fills ponds and rivers. It also goes into the ground.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "We should drink clean water. Boiling or filtering water makes it safe to drink.", "visual": null },
+              { "id": "s6", "duration_ms": 7000, "text": "Do not waste water. Turn off the tap while you brush your teeth.", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Who needs water", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Who needs water to live?", "image_key": null, "options": [{ "id": "a", "text": "Only people" }, { "id": "b", "text": "Only plants" }, { "id": "c", "text": "All living things" }] }, "solution": { "correct": ["c"], "explanation": "People, animals and plants all need water." } },
+        { "title": "Safe drinking water", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "How can we make water safe to drink?", "image_key": null, "options": [{ "id": "a", "text": "By boiling or filtering it" }, { "id": "b", "text": "By adding mud" }, { "id": "c", "text": "By keeping it open in the sun all week" }] }, "solution": { "correct": ["a"], "explanation": "Boiling or filtering removes germs and dirt." } },
+        { "title": "Saving water", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which is a good way to save water?", "image_key": null, "options": [{ "id": "a", "text": "Leave the tap running" }, { "id": "b", "text": "Turn off the tap while brushing" }, { "id": "c", "text": "Play with the hose all day" }] }, "solution": { "correct": ["b"], "explanation": "Turning off the tap while brushing saves a lot of water." } },
+        { "title": "Sources of water", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which of these is a source of water?", "image_key": null, "options": [{ "id": "a", "text": "Well" }, { "id": "b", "text": "Chair" }, { "id": "c", "text": "Pencil" }, { "id": "d", "text": "Shoe" }] }, "solution": { "correct": ["a"], "explanation": "We can get water from a well." } },
+        { "title": "Uses of water", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "We use water for many things. Which one needs water?", "image_key": null, "options": [{ "id": "a", "text": "Reading a book" }, { "id": "b", "text": "Cooking rice" }, { "id": "c", "text": "Flying a kite" }] }, "solution": { "correct": ["b"], "explanation": "We need water to cook rice." } },
+        { "title": "Rain fills ponds", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "Rain water fills ponds and rivers." }, "solution": { "correct": true, "explanation": "Rain water collects in ponds, lakes and rivers." } },
+        { "title": "Dirty water", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "It is safe to drink dirty water." }, "solution": { "correct": false, "explanation": "Dirty water can make us sick. We should drink clean water." } },
+        { "title": "Do not waste", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "We should not ___ water.", "choices": ["waste", "drink", "boil"] }, "solution": { "correct": "waste", "explanation": "Water is precious, so we should not waste it." } },
+        { "title": "Water from the sky", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "Water that falls from clouds is called ___.", "choices": ["rain", "sand", "smoke"] }, "solution": { "correct": "rain", "explanation": "Rain is water that falls from clouds." } },
+        { "title": "Water uses", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match the place to what we do with water there.", "left": [{ "id": "l1", "text": "Kitchen" }, { "id": "l2", "text": "Bathroom" }, { "id": "l3", "text": "Garden" }], "right": [{ "id": "r1", "text": "Water the plants" }, { "id": "r2", "text": "Cook food" }, { "id": "r3", "text": "Take a bath" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "We cook in the kitchen, bathe in the bathroom and water plants in the garden." } }
+      ]
+    },
+    {
+      "name": "Food we eat",
+      "lessons": [
+        {
+          "title": "Where our food comes from",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "We need food to grow, to stay healthy and to play.", "visual": { "illustration": "subject-evs", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "Some food comes from plants: rice, wheat, dal, fruits and vegetables.", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "Some food comes from animals: milk, eggs and honey.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "Milk gives us curd, butter and paneer.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "A healthy meal has many kinds of food, like roti, dal, vegetables and a fruit.", "visual": null },
+              { "id": "s6", "duration_ms": 7000, "text": "Wash your hands before eating, and do not waste food.", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Food from animals", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which food comes from an animal?", "image_key": null, "options": [{ "id": "a", "text": "Milk" }, { "id": "b", "text": "Rice" }, { "id": "c", "text": "Carrot" }] }, "solution": { "correct": ["a"], "explanation": "We get milk from cows, buffaloes and goats." } },
+        { "title": "Food from plants", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which food comes from a plant?", "image_key": null, "options": [{ "id": "a", "text": "Egg" }, { "id": "b", "text": "Honey" }, { "id": "c", "text": "Wheat" }] }, "solution": { "correct": ["c"], "explanation": "Wheat is a grain that grows on a plant." } },
+        { "title": "Made from milk", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which of these is made from milk?", "image_key": null, "options": [{ "id": "a", "text": "Paneer" }, { "id": "b", "text": "Roti" }, { "id": "c", "text": "Dal" }, { "id": "d", "text": "Rice" }] }, "solution": { "correct": ["a"], "explanation": "Paneer is made from milk." } },
+        { "title": "Before eating", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What should we do before eating?", "image_key": null, "options": [{ "id": "a", "text": "Wash our hands" }, { "id": "b", "text": "Play in the mud" }, { "id": "c", "text": "Sleep" }] }, "solution": { "correct": ["a"], "explanation": "Washing hands removes germs before we eat." } },
+        { "title": "Honey makers", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which animal gives us honey?", "image_key": null, "options": [{ "id": "a", "text": "Hen" }, { "id": "b", "text": "Bee" }, { "id": "c", "text": "Cow" }] }, "solution": { "correct": ["b"], "explanation": "Bees make honey." } },
+        { "title": "Eggs from hens", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "We get eggs from hens." }, "solution": { "correct": true, "explanation": "Hens lay eggs." } },
+        { "title": "Healthy meal", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "Eating only sweets every day keeps us healthy." }, "solution": { "correct": false, "explanation": "We need many kinds of food, not only sweets." } },
+        { "title": "Grains", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "Rice and ___ are grains.", "choices": ["wheat", "milk", "eggs"] }, "solution": { "correct": "wheat", "explanation": "Rice and wheat are grains that grow on plants." } },
+        { "title": "Do not waste food", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "Take only what you can eat and do not ___ food.", "choices": ["waste", "share", "cook"] }, "solution": { "correct": "waste", "explanation": "We should not waste food." } },
+        { "title": "Food and source", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match the food to where it comes from.", "left": [{ "id": "l1", "text": "Milk" }, { "id": "l2", "text": "Egg" }, { "id": "l3", "text": "Mango" }], "right": [{ "id": "r1", "text": "Hen" }, { "id": "r2", "text": "Tree" }, { "id": "r3", "text": "Cow" }] }, "solution": { "pairs": [["l1", "r3"], ["l2", "r1"], ["l3", "r2"]], "explanation": "Milk from a cow, egg from a hen, mango from a tree." } }
+      ]
+    },
+    {
+      "name": "Our sense organs",
+      "lessons": [
+        {
+          "title": "Our five senses",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "We have five sense organs. They help us know the world around us.", "visual": { "illustration": "subject-evs", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 6000, "text": "We see with our eyes. We see colours, shapes and light.", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "We hear with our ears. We hear music, birds and our friends.", "visual": null },
+              { "id": "s4", "duration_ms": 6000, "text": "We smell with our nose. Flowers smell sweet.", "visual": null },
+              { "id": "s5", "duration_ms": 6000, "text": "We taste with our tongue. Sugar is sweet and lemon is sour.", "visual": null },
+              { "id": "s6", "duration_ms": 6000, "text": "We feel with our skin. We feel hot, cold, soft and rough things.", "visual": null },
+              { "id": "s7", "duration_ms": 6000, "text": "Take care of your sense organs. Keep them clean.", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Organ for seeing", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which sense organ do we use to see?", "image_key": null, "options": [{ "id": "a", "text": "Ears" }, { "id": "b", "text": "Eyes" }, { "id": "c", "text": "Nose" }] }, "solution": { "correct": ["b"], "explanation": "We see with our eyes." } },
+        { "title": "Organ for hearing", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which sense organ do we use to hear?", "image_key": null, "options": [{ "id": "a", "text": "Ears" }, { "id": "b", "text": "Tongue" }, { "id": "c", "text": "Skin" }] }, "solution": { "correct": ["a"], "explanation": "We hear with our ears." } },
+        { "title": "Organ for tasting", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which sense organ tells us that a lemon is sour?", "image_key": null, "options": [{ "id": "a", "text": "Eyes" }, { "id": "b", "text": "Nose" }, { "id": "c", "text": "Tongue" }] }, "solution": { "correct": ["c"], "explanation": "We taste with our tongue." } },
+        { "title": "Number of senses", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "How many sense organs do we have?", "image_key": null, "options": [{ "id": "a", "text": "Three" }, { "id": "b", "text": "Five" }, { "id": "c", "text": "Ten" }] }, "solution": { "correct": ["b"], "explanation": "Eyes, ears, nose, tongue and skin: five sense organs." } },
+        { "title": "Feeling hot and cold", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which sense organ helps us feel that ice is cold?", "image_key": null, "options": [{ "id": "a", "text": "Skin" }, { "id": "b", "text": "Ears" }, { "id": "c", "text": "Eyes" }, { "id": "d", "text": "Nose" }] }, "solution": { "correct": ["a"], "explanation": "Our skin feels hot, cold, soft and rough things." } },
+        { "title": "Smelling flowers", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "We smell flowers with our nose." }, "solution": { "correct": true, "explanation": "The nose helps us smell." } },
+        { "title": "Hearing with eyes", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "We hear music with our eyes." }, "solution": { "correct": false, "explanation": "We hear with our ears, not our eyes." } },
+        { "title": "Sweet sugar", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "Sugar tastes ___.", "choices": ["sweet", "sour", "salty"] }, "solution": { "correct": "sweet", "explanation": "Sugar is sweet." } },
+        { "title": "Clean senses", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "We should keep our sense organs ___.", "choices": ["clean", "dirty", "closed"] }, "solution": { "correct": "clean", "explanation": "Clean sense organs stay healthy." } },
+        { "title": "Senses and organs", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match the sense to its organ.", "left": [{ "id": "l1", "text": "See" }, { "id": "l2", "text": "Hear" }, { "id": "l3", "text": "Smell" }, { "id": "l4", "text": "Taste" }], "right": [{ "id": "r1", "text": "Nose" }, { "id": "r2", "text": "Tongue" }, { "id": "r3", "text": "Eyes" }, { "id": "r4", "text": "Ears" }] }, "solution": { "pairs": [["l1", "r3"], ["l2", "r4"], ["l3", "r1"], ["l4", "r2"]], "explanation": "We see with eyes, hear with ears, smell with the nose and taste with the tongue." } }
+      ]
+    }
+  ]
+}

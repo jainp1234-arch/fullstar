@@ -1,0 +1,177 @@
+{
+  "class_level": 3,
+  "subject": "english",
+  "topics": [
+    {
+      "name": "Nouns",
+      "lessons": [
+        {
+          "title": "Naming words",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Every person, place, animal and thing has a name.", "visual": { "illustration": "subject-english", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 6000, "text": "A naming word is called a noun.", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "Meena and teacher are names of people. They are nouns.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "School and park are names of places. Cat and parrot are names of animals.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "Ball, book and chair are names of things. They are nouns too.", "visual": null },
+              { "id": "s6", "duration_ms": 7000, "text": "In the sentence 'The dog sleeps on the mat', dog and mat are nouns.", "visual": { "illustration": "avatar-dog", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Find the noun", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which word is a noun?", "image_key": null, "options": [{ "id": "a", "text": "run" }, { "id": "b", "text": "bird" }, { "id": "c", "text": "blue" }] }, "solution": { "correct": ["b"], "explanation": "A bird is a living thing, so 'bird' is a noun." } },
+        { "title": "Name of a place", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which word is the name of a place?", "image_key": null, "options": [{ "id": "a", "text": "market" }, { "id": "b", "text": "happy" }, { "id": "c", "text": "jump" }] }, "solution": { "correct": ["a"], "explanation": "A market is a place, so 'market' is a noun." } },
+        { "title": "Name of a person", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which word names a person?", "image_key": null, "options": [{ "id": "a", "text": "quickly" }, { "id": "b", "text": "doctor" }, { "id": "c", "text": "tall" }] }, "solution": { "correct": ["b"], "explanation": "A doctor is a person, so 'doctor' is a noun." } },
+        { "title": "Noun in a sentence", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which word is a noun in: 'Ravi eats a mango.'?", "image_key": null, "options": [{ "id": "a", "text": "eats" }, { "id": "b", "text": "a" }, { "id": "c", "text": "mango" }] }, "solution": { "correct": ["c"], "explanation": "A mango is a thing, so 'mango' is a noun. 'Ravi' is a noun too." } },
+        { "title": "Not a noun", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which word is NOT a noun?", "image_key": null, "options": [{ "id": "a", "text": "pencil" }, { "id": "b", "text": "river" }, { "id": "c", "text": "sing" }, { "id": "d", "text": "lion" }] }, "solution": { "correct": ["c"], "explanation": "'Sing' is an action, so it is not a noun." } },
+        { "title": "Animals are nouns", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'Elephant' is a noun." }, "solution": { "correct": true, "explanation": "An elephant is an animal, so its name is a noun." } },
+        { "title": "Action or noun", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "'Swim' is a noun in: 'Fish swim in water.'" }, "solution": { "correct": false, "explanation": "'Swim' is an action word here. 'Fish' and 'water' are the nouns." } },
+        { "title": "Complete with a noun", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "The ___ is flying in the sky.", "choices": ["kite", "slowly", "green"] }, "solution": { "correct": "kite", "explanation": "'Kite' is a thing, a noun, that can fly in the sky." } },
+        { "title": "Naming word", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "A naming word is called a ___.", "choices": ["noun", "verb", "letter"] }, "solution": { "correct": "noun", "explanation": "Naming words are nouns." } },
+        { "title": "Kinds of nouns", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each noun to what it names.", "left": [{ "id": "l1", "text": "teacher" }, { "id": "l2", "text": "garden" }, { "id": "l3", "text": "parrot" }, { "id": "l4", "text": "chair" }], "right": [{ "id": "r1", "text": "an animal" }, { "id": "r2", "text": "a thing" }, { "id": "r3", "text": "a person" }, { "id": "r4", "text": "a place" }] }, "solution": { "pairs": [["l1", "r3"], ["l2", "r4"], ["l3", "r1"], ["l4", "r2"]], "explanation": "A teacher is a person, a garden is a place, a parrot is an animal and a chair is a thing." } }
+      ],
+      "passages": [
+        { "title": "Ravi's red kite", "difficulty": 1, "body": { "text": "Ravi has a red kite. On Sunday, he goes to the park with his sister Asha. The wind is strong. Ravi runs and the kite goes up, up, up. It flies over the tall trees. Asha claps her hands. \"Your kite is like a bird!\" she says. Ravi smiles and holds the string tight. When the sun goes down, they walk home happily.", "word_count": 0, "level": 1 } }
+      ]
+    },
+    {
+      "name": "Verbs",
+      "lessons": [
+        {
+          "title": "Action words",
+          "difficulty": 1,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "We do many things every day. We run, jump, read and eat.", "visual": { "illustration": "subject-english", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 6000, "text": "Words that tell us what someone does are action words.", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "An action word is called a verb.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "In 'The baby cries', cries is a verb. It tells us what the baby does.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "In 'Birds fly in the sky', fly is a verb.", "visual": null },
+              { "id": "s6", "duration_ms": 6000, "text": "Clap your hands! Clap is a verb too.", "visual": { "illustration": "celebrate", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Find the verb", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which word is a verb?", "image_key": null, "options": [{ "id": "a", "text": "jump" }, { "id": "b", "text": "table" }, { "id": "c", "text": "red" }] }, "solution": { "correct": ["a"], "explanation": "'Jump' is an action, so it is a verb." } },
+        { "title": "Verb in a sentence", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which word is the verb in: 'Neha reads a book.'?", "image_key": null, "options": [{ "id": "a", "text": "Neha" }, { "id": "b", "text": "reads" }, { "id": "c", "text": "book" }] }, "solution": { "correct": ["b"], "explanation": "'Reads' tells us what Neha does." } },
+        { "title": "What the cow does", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Choose the verb: 'The cow eats grass.'", "image_key": null, "options": [{ "id": "a", "text": "cow" }, { "id": "b", "text": "grass" }, { "id": "c", "text": "eats" }] }, "solution": { "correct": ["c"], "explanation": "'Eats' is the action of the cow." } },
+        { "title": "Action of a bird", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which action can a bird do?", "image_key": null, "options": [{ "id": "a", "text": "fly" }, { "id": "b", "text": "blue" }, { "id": "c", "text": "nest" }] }, "solution": { "correct": ["a"], "explanation": "'Fly' is an action word." } },
+        { "title": "Not a verb", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which word is NOT a verb?", "image_key": null, "options": [{ "id": "a", "text": "write" }, { "id": "b", "text": "sing" }, { "id": "c", "text": "apple" }, { "id": "d", "text": "dance" }] }, "solution": { "correct": ["c"], "explanation": "'Apple' is a thing, a noun, not an action." } },
+        { "title": "Run is a verb", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'Run' is a verb." }, "solution": { "correct": true, "explanation": "Running is an action, so 'run' is a verb." } },
+        { "title": "Is ball a verb", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "'Ball' is a verb." }, "solution": { "correct": false, "explanation": "A ball is a thing, so 'ball' is a noun." } },
+        { "title": "Complete with a verb", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "The children ___ in the park.", "choices": ["play", "park", "happy"] }, "solution": { "correct": "play", "explanation": "'Play' tells us what the children do." } },
+        { "title": "Fish in water", "question_type": "fill_blank", "difficulty": 2, "body": { "prompt": "Fish ___ in the river.", "choices": ["swim", "river", "wet"] }, "solution": { "correct": "swim", "explanation": "'Swim' is what fish do." } },
+        { "title": "Who does what", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match who to the action.", "left": [{ "id": "l1", "text": "A dog" }, { "id": "l2", "text": "A cook" }, { "id": "l3", "text": "A singer" }], "right": [{ "id": "r1", "text": "cooks" }, { "id": "r2", "text": "sings" }, { "id": "r3", "text": "barks" }] }, "solution": { "pairs": [["l1", "r3"], ["l2", "r1"], ["l3", "r2"]], "explanation": "A dog barks, a cook cooks and a singer sings." } }
+      ],
+      "passages": [
+        { "title": "A rainy day", "difficulty": 1, "body": { "text": "Dark clouds fill the sky. Soon, big drops of rain begin to fall. Meera opens the window and looks outside. The trees dance in the wind. Frogs jump in the puddles and sing loudly. Meera's mother makes hot pakoras in the kitchen. Meera sits near the window with a cup of milk. She loves the smell of wet earth.", "word_count": 0, "level": 1 } }
+      ]
+    },
+    {
+      "name": "Adjectives",
+      "lessons": [
+        {
+          "title": "Describing words",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Some words tell us more about a noun.", "visual": { "illustration": "subject-english", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "They can tell us the colour, size, shape or number of something.", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "These describing words are called adjectives.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "A red ball. Red tells us the colour of the ball.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "A big elephant. Big tells us the size of the elephant.", "visual": null },
+              { "id": "s6", "duration_ms": 7000, "text": "Two cats. Two tells us how many cats there are.", "visual": { "illustration": "avatar-cat", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Find the adjective", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which word is a describing word?", "image_key": null, "options": [{ "id": "a", "text": "tall" }, { "id": "b", "text": "tree" }, { "id": "c", "text": "climb" }] }, "solution": { "correct": ["a"], "explanation": "'Tall' tells us how something looks, so it is an adjective." } },
+        { "title": "Colour word", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which word is the adjective in: 'I have a yellow pencil.'?", "image_key": null, "options": [{ "id": "a", "text": "have" }, { "id": "b", "text": "yellow" }, { "id": "c", "text": "pencil" }] }, "solution": { "correct": ["b"], "explanation": "'Yellow' tells us the colour of the pencil." } },
+        { "title": "Size word", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which adjective tells us size?", "image_key": null, "options": [{ "id": "a", "text": "green" }, { "id": "b", "text": "small" }, { "id": "c", "text": "sweet" }] }, "solution": { "correct": ["b"], "explanation": "'Small' tells us the size of something." } },
+        { "title": "Number word", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Find the adjective: 'There are five ducks in the pond.'", "image_key": null, "options": [{ "id": "a", "text": "five" }, { "id": "b", "text": "ducks" }, { "id": "c", "text": "pond" }] }, "solution": { "correct": ["a"], "explanation": "'Five' tells us how many ducks there are." } },
+        { "title": "Opposite adjective", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What is the opposite of 'hot'?", "image_key": null, "options": [{ "id": "a", "text": "warm" }, { "id": "b", "text": "cold" }, { "id": "c", "text": "big" }, { "id": "d", "text": "fast" }] }, "solution": { "correct": ["b"], "explanation": "'Hot' and 'cold' are opposites." } },
+        { "title": "Soft is an adjective", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "In 'a soft pillow', the word 'soft' is an adjective." }, "solution": { "correct": true, "explanation": "'Soft' describes the pillow." } },
+        { "title": "Is run an adjective", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "'Run' is a describing word." }, "solution": { "correct": false, "explanation": "'Run' is an action word, a verb." } },
+        { "title": "Sweet mango", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "This mango is very ___.", "choices": ["sweet", "eat", "mango"] }, "solution": { "correct": "sweet", "explanation": "'Sweet' describes how the mango tastes." } },
+        { "title": "Big elephant", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "An elephant is a ___ animal.", "choices": ["big", "tiny", "walks"] }, "solution": { "correct": "big", "explanation": "Elephants are big animals." } },
+        { "title": "Opposites", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each word to its opposite.", "left": [{ "id": "l1", "text": "big" }, { "id": "l2", "text": "fast" }, { "id": "l3", "text": "happy" }], "right": [{ "id": "r1", "text": "sad" }, { "id": "r2", "text": "small" }, { "id": "r3", "text": "slow" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r3"], ["l3", "r1"]], "explanation": "Big–small, fast–slow, happy–sad." } }
+      ],
+      "passages": [
+        { "title": "The village fair", "difficulty": 2, "body": { "text": "Every year, a big fair comes to our village. There are colourful stalls full of toys, bangles and sweets. A tall giant wheel turns slowly near the pond. My little brother wants a shiny balloon, so Father buys him a blue one. We eat hot jalebis and drink cold lassi. At night, bright lights shine everywhere. It is the happiest day of the year.", "word_count": 0, "level": 2 } }
+      ]
+    },
+    {
+      "name": "Singular and plural",
+      "lessons": [
+        {
+          "title": "One and many",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "One cat. Two cats. Can you see the difference?", "visual": { "illustration": "avatar-cat", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 6000, "text": "A word for one thing is singular. A word for many things is plural.", "visual": null },
+              { "id": "s3", "duration_ms": 7000, "text": "We often add s to make a plural: book becomes books, pen becomes pens.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "Some words take es: box becomes boxes, bus becomes buses.", "visual": null },
+              { "id": "s5", "duration_ms": 7000, "text": "Some words change: man becomes men, child becomes children.", "visual": null },
+              { "id": "s6", "duration_ms": 6000, "text": "Look around you. Name one thing, then many things.", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Plural of book", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "What is the plural of 'book'?", "image_key": null, "options": [{ "id": "a", "text": "bookes" }, { "id": "b", "text": "books" }, { "id": "c", "text": "book" }] }, "solution": { "correct": ["b"], "explanation": "We add s to book to make books." } },
+        { "title": "Plural of box", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What is the plural of 'box'?", "image_key": null, "options": [{ "id": "a", "text": "boxs" }, { "id": "b", "text": "boxes" }, { "id": "c", "text": "boxies" }] }, "solution": { "correct": ["b"], "explanation": "Words ending in x take es: boxes." } },
+        { "title": "Plural of child", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "What is the plural of 'child'?", "image_key": null, "options": [{ "id": "a", "text": "childs" }, { "id": "b", "text": "childes" }, { "id": "c", "text": "children" }] }, "solution": { "correct": ["c"], "explanation": "Child changes to children." } },
+        { "title": "Singular word", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which word is singular?", "image_key": null, "options": [{ "id": "a", "text": "trees" }, { "id": "b", "text": "flower" }, { "id": "c", "text": "birds" }] }, "solution": { "correct": ["b"], "explanation": "'Flower' means one flower, so it is singular." } },
+        { "title": "Plural of man", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "One man, two ___.", "image_key": null, "options": [{ "id": "a", "text": "mans" }, { "id": "b", "text": "men" }, { "id": "c", "text": "manes" }, { "id": "d", "text": "mens" }] }, "solution": { "correct": ["b"], "explanation": "Man changes to men." } },
+        { "title": "Plural of bus", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "The plural of 'bus' is 'buses'." }, "solution": { "correct": true, "explanation": "Words ending in s take es: buses." } },
+        { "title": "Plural of pen", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "The plural of 'pen' is 'penes'." }, "solution": { "correct": false, "explanation": "We just add s: pens." } },
+        { "title": "Many apples", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "I ate three ___.", "choices": ["apples", "apple", "appleses"] }, "solution": { "correct": "apples", "explanation": "Three means many, so we use the plural 'apples'." } },
+        { "title": "One cup", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "Please give me one ___ of milk.", "choices": ["cup", "cups", "cupes"] }, "solution": { "correct": "cup", "explanation": "One means singular, so we use 'cup'." } },
+        { "title": "Singular and plural pairs", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each word to its plural.", "left": [{ "id": "l1", "text": "dish" }, { "id": "l2", "text": "tooth" }, { "id": "l3", "text": "girl" }, { "id": "l4", "text": "mouse" }], "right": [{ "id": "r1", "text": "girls" }, { "id": "r2", "text": "mice" }, { "id": "r3", "text": "dishes" }, { "id": "r4", "text": "teeth" }] }, "solution": { "pairs": [["l1", "r3"], ["l2", "r4"], ["l3", "r1"], ["l4", "r2"]], "explanation": "Dish–dishes, tooth–teeth, girl–girls, mouse–mice." } }
+      ],
+      "passages": [
+        { "title": "At the market", "difficulty": 2, "body": { "text": "On Saturday, Grandmother takes Arjun to the vegetable market. There are many shops in a long row. One shop has red tomatoes and green chillies. Another shop has potatoes, onions and carrots. Grandmother buys two kilos of potatoes and some bananas. Arjun carries the bags. The shopkeeper gives Arjun a sweet guava. \"Thank you, uncle,\" says Arjun with a big smile.", "word_count": 0, "level": 2 } },
+        { "title": "The little seed", "difficulty": 1, "body": { "text": "Tara plants a little seed in a pot. She gives it water every morning. She keeps the pot in the sun. One day, she sees a tiny green leaf. \"My seed is growing!\" she shouts. Day by day, the plant grows taller. After many weeks, a pretty yellow flower opens. Tara is very proud of her plant.", "word_count": 0, "level": 1 } }
+      ]
+    },
+    {
+      "name": "Punctuation",
+      "lessons": [
+        {
+          "title": "Full stop and question mark",
+          "difficulty": 2,
+          "body": {
+            "scenes": [
+              { "id": "s1", "duration_ms": 6000, "text": "Every sentence begins with a capital letter.", "visual": { "illustration": "subject-english", "animation": "fade-up" } },
+              { "id": "s2", "duration_ms": 7000, "text": "A sentence that tells us something ends with a full stop. It looks like a small dot.", "visual": null },
+              { "id": "s3", "duration_ms": 6000, "text": "Example: The sun is hot. This sentence tells us something.", "visual": null },
+              { "id": "s4", "duration_ms": 7000, "text": "A sentence that asks something ends with a question mark.", "visual": null },
+              { "id": "s5", "duration_ms": 6000, "text": "Example: Where is my bag? This sentence asks a question.", "visual": null },
+              { "id": "s6", "duration_ms": 6000, "text": "Names of people and places also begin with capital letters, like Riya and Delhi.", "visual": { "illustration": "reward-star", "animation": "pop" } }
+            ]
+          }
+        }
+      ],
+      "questions": [
+        { "title": "Question sentence", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which mark ends this sentence: 'What is your name'", "image_key": null, "options": [{ "id": "a", "text": "Full stop (.)" }, { "id": "b", "text": "Question mark (?)" }, { "id": "c", "text": "Comma (,)" }] }, "solution": { "correct": ["b"], "explanation": "It asks something, so it ends with a question mark." } },
+        { "title": "Telling sentence", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which mark ends this sentence: 'I like to read books'", "image_key": null, "options": [{ "id": "a", "text": "Full stop (.)" }, { "id": "b", "text": "Question mark (?)" }] }, "solution": { "correct": ["a"], "explanation": "It tells us something, so it ends with a full stop." } },
+        { "title": "Capital letter", "question_type": "mcq", "difficulty": 1, "body": { "prompt": "Which sentence is written correctly?", "image_key": null, "options": [{ "id": "a", "text": "the cat is sleeping." }, { "id": "b", "text": "The cat is sleeping." }, { "id": "c", "text": "The cat is sleeping" }] }, "solution": { "correct": ["b"], "explanation": "It begins with a capital letter and ends with a full stop." } },
+        { "title": "Name of a city", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which is written correctly?", "image_key": null, "options": [{ "id": "a", "text": "I live in mumbai." }, { "id": "b", "text": "I live in Mumbai." }, { "id": "c", "text": "i live in mumbai." }] }, "solution": { "correct": ["b"], "explanation": "Names of places, like Mumbai, begin with a capital letter." } },
+        { "title": "Find the question", "question_type": "mcq", "difficulty": 2, "body": { "prompt": "Which sentence is a question?", "image_key": null, "options": [{ "id": "a", "text": "The sky is blue." }, { "id": "b", "text": "Can you swim?" }, { "id": "c", "text": "We go to school." }, { "id": "d", "text": "I am happy." }] }, "solution": { "correct": ["b"], "explanation": "'Can you swim?' asks something and ends with a question mark." } },
+        { "title": "Names need capitals", "question_type": "true_false", "difficulty": 1, "body": { "prompt": "A person's name, like Riya, begins with a capital letter." }, "solution": { "correct": true, "explanation": "Names of people always begin with a capital letter." } },
+        { "title": "Question with full stop", "question_type": "true_false", "difficulty": 2, "body": { "prompt": "'How old are you.' is correct." }, "solution": { "correct": false, "explanation": "It asks something, so it should end with a question mark: 'How old are you?'" } },
+        { "title": "End of a question", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "A question ends with a ___ mark.", "choices": ["question", "full", "capital"] }, "solution": { "correct": "question", "explanation": "Questions end with a question mark." } },
+        { "title": "Start of a sentence", "question_type": "fill_blank", "difficulty": 1, "body": { "prompt": "A sentence begins with a ___ letter.", "choices": ["capital", "small", "missing"] }, "solution": { "correct": "capital", "explanation": "Every sentence begins with a capital letter." } },
+        { "title": "Which mark", "question_type": "match", "difficulty": 2, "body": { "prompt": "Match each sentence to the mark it needs at the end.", "left": [{ "id": "l1", "text": "Where is the ball" }, { "id": "l2", "text": "The ball is red" }], "right": [{ "id": "r1", "text": "Full stop (.)" }, { "id": "r2", "text": "Question mark (?)" }] }, "solution": { "pairs": [["l1", "r2"], ["l2", "r1"]], "explanation": "A question needs a question mark; a telling sentence needs a full stop." } }
+      ],
+      "passages": [
+        { "title": "The train journey", "difficulty": 2, "body": { "text": "Kabir and his family are going to Jaipur by train. The station is very busy. People carry bags and boxes. A loud whistle blows and the train starts to move. Kabir sits near the window. He sees green fields, cows and small houses. \"Are we there yet?\" he asks. Mother laughs and gives him a book to read. In the evening, the train reaches Jaipur.", "word_count": 0, "level": 2 } }
+      ]
+    }
+  ]
+}

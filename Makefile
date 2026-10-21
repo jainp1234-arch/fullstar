@@ -20,7 +20,7 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api family studio db-bootstrap db-migrate bootstrap bootstrap-admin vendor-assets
+.PHONY: help up down test lint api family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
@@ -33,6 +33,7 @@ help:
 	@echo "make db-migrate       run Flyway migrations as app_owner (DB_MIGRATE_JDBC_URL)"
 	@echo "make bootstrap        create the queues + DLQs (and the trial bucket)"
 	@echo "make bootstrap-admin EMAIL=you@example.com NAME=\"Your Name\"   make the first Studio super admin"
+	@echo "make seed-content     load the Class 3 starter content (infra/seed/class3), checked and published"
 	@echo "make vendor-assets    download and convert fonts, icons and illustrations (libs/ui/assets)"
 
 up:
@@ -107,3 +108,8 @@ bootstrap-admin:
 	@test -n "$(EMAIL)" -a -n "$(NAME)" || { echo 'usage: make bootstrap-admin EMAIL=you@example.com NAME="Your Name"'; exit 1; }
 	$(MVNW) -q -f services/api/pom.xml spring-boot:run -Dspring-boot.run.profiles=bootstrap-admin \
 		"-Dspring-boot.run.arguments=--spring.config.import=optional:file:$(CURDIR)/.env[.properties] --email=$(EMAIL) '--name=$(NAME)'"
+
+seed-content:
+	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
+	$(MVNW) -q -f services/api/pom.xml spring-boot:run -Dspring-boot.run.profiles=seed-content \
+		"-Dspring-boot.run.arguments=--spring.config.import=optional:file:$(CURDIR)/.env[.properties] --dir=$(CURDIR)/infra/seed/class3"
