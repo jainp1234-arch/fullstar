@@ -64,6 +64,9 @@ interface DraftRow {
   imports: [Button, ContentPreview, ReactiveFormsModule, SectionHeader, SelectField, TextField],
   template: `
     <p class="intro">{{ text.intro }}</p>
+    @if (chapter()) {
+      <p class="intro" role="status">{{ text.forChapter }}</p>
+    }
     <form class="form" [formGroup]="form" novalidate (submit)="$event.preventDefault()">
       <div class="grid">
         <app-select-field
@@ -284,6 +287,12 @@ export class DraftPage {
   protected readonly topics = signal<readonly Topic[]>([]);
   protected readonly topicsLoaded = signal(false);
   protected readonly prompt = signal<string | null>(null);
+  /** Drafting for an uploaded chapter from S9 (Plan 5.5): Claude gets its text, saves go to its catalog chapter. */
+  protected readonly chapter = signal<{
+    readonly familyChapter: string;
+    readonly catalogChapter: string;
+    readonly task: string | null;
+  } | null>(null);
   protected readonly draft = signal<Draft | null>(null);
   protected readonly draftType = computed(() => this.draft()?.type ?? null);
   protected readonly busy = signal<'claude' | 'prompt' | 'paste' | 'save' | null>(null);
@@ -328,6 +337,15 @@ export class DraftPage {
 
   constructor() {
     const query = this.route.snapshot.queryParamMap;
+    const familyChapter = query.get('family_chapter');
+    const catalogChapter = query.get('catalog_chapter');
+    if (familyChapter && catalogChapter) {
+      this.chapter.set({ familyChapter, catalogChapter, task: query.get('task') });
+    }
+    const type = query.get('type');
+    if (type === 'lesson' || type === 'question_bank' || type === 'passage') {
+      this.form.controls.type.setValue(type);
+    }
     const classLevel = query.get('class');
     const subject = query.get('subject');
     if (classLevel && CLASS_LEVELS.includes(Number(classLevel))) {
@@ -414,6 +432,7 @@ export class DraftPage {
         class: place.class_level,
         subject: place.subject,
         topic: place.topic_id,
+        ...(this.chapter() ? { catalog_chapter: this.chapter()?.catalogChapter } : {}),
       },
     });
   }
@@ -439,6 +458,7 @@ export class DraftPage {
             kind: 'question',
             question_type: row.item.question_type ?? 'mcq',
             ...bodyAndSolution(row.value as ContentValue),
+            ...(this.chapter() ? { catalog_chapter_id: this.chapter()?.catalogChapter } : {}),
           }),
         ),
         toArray(),
@@ -448,6 +468,11 @@ export class DraftPage {
         next: (saved) => {
           this.busy.set(null);
           this.toasts.show(this.text.savedAll(saved.length));
+          const task = this.chapter()?.task;
+          if (task) {
+            void this.router.navigate(['/uploads', task, 'prepare']);
+            return;
+          }
           void this.router.navigate(['/library'], {
             queryParams: {
               class: place.class_level,
@@ -481,6 +506,7 @@ export class DraftPage {
       lang: form.lang,
       ...(form.type === 'question_bank' ? { count: Number(form.count) } : {}),
       ...(pasted ? { pasted } : {}),
+      ...(this.chapter() ? { family_chapter_id: this.chapter()?.familyChapter } : {}),
     };
   }
 

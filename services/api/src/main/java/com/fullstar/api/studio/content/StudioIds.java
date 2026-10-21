@@ -7,13 +7,13 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /** Ids and subject codes in Studio requests. */
-final class StudioIds {
+public final class StudioIds {
 
 	private StudioIds() {
 	}
 
 	/** A malformed path id is the same as an unknown one. */
-	static UUID path(String id) {
+	public static UUID path(String id) {
 		try {
 			return UUID.fromString(id);
 		}
@@ -23,7 +23,7 @@ final class StudioIds {
 	}
 
 	/** A body or query id; null stays null, malformed → field INVALID. */
-	static UUID field(String value, String field) {
+	public static UUID field(String value, String field) {
 		if (value == null) {
 			return null;
 		}
@@ -36,7 +36,7 @@ final class StudioIds {
 	}
 
 	/** The id of an active subject taught in that class (class_subjects); otherwise field INVALID. */
-	static short subject(JdbcTemplate jdbc, int classLevel, String code, String field) {
+	public static short subject(JdbcTemplate jdbc, int classLevel, String code, String field) {
 		java.util.List<Short> ids = jdbc.queryForList("""
 				SELECT s.id FROM app.subjects s
 				  JOIN app.class_subjects cs ON cs.subject_id = s.id AND cs.class_level = ?

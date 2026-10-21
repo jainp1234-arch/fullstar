@@ -57,6 +57,8 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
         '/parent/books/english/fix-pages',
         '/parent/books/english/preview',
         '/parent/books/english/replace',
+        // P8a reports inline (Plan 5.5); P18 from any lesson arrives with Plan 7.3
+        '/parent/report',
       ]) {
         await navigateInApp(page, path);
         await walk(page, [], seen);

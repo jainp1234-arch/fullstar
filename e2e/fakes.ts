@@ -57,11 +57,18 @@ export interface FakeServer {
     splits: { number: number; title: string; start_page: number }[][];
     /** Files PUT to the fake storage. */
     stored: string[];
+    /** P19 messages (Plan 5.5). */
+    messages: FakeMessage[];
+    /** P8a answers by content item, and the reports they opened. */
+    previews: Record<string, string>;
+    reports: { content_item_id: string; reason: string; note: string | null }[];
   };
   /** Studio staff list as the fake API holds it (s1 is the signed-in member). */
   readonly staff: FakeStaffMember[];
   /** Studio topics, content items and versions (Plan 4.2). */
   readonly content: FakeContent;
+  /** S8 queue and prepared books (Plan 5.5); task "sample" is the S9 route sample. */
+  readonly prep: FakePrep;
 }
 
 const CONSENT = '2026-10-v1';
@@ -157,6 +164,9 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       deletionRequestedAt: null,
       books: [],
       splits: [],
+      messages: [],
+      previews: {},
+      reports: [],
       stored: [],
     },
     staff: [
@@ -169,6 +179,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       },
     ],
     content: sampleContent(),
+    prep: samplePrep(),
   };
   let nextStaff = 2;
   let hasFamily = initial !== null;
@@ -346,6 +357,13 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       return envelope(route, first ? 201 : 200, { requested_at: requestedAt, due_by: dueBy });
     }
     if (
+      path.startsWith('/family/parent/messages') ||
+      path.startsWith('/family/parent/lessons/') ||
+      /^\/family\/parent\/chapters\/[^/]+\/lessons$/.test(path)
+    ) {
+      return familyMessages(route, server, path, method, body);
+    }
+    if (
       path.startsWith('/family/parent/books') ||
       path.startsWith('/family/parent/uploads') ||
       path.startsWith('/family/parent/chapters') ||
@@ -464,6 +482,13 @@ function studio(
   if (path.startsWith('/studio/ai/')) {
     return studioDrafts(route, path, !!options.aiDrafts);
   }
+  if (
+    path.startsWith('/studio/prep-tasks') ||
+    path.startsWith('/studio/catalog-') ||
+    path.startsWith('/studio/family-chapters/')
+  ) {
+    return studioPrep(route, server, path, method, newId);
+  }
   if (path === '/studio/dashboard') {
     return envelope(route, 200, {
       uploads_waiting: 3,
@@ -556,6 +581,8 @@ export interface FakeItem {
   versions: FakeVersion[];
   /** Content checks of this item's versions, newest last (Plan 4.4). */
   checks?: FakeCheck[];
+  /** Content of a prepared chapter (Plan 5.5). */
+  catalog_chapter_id?: string | null;
 }
 
 export interface FakeFlag {
@@ -640,7 +667,12 @@ function sampleContent(): FakeContent {
 function summary(item: FakeItem) {
   const { versions, ...rest } = item;
   const current = versions.find((v) => v.id === item.current_version_id);
-  return { ...rest, title: current?.title ?? '', version_no: current?.version_no ?? 0 };
+  return {
+    ...rest,
+    catalog_chapter_id: item.catalog_chapter_id ?? null,
+    title: current?.title ?? '',
+    version_no: current?.version_no ?? 0,
+  };
 }
 
 function versionView(item: FakeItem, version: FakeVersion) {
@@ -749,9 +781,13 @@ function studioContent(
   if (path === '/studio/content-items' && method === 'GET') {
     const topicId = url.searchParams.get('topic_id');
     const status = url.searchParams.get('status');
+    const catalogChapter = url.searchParams.get('catalog_chapter_id');
     const items = content.items
       .filter(
-        (i) => (topicId ? i.topic_id === topicId : true) && (status ? i.status === status : true),
+        (i) =>
+          (topicId ? i.topic_id === topicId : true) &&
+          (status ? i.status === status : true) &&
+          (catalogChapter ? i.catalog_chapter_id === catalogChapter : true),
       )
       .map(summary);
     return envelope(route, 200, { items, next_cursor: null });
@@ -775,6 +811,7 @@ function studioContent(
       published_version_id: null,
       updated_at: now,
       versions: [],
+      catalog_chapter_id: (body['catalog_chapter_id'] as string | undefined) ?? null,
     };
     const first = newVersion(item, body, now);
     item.versions.push(first);
@@ -1033,6 +1070,8 @@ export interface FakeChapter {
   unclear_pages: number;
   /** Read pages (Plan 5.3); absent means none yet. */
   pages?: FakePage[];
+  /** The prepared chapter it is linked to (Plan 5.5). */
+  catalog_chapter_id?: string;
 }
 
 export interface FakePage {
@@ -1336,6 +1375,339 @@ function familyBooks(
         }
         return envelope(route, 200, uploadView(upload));
       }
+    }
+  }
+  return envelope(route, 404, null, 'NOT_FOUND');
+}
+
+export interface FakePrepTask {
+  id: string;
+  status: string;
+  opened_at: string;
+  mine: boolean;
+  assigned: boolean;
+  family_chapter_id: string;
+  family_book_id: string;
+  family_ref: string;
+  class_level: number;
+  subject: string;
+  subject_name: string;
+  chapter_number: number;
+  chapter_title: string;
+  page_count: number;
+  catalog_chapter_id: string | null;
+}
+
+export interface FakeCatalogBook {
+  id: string;
+  class_level: number;
+  subject: string;
+  title: string;
+  board: string;
+  publisher: string | null;
+  edition: string | null;
+  chapters: { id: string; number: number; title: string; status: string }[];
+}
+
+export interface FakePrep {
+  tasks: FakePrepTask[];
+  books: FakeCatalogBook[];
+}
+
+/** One open task ("sample") for a Class 3 EVS chapter, and one prepared book with a ready chapter. */
+function samplePrep(): FakePrep {
+  const task = (id: string, chapter: number, title: string, hoursAgo: number): FakePrepTask => ({
+    id,
+    status: 'open',
+    opened_at: new Date(Date.now() - hoursAgo * 3_600_000).toISOString(),
+    mine: false,
+    assigned: false,
+    family_chapter_id: `fc-${id}`,
+    family_book_id: `fb-${id}`,
+    family_ref: id === 'sample' ? '3fa85f64' : '9b2c41d0',
+    class_level: 3,
+    subject: 'evs',
+    subject_name: 'EVS',
+    chapter_number: chapter,
+    chapter_title: title,
+    page_count: 2,
+    catalog_chapter_id: null,
+  });
+  return {
+    tasks: [task('sample', 2, 'Water', 3), task('second', 1, 'Plants around us', 1)],
+    books: [
+      {
+        id: 'cb-looking',
+        class_level: 3,
+        subject: 'evs',
+        title: 'Looking Around',
+        board: 'CBSE',
+        publisher: 'NCERT',
+        edition: '2026',
+        chapters: [{ id: 'cc-plants', number: 1, title: 'Plants around us', status: 'ready' }],
+      },
+    ],
+  };
+}
+
+function catalogLink(server: FakeServer, chapterId: string | null) {
+  if (!chapterId) {
+    return null;
+  }
+  for (const book of server.prep.books) {
+    const chapter = book.chapters.find((c) => c.id === chapterId);
+    if (chapter) {
+      const items = server.content.items.filter((i) => i.catalog_chapter_id === chapterId);
+      const count = (kind: string) =>
+        items.filter((i) => i.kind === kind && i.status === 'published').length;
+      return {
+        catalog_book_id: book.id,
+        book_title: book.title,
+        catalog_chapter_id: chapter.id,
+        number: chapter.number,
+        title: chapter.title,
+        status: chapter.status,
+        published_lessons: count('lesson'),
+        published_questions: count('question'),
+        unpublished: items.filter((i) => i.status === 'draft' || i.status === 'in_check').length,
+      };
+    }
+  }
+  return null;
+}
+
+/** S8/S9 (Plan 5.5): queue, claim, pages, catalog search and create, link, mark ready. */
+function studioPrep(
+  route: Route,
+  server: FakeServer,
+  path: string,
+  method: string,
+  newId: () => string,
+): Promise<void> {
+  const url = new URL(route.request().url());
+  const body = (method === 'GET' ? {} : (route.request().postDataJSON() ?? {})) as Record<
+    string,
+    unknown
+  >;
+  const prep = server.prep;
+  if (path === '/studio/prep-tasks' && method === 'GET') {
+    const statuses = (url.searchParams.get('status') ?? 'open').split(',');
+    return envelope(
+      route,
+      200,
+      prep.tasks.filter((t) => statuses.includes(t.status)),
+    );
+  }
+  for (const task of prep.tasks) {
+    const base = `/studio/prep-tasks/${task.id}`;
+    if (path === base && method === 'GET') {
+      return envelope(route, 200, { task, catalog: catalogLink(server, task.catalog_chapter_id) });
+    }
+    if (path === `${base}/claim` && method === 'POST') {
+      if (task.status === 'open') {
+        Object.assign(task, { status: 'in_progress', mine: true, assigned: true });
+      } else if (!(task.status === 'in_progress' && task.mine)) {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      return envelope(route, 200, task);
+    }
+    if (path === `${base}/link` && method === 'POST') {
+      const link = catalogLink(server, String(body['catalog_chapter_id']));
+      if (!link) {
+        return envelope(route, 400, null, 'VALIDATION_FAILED', {
+          fields: { catalog_chapter_id: 'INVALID' },
+        });
+      }
+      const chapter = prep.books
+        .flatMap((b) => b.chapters)
+        .find((c) => c.id === link.catalog_chapter_id);
+      task.catalog_chapter_id = link.catalog_chapter_id;
+      if (chapter?.status === 'ready') {
+        task.status = 'done';
+      } else if (chapter) {
+        task.status = 'in_progress';
+        if (chapter.status === 'not_started') {
+          chapter.status = 'in_progress';
+        }
+      }
+      return envelope(route, 200, { task, catalog: catalogLink(server, task.catalog_chapter_id) });
+    }
+    if (path === `/studio/family-chapters/${task.family_chapter_id}/pages` && method === 'GET') {
+      return envelope(
+        route,
+        200,
+        [1, 2].map((n) => ({
+          id: `${task.id}-p${n}`,
+          page_no: n,
+          quality: 'ok',
+          text: n === 1 ? 'Water is everywhere around us.' : 'We drink water every day.',
+          image_url: PAGE_IMAGE,
+        })),
+      );
+    }
+  }
+  if (path === '/studio/catalog-books' && method === 'GET') {
+    const q = (url.searchParams.get('q') ?? '').toLowerCase();
+    return envelope(
+      route,
+      200,
+      prep.books.filter(
+        (b) =>
+          b.class_level === Number(url.searchParams.get('class')) &&
+          b.subject === url.searchParams.get('subject') &&
+          b.title.toLowerCase().includes(q),
+      ),
+    );
+  }
+  if (path === '/studio/catalog-books' && method === 'POST') {
+    const book: FakeCatalogBook = {
+      id: `cb-${newId()}`,
+      class_level: Number(body['class_level']),
+      subject: String(body['subject']),
+      title: String(body['title']),
+      board: String(body['board'] ?? 'CBSE'),
+      publisher: (body['publisher'] as string | undefined) ?? null,
+      edition: (body['edition'] as string | undefined) ?? null,
+      chapters: [],
+    };
+    prep.books.push(book);
+    return envelope(route, 201, book);
+  }
+  for (const book of prep.books) {
+    if (path === `/studio/catalog-books/${book.id}/chapters` && method === 'POST') {
+      if (book.chapters.some((c) => c.number === Number(body['number']))) {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      book.chapters.push({
+        id: `cc-${newId()}`,
+        number: Number(body['number']),
+        title: String(body['title']),
+        status: 'not_started',
+      });
+      return envelope(route, 201, book);
+    }
+    for (const chapter of book.chapters) {
+      if (path === `/studio/catalog-chapters/${chapter.id}` && method === 'PATCH') {
+        const link = catalogLink(server, chapter.id);
+        if (
+          !link ||
+          link.published_lessons < 1 ||
+          link.published_questions < 20 ||
+          link.unpublished > 0
+        ) {
+          return envelope(route, 409, null, 'CONFLICT');
+        }
+        chapter.status = 'ready';
+        for (const task of prep.tasks.filter((t) => t.catalog_chapter_id === chapter.id)) {
+          task.status = 'done';
+        }
+        return envelope(route, 200, catalogLink(server, chapter.id));
+      }
+    }
+  }
+  return envelope(route, 404, null, 'NOT_FOUND');
+}
+
+export interface FakeMessage {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  link: Record<string, string> | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+/** P19 messages and P8a previews (Plan 5.5). A chapter's lessons are those of its catalog chapter. */
+function familyMessages(
+  route: Route,
+  server: FakeServer,
+  path: string,
+  method: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const family = server.family;
+  if (path === '/family/parent/messages' && method === 'GET') {
+    const items = [...family.messages].sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return envelope(route, 200, {
+      items,
+      next_cursor: null,
+      unread: items.filter((m) => !m.read_at).length,
+    });
+  }
+  for (const message of family.messages) {
+    if (path === `/family/parent/messages/${message.id}/read` && method === 'POST') {
+      message.read_at ??= new Date().toISOString();
+      return envelope(route, 200, message);
+    }
+  }
+  const published = (kind: string, catalogChapterId: string | null | undefined) =>
+    server.content.items.filter(
+      (i) =>
+        i.kind === kind &&
+        i.status === 'published' &&
+        !!catalogChapterId &&
+        i.catalog_chapter_id === catalogChapterId,
+    );
+  for (const chapter of family.books.flatMap((b) => b.chapters)) {
+    if (path === `/family/parent/chapters/${chapter.id}/lessons` && method === 'GET') {
+      return envelope(
+        route,
+        200,
+        published('lesson', chapter.catalog_chapter_id).map((i) => ({
+          content_item_id: i.id,
+          title: i.versions.find((v) => v.id === i.published_version_id)?.title ?? '',
+          duration_seconds: 60,
+          preview_result: family.previews[i.id] ?? null,
+        })),
+      );
+    }
+  }
+  const lessons = server.content.items.filter(
+    (i) => i.kind === 'lesson' && i.status === 'published',
+  );
+  for (const item of lessons) {
+    const version = item.versions.find((v) => v.id === item.published_version_id);
+    const preview = () => ({
+      lesson: {
+        id: item.id,
+        title: version?.title ?? '',
+        lang: item.lang,
+        duration_seconds: 60,
+        body: version?.body,
+      },
+      questions: published('question', item.catalog_chapter_id).map((q) => {
+        const v = q.versions.find((x) => x.id === q.published_version_id);
+        return {
+          id: q.id,
+          title: v?.title ?? '',
+          question_type: q.question_type,
+          difficulty: q.difficulty,
+          body: v?.body,
+          solution: v?.solution,
+        };
+      }),
+      preview_result: family.previews[item.id] ?? null,
+    });
+    if (path === `/family/parent/lessons/${item.id}/preview` && method === 'GET') {
+      return envelope(route, 200, preview());
+    }
+    if (path === `/family/parent/lessons/${item.id}/preview-result` && method === 'POST') {
+      const result = String(body['result']);
+      if (result === 'reported' && !body['reason']) {
+        return envelope(route, 400, null, 'VALIDATION_FAILED', {
+          fields: { reason: 'REQUIRED' },
+        });
+      }
+      if (result === 'reported' && family.previews[item.id] !== 'reported') {
+        family.reports.push({
+          content_item_id: item.id,
+          reason: String(body['reason']),
+          note: (body['note'] as string | undefined) ?? null,
+        });
+      }
+      family.previews[item.id] = result;
+      return envelope(route, 200, preview());
     }
   }
   return envelope(route, 404, null, 'NOT_FOUND');

@@ -83,6 +83,14 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
                           (pressed)="fixPages(row, chapter.id)"
                         />
                       }
+                      @if (chapter.status === 'lessons_ready') {
+                        <app-button
+                          variant="ghost"
+                          icon="play_arrow"
+                          [label]="text.previewLessons"
+                          (pressed)="chapterPage(row, chapter.id, 'preview')"
+                        />
+                      }
                     </li>
                   }
                 </ul>
@@ -318,7 +326,15 @@ export class BooksPage {
   }
 
   protected fixPages(row: SubjectBookRow, chapterId: string): void {
-    void this.router.navigate(['/parent/books', row.subject, 'fix-pages'], {
+    this.chapterPage(row, chapterId, 'fix-pages');
+  }
+
+  protected chapterPage(
+    row: SubjectBookRow,
+    chapterId: string,
+    page: 'fix-pages' | 'preview',
+  ): void {
+    void this.router.navigate(['/parent/books', row.subject, page], {
       queryParams: { child: this.childId(), chapter: chapterId },
     });
   }

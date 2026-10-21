@@ -50,7 +50,7 @@ public class ContentController {
 			@NotBlank String subject, @NotBlank String topicId,
 			@Pattern(regexp = "mcq|true_false|fill_blank|match") String questionType,
 			@Min(1) @Max(3) Integer difficulty, @NotBlank @Pattern(regexp = "en|hi") String lang,
-			@NotBlank @Size(max = TITLE_MAX) String title, @NotNull JsonNode body, JsonNode solution) {
+			@NotBlank @Size(max = TITLE_MAX) String title, @NotNull JsonNode body, JsonNode solution, String catalogChapterId) {
 	}
 
 	record NewVersionRequest(@NotBlank String baseVersionId, @NotBlank @Size(max = TITLE_MAX) String title,
@@ -100,7 +100,7 @@ public class ContentController {
 		ContentService.NewItem item = new ContentService.NewItem(body.kind(), body.classLevel(), body.subject(),
 				StudioIds.field(body.topicId(), "topic_id"), body.questionType(),
 				body.difficulty() == null ? 2 : body.difficulty(), body.lang(), body.title().strip(), body.body(),
-				body.solution());
+				body.solution(), StudioIds.field(body.catalogChapterId(), "catalog_chapter_id"));
 		return ApiResponse.success(service.create(StaffGuard.staffId(request), item));
 	}
 

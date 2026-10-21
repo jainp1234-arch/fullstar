@@ -10,6 +10,8 @@ import { ContentEditPage } from './editor/content-edit.page';
 import { LibraryPage } from './library/library.page';
 import { STUDIO_SCREENS } from './screens';
 import { StaffPage } from './staff/staff.page';
+import { PreparePage } from './uploads/prepare.page';
+import { UploadsPage } from './uploads/uploads.page';
 
 /** Staff land on the dashboard; every screen but S1 needs an active staff account (UX only). */
 export const routes: Routes = [
@@ -22,6 +24,8 @@ export const routes: Routes = [
       S4: DraftPage,
       S5: ContentEditPage,
       S6: PublishPage,
+      S8: UploadsPage,
+      S9: PreparePage,
       S11: ContentCheckPage,
       S13: StaffPage,
     },

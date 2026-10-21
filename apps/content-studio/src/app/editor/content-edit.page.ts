@@ -56,6 +56,8 @@ interface NewItemPlace {
   readonly classLevel: number;
   readonly subject: SubjectCode;
   readonly topicId: string;
+  /** Content of a prepared chapter (S9, Plan 5.5). */
+  readonly catalogChapterId?: string;
 }
 
 /** Empty but well-formed content to start a new item from. */
@@ -588,6 +590,7 @@ export class ContentEditPage {
       kind: value.kind,
       ...(value.kind === 'question' ? { question_type: value.type } : {}),
       ...bodyAndSolution(value),
+      ...(place.catalogChapterId ? { catalog_chapter_id: place.catalogChapterId } : {}),
     });
   }
 
@@ -608,7 +611,14 @@ export class ContentEditPage {
     }
     this.detail.set(null);
     this.viewing.set(null);
-    this.place.set({ kind, classLevel, subject: subject as SubjectCode, topicId });
+    const catalogChapterId = query.get('catalog_chapter') ?? undefined;
+    this.place.set({
+      kind,
+      classLevel,
+      subject: subject as SubjectCode,
+      topicId,
+      ...(catalogChapterId ? { catalogChapterId } : {}),
+    });
     // A draft from S4 for this topic opens instead of the empty form
     const draft = this.handoff.take(topicId, kind);
     const value = draft?.value ?? starter(kind, 'mcq');

@@ -323,6 +323,71 @@ export const EN = {
       columns: { name: 'Name', role: 'Role', status: 'Status', since: 'Added', change: 'Change' },
       statusOn: 'Active',
     },
+    /** S8 Uploaded books queue. */
+    uploads: {
+      intro: 'Chapters families uploaded, oldest first. Claim one to prepare its lessons.',
+      waitingTab: 'Waiting',
+      mineTab: 'Being prepared',
+      family: (ref: string) => `Family ${ref}`,
+      chapterLine: (classLevel: number, subject: string, number: number, title: string) =>
+        `Class ${classLevel} ${subject} · Ch ${number}: ${title}`,
+      pages: (count: number) => `${count} ${count === 1 ? 'page' : 'pages'}`,
+      waiting: (minutes: number) =>
+        minutes < 60
+          ? `Waiting ${minutes} min`
+          : minutes < 2880
+            ? `Waiting ${Math.floor(minutes / 60)} h`
+            : `Waiting ${Math.floor(minutes / 1440)} days`,
+      claim: 'Claim',
+      open: 'Prepare',
+      claimedByOther: 'Another admin is preparing this chapter.',
+      byOther: 'Another admin',
+      empty: 'No uploads are waiting.',
+      loadFailed: "We couldn't load the queue.",
+    },
+    /** S9 Prepare chapter. */
+    prepare: {
+      pagesTitle: 'Pages',
+      pageLabel: (page: number) => `Page ${page}`,
+      unclear: 'Unclear',
+      catalogTitle: 'Prepared book',
+      catalogIntro:
+        'Link this chapter to a prepared book. If that chapter is ready, the family gets its lessons at once.',
+      search: 'Find a prepared book',
+      searchButton: 'Search',
+      noBooks: 'No prepared book found. Create one.',
+      newBook: 'New prepared book',
+      bookTitle: 'Book title',
+      publisher: 'Publisher (optional)',
+      edition: 'Edition (optional)',
+      createBook: 'Create book',
+      newChapter: 'Add chapter',
+      chapterNumber: 'Chapter number',
+      chapterTitle: 'Chapter name',
+      createChapter: 'Add chapter',
+      link: 'Link',
+      linked: (title: string) => `Linked to ${title}.`,
+      instant: 'This chapter was ready: the family has its lessons now.',
+      chapterStatus: {
+        not_started: 'Not started',
+        in_progress: 'Being prepared',
+        ready: 'Ready',
+      } as Record<string, string>,
+      contentTitle: 'Lessons and questions',
+      counts: (lessons: number, questions: number, waiting: number) =>
+        `${lessons} published ${lessons === 1 ? 'lesson' : 'lessons'}, ${questions} published questions, ${waiting} in draft or check`,
+      draftLesson: 'Draft lesson with Claude',
+      draftQuestions: 'Draft questions with Claude',
+      openItem: 'Open',
+      markReady: 'Mark chapter ready',
+      readyRule: (questions: number) =>
+        `Needs at least one published lesson and ${questions} published questions, with nothing left in draft or check.`,
+      ready: 'Chapter ready. Every linked family has been told.',
+      claimFirst: 'Claim this chapter in the queue before preparing it.',
+      claim: 'Claim',
+      done: 'This chapter is done.',
+      loadFailed: "We couldn't load this chapter.",
+    },
     /** S3 Library: class → subject → topic tree and its content. */
     library: {
       classLabel: 'Class',
@@ -375,6 +440,8 @@ export const EN = {
     /** S4 Draft with AI (Plan 4.3). In trial the admin uses a Claude chat and pastes the reply. */
     draft: {
       intro: 'Choose what to draft. The draft is not saved until you save it.',
+      forChapter:
+        'Drafting for an uploaded chapter: Claude gets its page text, and what you save belongs to its prepared chapter.',
       topic: 'Topic',
       noTopics: 'This class and subject has no topics yet. Add one in the Library.',
       type: 'Content type',
@@ -738,6 +805,45 @@ export const EN = {
     // P4 actions for P6 and P8
     checkChapters: 'Check chapters',
     fixPages: (count: number) => `Fix ${count} unclear ${count === 1 ? 'page' : 'pages'}`,
+    previewLessons: 'Preview lessons',
+  },
+
+  /** P19 Messages (App Flow §6, §9). */
+  messages: {
+    empty: "You're all caught up.",
+    unread: 'New',
+    open: 'Open',
+    more: 'Show older messages',
+    loadFailed: "We couldn't load your messages.",
+  },
+
+  /** P8a Preview new lessons (App Flow §6). */
+  lessonPreview: {
+    intro:
+      'Our team prepared these lessons from your book. A quick look is recommended, but your child can already use them.',
+    recommended: 'New · preview recommended',
+    looksGood: 'Looks good',
+    reported: 'Reported',
+    open: 'Preview',
+    questions: (count: number) => `${count} ${count === 1 ? 'question' : 'questions'}`,
+    answer: 'Answer',
+    report: 'Report a problem',
+    reportTitle: 'What is wrong?',
+    reason: 'Reason',
+    reasons: {
+      wrong_answer: 'A wrong answer',
+      spelling: 'Spelling or grammar',
+      not_suitable: 'Not suitable for my child',
+      audio_problem: 'A problem with the sound',
+      other: 'Something else',
+    } as Record<string, string>,
+    note: 'What did you notice? (optional)',
+    send: 'Send report',
+    cancel: 'Cancel',
+    thanks: 'Thank you. Our team will look at it.',
+    thanksGood: 'Thank you for checking.',
+    none: 'No lessons for this chapter yet.',
+    back: 'Back to lessons',
   },
 
   /** P6 Check chapters (App Flow §6). */

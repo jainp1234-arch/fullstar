@@ -44,7 +44,7 @@ public class DraftController {
 	@PostMapping("/drafts")
 	ApiResponse<DraftService.Draft> draft(HttpServletRequest request, @Valid @RequestBody DraftRequest body) {
 		StaffGuard.requireStaff(request);
-		DraftService.Request draft = toRequest(body);
+		DraftService.Request draft = toRequest(body, StaffGuard.staffId(request));
 		return ApiResponse.success(body.pasted() == null || body.pasted().isBlank() ? service.fromClaude(draft)
 				: service.fromPaste(draft, body.pasted()));
 	}
@@ -52,14 +52,18 @@ public class DraftController {
 	@PostMapping("/draft-prompt")
 	ApiResponse<DraftPrompts.Prompt> prompt(HttpServletRequest request, @Valid @RequestBody DraftRequest body) {
 		StaffGuard.requireStaff(request);
-		return ApiResponse.success(service.prompt(toRequest(body)));
+		return ApiResponse.success(service.prompt(toRequest(body, StaffGuard.staffId(request))));
 	}
 
-	private static DraftService.Request toRequest(DraftRequest body) {
+	private static DraftService.Request toRequest(DraftRequest body, UUID staffId) {
+		UUID familyChapterId = null;
 		if (body.familyChapterId() != null) {
-			// Drafts from a family's chapter come with S9 (Phase 5)
-			throw new ValidationException("family_chapter_id is not supported yet",
-					Map.of("family_chapter_id", "INVALID"));
+			try {
+				familyChapterId = UUID.fromString(body.familyChapterId());
+			}
+			catch (IllegalArgumentException ex) {
+				throw new ValidationException("family_chapter_id is not valid", Map.of("family_chapter_id", "INVALID"));
+			}
 		}
 		if (body.topicId() == null || body.topicId().isBlank()) {
 			throw new ValidationException("topic_id is required", Map.of("topic_id", "REQUIRED"));
@@ -73,7 +77,7 @@ public class DraftController {
 		}
 		String lang = body.lang() != null ? body.lang() : "hindi".equals(body.subject()) ? "hi" : "en";
 		return new DraftService.Request(body.type(), body.classLevel(), body.subject(), topicId,
-				body.count() == null ? 10 : body.count(), lang);
+				body.count() == null ? 10 : body.count(), lang, familyChapterId, staffId);
 	}
 
 }
