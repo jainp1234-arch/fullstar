@@ -7,7 +7,7 @@ import { EN, ScreenConfig, ScreenDef } from '@fullstar/ui';
 const SCREENS: readonly ScreenDef[] = [
   // Sign-up, sign-in and setup (App Flow §4)
   { id: 'A1', path: 'welcome', shell: 'focus', mode: 'parent', links: ['A2'] },
-  { id: 'A2', path: 'sign-in/email', shell: 'focus', mode: 'parent', parent: 'A1', links: ['A3'] },
+  { id: 'A2', path: 'sign-up', shell: 'focus', mode: 'parent', parent: 'A1', links: ['A3'] },
   {
     id: 'A3',
     path: 'sign-in/code',

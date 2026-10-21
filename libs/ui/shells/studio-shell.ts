@@ -1,9 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { NgComponentOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, InjectionToken, Type, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { IconButton } from '../components/icon-button';
 import { EN } from '../strings/en';
 import { AppNav } from './app-nav';
 import { CurrentScreen } from './current-screen';
+
+/** The signed-in user's menu in the Studio top bar, supplied by the app (it knows about auth). */
+export const STUDIO_ACCOUNT = new InjectionToken<Type<unknown> | null>('STUDIO_ACCOUNT', {
+  providedIn: 'root',
+  factory: () => null,
+});
 
 /**
  * Shell E · Studio (Guidelines §10, §13): 64 px sky top bar with the name, side navigation
@@ -12,11 +19,14 @@ import { CurrentScreen } from './current-screen';
 @Component({
   selector: 'app-shell-studio',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppNav, IconButton, RouterOutlet],
-  host: { 'data-shell': 'E' },
+  imports: [AppNav, IconButton, NgComponentOutlet, RouterOutlet],
+  host: { 'data-shell': 'E', '[attr.data-screen]': 'current.screen()?.id' },
   template: `
     <header class="bar ui-sky">
       <span class="bar__name">{{ appName }}</span>
+      @if (account) {
+        <div class="bar__account"><ng-container *ngComponentOutlet="account" /></div>
+      }
     </header>
     <div class="body" [class.body--nav]="items().length > 0">
       @if (items().length) {
@@ -47,6 +57,9 @@ import { CurrentScreen } from './current-screen';
       height: 64px;
       padding: 0 var(--space-6);
       flex: none;
+    }
+    .bar__account {
+      margin-left: auto;
     }
     .bar__name {
       font: var(--type-h2);
@@ -103,6 +116,7 @@ import { CurrentScreen } from './current-screen';
 })
 export class StudioShell {
   protected readonly current = inject(CurrentScreen);
+  protected readonly account = inject(STUDIO_ACCOUNT);
   private readonly router = inject(Router);
   protected readonly items = this.current.navItems;
   protected readonly appName = EN.app.studioName;

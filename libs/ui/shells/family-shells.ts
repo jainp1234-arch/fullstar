@@ -77,7 +77,7 @@ export class FamilyFrame {
   selector: 'app-shell-sky-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FamilyFrame, RouterOutlet, SkyHeader],
-  host: { 'data-shell': 'A' },
+  host: { 'data-shell': 'A', '[attr.data-screen]': 'screen()?.id' },
   template: `
     <app-family-frame>
       <div class="sky ui-sky">
@@ -92,14 +92,16 @@ export class FamilyFrame {
     }
   `,
 })
-export class SkyListShell {}
+export class SkyListShell {
+  protected readonly screen = inject(CurrentScreen).screen;
+}
 
 /** Shell B · Sky + sheet: a 200 px sky header (180 px from 600 px) and a white sheet over it. */
 @Component({
   selector: 'app-shell-sky-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FamilyFrame, RouterOutlet, SkyHeader],
-  host: { 'data-shell': 'B' },
+  host: { 'data-shell': 'B', '[attr.data-screen]': 'screen()?.id' },
   template: `
     <app-family-frame>
       <div class="sky ui-sky"><app-sky-header /></div>
@@ -126,14 +128,16 @@ export class SkyListShell {}
     }
   `,
 })
-export class SkySheetShell {}
+export class SkySheetShell {
+  protected readonly screen = inject(CurrentScreen).screen;
+}
 
 /** Shell C · Focus: a 64 px sky header with close or back only; white body; no navigation. */
 @Component({
   selector: 'app-shell-focus',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FamilyFrame, RouterOutlet, SkyHeader],
-  host: { 'data-shell': 'C' },
+  host: { 'data-shell': 'C', '[attr.data-screen]': 'screen()?.id' },
   template: `
     <app-family-frame>
       <div class="sky ui-sky"><app-sky-header [focus]="true" /></div>
@@ -149,14 +153,16 @@ export class SkySheetShell {}
     }
   `,
 })
-export class FocusShell {}
+export class FocusShell {
+  protected readonly screen = inject(CurrentScreen).screen;
+}
 
 /** Shell D · Celebration: full sky; the page shows the owl, title, stars and two buttons. */
 @Component({
   selector: 'app-shell-celebration',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FamilyFrame, RouterOutlet],
-  host: { 'data-shell': 'D' },
+  host: { 'data-shell': 'D', '[attr.data-screen]': 'screen()?.id' },
   template: `
     <app-family-frame>
       <main class="sky ui-sky">
@@ -178,4 +184,6 @@ export class FocusShell {}
     }
   `,
 })
-export class CelebrationShell {}
+export class CelebrationShell {
+  protected readonly screen = inject(CurrentScreen).screen;
+}

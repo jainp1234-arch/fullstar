@@ -16,13 +16,15 @@ export interface ChildProfile {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [Avatar, IconButton],
   template: `
-    <app-icon-button
-      class="picker__parent"
-      icon="lock"
-      surface="sky"
-      [label]="parentLabel"
-      (pressed)="parent.emit()"
-    />
+    @if (showParentButton()) {
+      <app-icon-button
+        class="picker__parent"
+        icon="lock"
+        surface="sky"
+        [label]="parentLabel"
+        (pressed)="parent.emit()"
+      />
+    }
     <ul class="picker__list">
       @for (child of profiles(); track child.id) {
         <li>
@@ -82,6 +84,8 @@ export interface ChildProfile {
 })
 export class ProfilePicker {
   readonly profiles = input.required<readonly ChildProfile[]>();
+  /** Off when the screen header already has the Parent button (C1 in shell A). */
+  readonly showParentButton = input(true);
   /** Emits the child's id. */
   readonly picked = output<string>();
   /** The "Parent" button: the screen asks for the PIN (App Flow P0). */

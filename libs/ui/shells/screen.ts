@@ -1,5 +1,5 @@
 import { InjectionToken, Type } from '@angular/core';
-import { Routes } from '@angular/router';
+import { CanActivateFn, Routes } from '@angular/router';
 import { IconName } from '../icons/icons';
 import { DisplayMode } from '../mode/display-mode';
 import { EN } from '../strings/en';
@@ -59,6 +59,13 @@ export const SCREEN_CONFIG = new InjectionToken<ScreenConfig>('SCREEN_CONFIG');
 /** Route data key holding the ScreenDef. */
 export const SCREEN_DATA = 'screen';
 
+export interface ScreenRouteOptions {
+  /** Built screens; every other screen shows the placeholder page. */
+  readonly pages?: Partial<Record<ScreenId, Type<unknown>>>;
+  /** Guards per screen, e.g. sign-in required. */
+  readonly guards?: (screen: ScreenDef) => CanActivateFn[];
+}
+
 /**
  * One parent route per shell, each with its screens as children, so a shell stays mounted while
  * moving between its screens.
@@ -67,6 +74,7 @@ export function screenRoutes(
   config: ScreenConfig,
   shells: Partial<Record<ShellKind, Type<unknown>>>,
   page: Type<unknown>,
+  options: ScreenRouteOptions = {},
 ): Routes {
   const kinds = [...new Set(config.screens.map((screen) => screen.shell))];
   return kinds.map((kind) => {
@@ -81,7 +89,8 @@ export function screenRoutes(
         .filter((screen) => screen.shell === kind)
         .map((screen) => ({
           path: screen.path,
-          component: page,
+          component: options.pages?.[screen.id] ?? page,
+          canActivate: options.guards?.(screen) ?? [],
           title: EN.placeholder.pageTitle(EN.screens[screen.id], config.appName),
           data: { [SCREEN_DATA]: screen },
         })),

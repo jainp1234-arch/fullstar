@@ -14,6 +14,7 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
+      "@fullstar/core": ["./libs/core/index.ts"],
       "@fullstar/ui": ["./libs/ui/index.ts"],
       "@fullstar/ui/gallery": ["./libs/ui/gallery/ui-gallery.ts"]
     }
@@ -39,6 +40,12 @@
     },
     {
       "path": "./libs/ui/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/core/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/core/tsconfig.spec.json"
     },
     {
       "path": "./libs/ui/tsconfig.spec.json"

@@ -1,8 +1,12 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { signInFamily } from './fakes';
 import { WIDTHS, WidthName, walk } from './routes';
 
-/** App Flow §4–§6 screen IDs and their shells (Guidelines §10). */
+/**
+ * App Flow §4–§6 screen IDs and their shells (Guidelines §10), walked signed in. A1 (signed out
+ * only) and A3 (the sign-in return, which moves on at once) are covered in family-auth.spec.ts.
+ */
 const SHELLS: Record<string, readonly string[]> = {
   A: ['C1', 'K1', 'K2', 'K8', 'K12'],
   B: [
@@ -11,7 +15,7 @@ const SHELLS: Record<string, readonly string[]> = {
     ...['P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P18', 'P19'],
   ],
   C: [
-    ...['A1', 'A2', 'A3', 'A4', 'B1', 'B2', 'B3', 'B4'],
+    ...['A2', 'A4', 'B1', 'B2', 'B3', 'B4'],
     ...['K4', 'K5', 'K6', 'K9', 'K10', 'K11', 'K13', 'P0'],
   ],
   D: ['B5', 'K7', 'K14'],
@@ -31,7 +35,14 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       page,
     }) => {
       test.setTimeout(180_000);
-      const seen = await walk(page, '/welcome');
+      await signInFamily(page);
+      const seen = await walk(page, [
+        '/who',
+        '/parent/pin',
+        '/kid/learn',
+        '/setup/pin',
+        '/sign-up',
+      ]);
       expect([...seen.keys()].sort()).toEqual(EXPECTED.map((e) => e.id).sort());
       for (const { id, shell } of EXPECTED) {
         const visit = seen.get(id);
@@ -45,6 +56,9 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
 
 test.describe('headers', () => {
   test.use({ viewport: WIDTHS.phone });
+  test.beforeEach(async ({ page }) => {
+    await signInFamily(page);
+  });
 
   test('kid mode: Parent on a tab, Back inside it, Close in focus screens', async ({ page }) => {
     await page.goto('/kid/learn');
@@ -83,7 +97,7 @@ test.describe('headers', () => {
     await expect(nav.locator('[aria-current]')).toHaveCount(1);
   });
 
-  test('unknown paths and the root land on Who is learning?', async ({ page }) => {
+  test('signed in, unknown paths and the root land on Who is learning?', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/who$/);
     await page.goto('/no/such/screen');
@@ -92,6 +106,9 @@ test.describe('headers', () => {
 });
 
 test.describe('accessibility of each shell', () => {
+  test.beforeEach(async ({ page }) => {
+    await signInFamily(page);
+  });
   for (const path of [
     '/who',
     '/kid/learn/english/1',
