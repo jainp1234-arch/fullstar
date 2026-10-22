@@ -20,7 +20,7 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api book-reader test-ocr test-reading reading-check test-pages family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
+.PHONY: help up down test lint api book-reader test-ocr test-reading reading-check voice test-voice narrate-check test-pages family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
@@ -38,6 +38,9 @@ help:
 	@echo "make seed-content     load the Class 3 starter content (infra/seed/class3), checked and published"
 	@echo "make test-reading       real reading-checker model on synthetic speech (Docker)"
 	@echo "make reading-check DIR= score your own recordings against their passages"
+	@echo "make voice             start the voice-maker worker in compose (about 8 GB of memory)"
+	@echo "make test-voice        real voice-maker narration of an English and a Hindi page (Docker)"
+	@echo "make narrate-check DIR= narrate each page .txt in DIR to an MP3 with Audacity word labels"
 	@echo "make vendor-assets    download and convert fonts, icons and illustrations (libs/ui/assets)"
 
 up:
@@ -100,6 +103,22 @@ reading-check:
 	@test -n "$(DIR)" || { echo "Usage: make reading-check DIR=<folder with kite.m4a + kite.txt ...>"; exit 1; }
 	docker build -t fullstar/reading-checker:local workers/reading-checker
 	MSYS_NO_PATHCONV=1 docker run --rm -v "$(abspath $(DIR)):/check:ro" fullstar/reading-checker:local python -m reading_checker.check /check
+
+# Plan 8.2: the voice model is gated; HF_TOKEN from .env reaches the build only as a BuildKit secret
+VOICE_BUILD := HF_TOKEN="$$(grep '^HF_TOKEN=' .env | cut -d= -f2- | tr -d '\r')" docker build --secret id=hf_token,env=HF_TOKEN
+
+voice:
+	HF_TOKEN="$$(grep '^HF_TOKEN=' .env | cut -d= -f2- | tr -d '\r')" $(COMPOSE) --profile voice up -d --build voice-maker
+
+test-voice:
+	$(VOICE_BUILD) --target test -t fullstar/voice-maker:test workers/voice-maker
+	docker run --rm fullstar/voice-maker:test
+
+# Plan 8.2 manual check: open each MP3 in Audacity with its labels; every word within 150 ms
+narrate-check:
+	@test -n "$(DIR)" || { echo "Usage: make narrate-check DIR=<folder with page1.txt page2.txt ...>"; exit 1; }
+	$(VOICE_BUILD) -t fullstar/voice-maker:local workers/voice-maker
+	MSYS_NO_PATHCONV=1 docker run --rm -v "$(abspath $(DIR)):/check" fullstar/voice-maker:local python -m voice_maker.check /check
 
 # Renders the sample pages of test-ocr (services/book-reader/src/test/resources/pages)
 test-pages:

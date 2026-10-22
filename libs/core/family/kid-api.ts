@@ -154,6 +154,14 @@ export interface KidLesson {
   readonly body: unknown;
   readonly questions: readonly KidQuizQuestion[];
   readonly resume: { readonly attempt_id: string; readonly resume_state: unknown } | null;
+  /** Plan 8.2: the lesson's narration, null until voice-maker has made it. */
+  readonly narration: LessonNarration | null;
+}
+
+/** One MP3 (signed for 10 minutes) and where each narration scene is in it. */
+export interface LessonNarration {
+  readonly audio_url: string;
+  readonly scenes: readonly { readonly id: string; readonly start_ms: number; readonly end_ms: number }[];
 }
 
 /** Schema §4.3 pages.word_timings. */

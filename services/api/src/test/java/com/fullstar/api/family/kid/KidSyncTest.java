@@ -1,6 +1,8 @@
 package com.fullstar.api.family.kid;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -113,7 +115,20 @@ class KidSyncTest extends ApiTestSupport {
 			.andExpect(jsonPath("$.data.questions[0].id").value(question[0].toString()))
 			.andExpect(jsonPath("$.data.questions[0].solution.correct[0]").exists())
 			.andExpect(jsonPath("$.data.resume.attempt_id").value(attemptId.toString()))
-			.andExpect(jsonPath("$.data.resume.resume_state.position_s").value(4));
+			.andExpect(jsonPath("$.data.resume.resume_state.position_s").value(4))
+			.andExpect(jsonPath("$.data.narration").value(nullValue()));
+
+		// Plan 8.2: once narrated, the MP3 link and each scene's part of it
+		systemQuery("""
+				UPDATE app.content_versions SET narration_audio_key = ?, narration_timings = CAST(? AS jsonb)
+				 WHERE id = ? RETURNING id""", "content/" + lesson[0] + "/1/narration.mp3",
+				"[{\"id\": \"s1\", \"start_ms\": 300, \"end_ms\": 1500}]", lesson[1]);
+		mvc.perform(get("/api/v1/family/kid/lessons/" + lesson[0]).header(HttpHeaders.AUTHORIZATION, bearer)
+			.header("X-Child-Id", childId.toString()))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.narration.audio_url").value(containsString("/narration.mp3")))
+			.andExpect(jsonPath("$.data.narration.scenes[0].id").value("s1"))
+			.andExpect(jsonPath("$.data.narration.scenes[0].end_ms").value(1500));
 	}
 
 	@Test

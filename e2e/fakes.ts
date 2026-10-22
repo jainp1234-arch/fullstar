@@ -49,6 +49,8 @@ export interface FakeServer {
   readonly family: {
     children: FakeChild[];
     dailyLimitMinutes: number;
+    /** Plan 8.2: the sample lesson has narration audio (voice-maker has run). */
+    lessonNarrated: boolean;
     deletionRequests: number;
     deletionRequestedAt: string | null;
     /** Books, chapters and uploads (Plan 5.1). */
@@ -173,6 +175,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
     family: {
       children: [...(initial ?? [])],
       dailyLimitMinutes: 30,
+      lessonNarrated: false,
       deletionRequests: 0,
       deletionRequestedAt: null,
       books: [],
@@ -2021,6 +2024,15 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
         },
       ],
       resume: null,
+      narration: server.family.lessonNarrated
+        ? {
+            audio_url: SILENT_MP3,
+            scenes: [
+              { id: 's1', start_ms: 0, end_ms: 900 },
+              { id: 's2', start_ms: 1100, end_ms: 1900 },
+            ],
+          }
+        : null,
     });
   }
   if (path === '/family/kid/home') {

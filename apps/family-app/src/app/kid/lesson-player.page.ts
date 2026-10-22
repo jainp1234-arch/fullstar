@@ -18,6 +18,7 @@ import {
   KidApi,
   KidEvents,
   KidLesson,
+  LessonNarration,
   starsFor,
 } from '@fullstar/core';
 import {
@@ -53,6 +54,9 @@ interface Quiz {
  * step is saved on the device first (KidEvents) and synced when online, so a lesson finished
  * offline counts once back online. It resumes where the child left off. The first answer to each
  * quiz counts; the child may try again until it is right. ?chapter= carries the uploaded chapter.
+ * Plan 8.2: Read aloud plays the scene's part of the lesson's narration MP3, and a narrated scene
+ * stays until its voice has finished; without narration (not made yet, or offline) the device
+ * voice reads the text.
  */
 @Component({
   selector: 'app-lesson-player-page',
@@ -156,6 +160,15 @@ interface Quiz {
           (pressed)="last() ? finish() : go(index() + 1)"
         />
       </div>
+      @if (l.narration; as narration) {
+        <audio
+          #narration
+          preload="auto"
+          [src]="narration.audio_url"
+          (timeupdate)="narrationTick()"
+          (error)="narrationFailed.set(true)"
+        ></audio>
+      }
     } @else if (failed()) {
       <app-kid-retry (retry)="load()" />
     } @else {
@@ -222,6 +235,8 @@ export class LessonPlayerPage {
   protected readonly solved = signal(false);
   protected readonly missed = signal(false);
   protected readonly speaking = signal(false);
+  /** The MP3 could not be loaded (offline, or the link ran out): the device voice takes over. */
+  protected readonly narrationFailed = signal(false);
 
   protected readonly scenes = computed<readonly LessonScene[]>(() => {
     const lesson = this.lesson();
@@ -279,6 +294,9 @@ export class LessonPlayerPage {
   });
 
   private readonly picture = viewChild<ElementRef<HTMLImageElement>>('picture');
+  private readonly narrationAudio = viewChild<ElementRef<HTMLAudioElement>>('narration');
+  /** Where the playing scene's voice ends in the MP3, in seconds. */
+  private narrationEnd: number | null = null;
   private readonly buttons = viewChildren(AnswerButton);
   private readonly api = inject(KidApi);
   private readonly events = inject(KidEvents);
@@ -304,7 +322,12 @@ export class LessonPlayerPage {
       if (!scene || scene.quiz || paused || this.last()) {
         return;
       }
-      this.timer = setTimeout(() => this.go(this.index() + 1), Math.max(1500, scene.duration_ms));
+      const voiced = this.narrationPart(scene.id);
+      const voiceMs = voiced ? voiced.end_ms - voiced.start_ms + 500 : 0;
+      this.timer = setTimeout(
+        () => this.go(this.index() + 1),
+        Math.max(1500, scene.duration_ms, voiceMs),
+      );
     });
     // GSAP plays the scene's animation; with reduced motion the picture just appears
     effect(() => {
@@ -328,6 +351,7 @@ export class LessonPlayerPage {
     this.destroyRef.onDestroy(() => {
       this.clearTimer();
       window.speechSynthesis?.cancel();
+      this.stopNarration();
       // Leaving halfway keeps the place for the Continue card
       void this.save(null);
     });
@@ -362,6 +386,7 @@ export class LessonPlayerPage {
     this.elapsedMs += Date.now() - this.sceneStart;
     this.sceneStart = Date.now();
     window.speechSynthesis?.cancel();
+    this.stopNarration();
     this.speaking.set(false);
     this.index.set(target);
     this.solved.set(false);
@@ -389,6 +414,47 @@ export class LessonPlayerPage {
   }
 
   protected readAloud(text: string): void {
+    const part = this.narrationPart(this.scene()?.id);
+    const audio = this.narrationAudio()?.nativeElement;
+    if (part && audio && !this.narrationFailed()) {
+      window.speechSynthesis?.cancel();
+      audio.currentTime = part.start_ms / 1000;
+      this.narrationEnd = part.end_ms / 1000;
+      this.speaking.set(true);
+      audio.play().catch(() => {
+        this.stopNarration();
+        this.narrationFailed.set(true);
+        this.speakWithDevice(text);
+      });
+      return;
+    }
+    this.speakWithDevice(text);
+  }
+
+  /** Stops the MP3 at the end of the scene's part. */
+  protected narrationTick(): void {
+    const audio = this.narrationAudio()?.nativeElement;
+    if (audio && this.narrationEnd !== null && audio.currentTime >= this.narrationEnd) {
+      this.stopNarration();
+    }
+  }
+
+  private narrationPart(sceneId: string | undefined): LessonNarration['scenes'][number] | null {
+    const narration = this.lesson()?.narration;
+    return sceneId && narration && !this.narrationFailed()
+      ? (narration.scenes.find((s) => s.id === sceneId) ?? null)
+      : null;
+  }
+
+  private stopNarration(): void {
+    this.narrationAudio()?.nativeElement.pause();
+    if (this.narrationEnd !== null) {
+      this.narrationEnd = null;
+      this.speaking.set(false);
+    }
+  }
+
+  private speakWithDevice(text: string): void {
     const speech = window.speechSynthesis;
     if (!speech) {
       return;

@@ -1,6 +1,7 @@
 package com.fullstar.api.family.kid;
 
 import com.fullstar.api.common.error.NotFoundException;
+import com.fullstar.api.common.storage.FileStorage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import tools.jackson.databind.json.JsonMapper;
  * K4 lesson for the player (Schema §11 GET /family/kid/lessons/{id}; Plan 6.2): the published version,
  * the published questions its quiz scenes name (with solutions, so the player can check answers
  * offline), and where the child left off. RLS lets a family read only content it is entitled to.
+ * Plan 8.2: once voice-maker has narrated the version, its MP3 (signed for 10 minutes) and each
+ * scene's part of it; until then narration is null and the player uses the device voice.
  */
 @Service
 public class KidLessonService {
@@ -22,8 +25,11 @@ public class KidLessonService {
 
 	private final JdbcTemplate jdbc;
 
-	public KidLessonService(JdbcTemplate jdbc) {
+	private final FileStorage storage;
+
+	public KidLessonService(JdbcTemplate jdbc, FileStorage storage) {
 		this.jdbc = jdbc;
+		this.storage = storage;
 	}
 
 	public record Question(UUID id, UUID versionId, String questionType, UUID topicId, JsonNode body,
@@ -33,14 +39,20 @@ public class KidLessonService {
 	public record Resume(UUID attemptId, JsonNode resumeState) {
 	}
 
+	/** scenes: [{id, start_ms, end_ms}] in the MP3. */
+	public record Narration(String audioUrl, JsonNode scenes) {
+	}
+
 	public record Lesson(UUID id, UUID versionId, String title, String lang, Integer durationSeconds, int subjectId,
-			UUID topicId, UUID catalogChapterId, JsonNode body, List<Question> questions, Resume resume) {
+			UUID topicId, UUID catalogChapterId, JsonNode body, List<Question> questions, Resume resume,
+			Narration narration) {
 	}
 
 	public Lesson lesson(UUID childId, UUID contentItemId) {
 		List<Map<String, Object>> rows = jdbc.queryForList("""
 				SELECT ci.id, ci.published_version_id, ci.lang, ci.subject_id, ci.topic_id, ci.catalog_chapter_id,
-				       cv.title, cv.duration_seconds, cv.body::text AS body
+				       cv.title, cv.duration_seconds, cv.body::text AS body,
+				       cv.narration_audio_key, cv.narration_timings::text AS narration_timings
 				  FROM app.content_items ci JOIN app.content_versions cv ON cv.id = ci.published_version_id
 				 WHERE ci.id = ? AND ci.kind = 'lesson' AND ci.status = 'published'""", contentItemId);
 		if (rows.isEmpty()) {
@@ -73,10 +85,15 @@ public class KidLessonService {
 				(rs, n) -> new Resume(rs.getObject("id", UUID.class),
 						rs.getString("resume_state") == null ? null : JSON.readTree(rs.getString("resume_state"))),
 				childId, contentItemId);
+		String audioKey = (String) row.get("narration_audio_key");
+		Narration narration = audioKey == null || row.get("narration_timings") == null ? null
+				: new Narration(storage.signedGet(audioKey).url().toString(),
+						JSON.readTree((String) row.get("narration_timings")));
 		return new Lesson(contentItemId, (UUID) row.get("published_version_id"), (String) row.get("title"),
 				(String) row.get("lang"), (Integer) row.get("duration_seconds"),
 				((Number) row.get("subject_id")).intValue(), (UUID) row.get("topic_id"),
-				(UUID) row.get("catalog_chapter_id"), body, questions, resume.isEmpty() ? null : resume.get(0));
+				(UUID) row.get("catalog_chapter_id"), body, questions, resume.isEmpty() ? null : resume.get(0),
+				narration);
 	}
 
 }

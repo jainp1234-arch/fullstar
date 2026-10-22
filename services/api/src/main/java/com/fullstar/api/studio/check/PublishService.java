@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 /**
  * Publish and unpublish (Schema §11, S6). Publishing sets published_version_id to the current version;
  * the database rule guard_publish refuses a version whose latest check has not passed or still has
- * an open flag (409 CHECK_NOT_PASSED). Unpublishing archives the item: children no longer see it.
+ * an open flag (409 CHECK_NOT_PASSED). A published lesson is then narrated (Plan 8.2). Unpublishing
+ * archives the item: children no longer see it.
  */
 @Service
 public class PublishService {
@@ -26,9 +27,12 @@ public class PublishService {
 
 	private final AuditLog audit;
 
-	public PublishService(JdbcTemplate jdbc, AuditLog audit) {
+	private final LessonNarrationJobs narration;
+
+	public PublishService(JdbcTemplate jdbc, AuditLog audit, LessonNarrationJobs narration) {
 		this.jdbc = jdbc;
 		this.audit = audit;
+		this.narration = narration;
 	}
 
 	public void publish(UUID staffId, UUID itemId) {
@@ -51,6 +55,7 @@ public class PublishService {
 		audit.staff(staffId, "content.publish", "content_item", itemId,
 				Map.of("version_no", rows.get(0).get("version_no")));
 		log.info("Content published itemId={} versionId={}", itemId, versionId);
+		narration.queueIfNeeded(jdbc, itemId);
 	}
 
 	public void unpublish(UUID staffId, UUID itemId) {
