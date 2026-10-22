@@ -105,5 +105,9 @@ export class Tile {
     this.state() === 'locked' ? 'state-wait' : this.illustration(),
   );
   protected readonly art = computed(() => illustrationUrl(this.artKey()));
-  protected readonly artAlt = computed(() => EN.illustrations[this.artKey()]);
+  /** No alt when it would only repeat the label (WCAG: the button already says it). */
+  protected readonly artAlt = computed(() => {
+    const alt = EN.illustrations[this.artKey()];
+    return this.label().toLowerCase().includes(alt.toLowerCase()) ? '' : alt;
+  });
 }

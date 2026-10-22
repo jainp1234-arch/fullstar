@@ -689,6 +689,27 @@ export const EN = {
       showPairs: 'Show the pairs',
       backToSubject: 'Back to subject',
     },
+    /** K8–K11 practice (Plan 7.1). */
+    practice: {
+      englishGrammar: 'English grammar',
+      hindiGrammar: 'Hindi grammar',
+      tables: 'Maths tables',
+      evsQuiz: 'EVS quiz',
+      mistakes: 'Fix my mistakes',
+      mistakesCount: (count: number) => `${count} to fix`,
+      nothingYet: 'No practice here yet. Check back soon!',
+      question: (n: number, total: number) => `Question ${n} of ${total}`,
+      next: 'Next',
+      finish: 'Finish',
+      noMistakes: 'No mistakes to fix. Great job!',
+      pickTable: 'Pick a table',
+      table: (n: number) => `${n} times table`,
+      practise: 'Practise',
+      challenge: '60-second challenge',
+      sum: (table: number, by: number) => `${table} × ${by} = ?`,
+      timeLeft: (seconds: number) => `${seconds} seconds left`,
+      challengeScore: (right: number) => `${right} right!`,
+    },
     /** K5 read-along (Plan 6.3). */
     readAlong: {
       page: (page: number, total: number) => `Page ${page} of ${total}`,

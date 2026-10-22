@@ -22,7 +22,6 @@ import {
 } from '@fullstar/core';
 import {
   AnswerButton,
-  AnswerLetter,
   Button,
   EN,
   IllustrationKey,
@@ -38,49 +37,12 @@ import {
   illustrationUrl,
 } from '@fullstar/ui';
 import { gsap } from 'gsap';
-
-const LETTERS: readonly AnswerLetter[] = ['A', 'B', 'C', 'D'];
-
-interface Choice {
-  readonly letter: AnswerLetter;
-  readonly text: string;
-  readonly correct: boolean;
-  /** What the answer event records (Schema §4.4 answer_events.answer). */
-  readonly answer: unknown;
-}
+import { Choice, choicesOf, pairsOf } from './question-choices';
 
 interface Quiz {
   readonly itemId: string;
   readonly versionId: string;
   readonly content: QuestionContent;
-}
-
-function choicesOf(question: QuestionContent): readonly Choice[] {
-  switch (question.type) {
-    case 'mcq':
-      return question.body.options.map((option, i) => ({
-        letter: LETTERS[i],
-        text: option.text,
-        correct: option.id === question.solution.correct[0],
-        answer: { selected: [option.id] },
-      }));
-    case 'true_false':
-      return [true, false].map((value, i) => ({
-        letter: LETTERS[i],
-        text: value ? EN.preview.trueLabel : EN.preview.falseLabel,
-        correct: question.solution.correct === value,
-        answer: { value },
-      }));
-    case 'fill_blank':
-      return question.body.choices.map((choice, i) => ({
-        letter: LETTERS[i],
-        text: choice,
-        correct: choice.trim() === question.solution.correct.trim(),
-        answer: { text: choice },
-      }));
-    case 'match':
-      return [];
-  }
 }
 
 /**
@@ -313,12 +275,7 @@ export class LessonPlayerPage {
   });
   protected readonly pairs = computed(() => {
     const quiz = this.quiz()?.content;
-    if (quiz?.type !== 'match') {
-      return [];
-    }
-    const right = new Map(quiz.body.right.map((item) => [item.id, item.text]));
-    const partner = new Map(quiz.solution.pairs.map(([l, r]) => [l, right.get(r) ?? '']));
-    return quiz.body.left.map((item) => ({ left: item.text, right: partner.get(item.id) ?? '' }));
+    return quiz ? pairsOf(quiz) : [];
   });
 
   private readonly picture = viewChild<ElementRef<HTMLImageElement>>('picture');

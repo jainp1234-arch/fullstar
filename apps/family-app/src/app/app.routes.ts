@@ -22,6 +22,9 @@ import { SubjectPage } from './kid/subject.page';
 import { LessonPlayerPage } from './kid/lesson-player.page';
 import { WellDonePage } from './kid/well-done.page';
 import { ReadAlongPage } from './kid/read-along.page';
+import { PracticeHomePage } from './kid/practice-home.page';
+import { PracticeSetPage } from './kid/practice-set.page';
+import { TablesPage } from './kid/tables.page';
 import { ProgressPage } from './parent/progress.page';
 import { SubjectProgressPage } from './parent/subject-progress.page';
 import { BooksPage } from './books/books.page';
@@ -120,6 +123,10 @@ export const routes: Routes = [
         K4: LessonPlayerPage,
         K5: ReadAlongPage,
         K7: WellDonePage,
+        K8: PracticeHomePage,
+        K9: PracticeSetPage,
+        K10: TablesPage,
+        K11: PracticeSetPage,
         P0: ParentPinPage,
         P1: ProgressPage,
         P2: SubjectProgressPage,

@@ -2,8 +2,8 @@ import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../api/api-client';
 
-/** Schema §4.4 activity kinds with a player so far (Plan 6.2: lesson; 6.3: readalong). */
-export type AttemptKind = 'lesson' | 'readalong';
+/** Schema §4.4 activity kinds with a player so far (6.2 lesson, 6.3 readalong, 7.1 practice and tables). */
+export type AttemptKind = 'lesson' | 'readalong' | 'practice' | 'tables' | 'tables_challenge';
 
 /** An attempt as the device records it; the server computes stars from the counts. */
 export interface AttemptEvent {
