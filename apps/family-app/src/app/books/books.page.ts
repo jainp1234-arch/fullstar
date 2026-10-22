@@ -13,6 +13,7 @@ import {
   BookApi,
   BookChapter,
   FamilyApi,
+  FamilyBook,
   FamilyChild,
   SubjectBookRow,
 } from '@fullstar/core';
@@ -21,12 +22,14 @@ import {
   Avatar,
   AvatarKey,
   Button,
+  DialogService,
   EN,
   Skeleton,
   StatusChip,
   ToastService,
   errorMessage,
 } from '@fullstar/ui';
+import { filter, switchMap } from 'rxjs';
 import { chipFor } from './book-status';
 
 const AVATARS = new Set<string>(AVATAR_KEYS);
@@ -35,6 +38,8 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
  * P4 Books (App Flow §6, Schema §11; Plan 5.1): one row per subject of the chosen child's class with
  * the book status and each chapter's status; upload a whole book (P5), add a chapter (P7), or share
  * a book with a sibling in the same class. With two children, tabs choose the child (?child=).
+ * Plan 7.4: chapters of a chapter-by-chapter book move up or down and can be deleted; Replace book
+ * opens P9.
  */
 @Component({
   selector: 'app-books-page',
@@ -71,10 +76,39 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
             @if (row.book; as book) {
               @if (book.chapters.length) {
                 <ul class="chapters" role="list">
-                  @for (chapter of book.chapters; track chapter.id) {
+                  @for (chapter of book.chapters; track chapter.id; let i = $index, last = $last) {
                     <li class="chapter">
                       <span>{{ text.chapterLine(chapter.number, chapter.title) }}</span>
                       <app-status-chip [status]="chipOf(chapter.status)" />
+                      @if (book.upload_mode === 'chapterwise') {
+                        <span class="chapter__tools">
+                          @if (i > 0) {
+                            <app-button
+                              variant="ghost"
+                              [label]="text.moveUp"
+                              [ariaLabel]="text.moveUp + ': ' + chapter.title"
+                              [disabled]="busy()"
+                              (pressed)="move(book, i, -1)"
+                            />
+                          }
+                          @if (!last) {
+                            <app-button
+                              variant="ghost"
+                              [label]="text.moveDown"
+                              [ariaLabel]="text.moveDown + ': ' + chapter.title"
+                              [disabled]="busy()"
+                              (pressed)="move(book, i, 1)"
+                            />
+                          }
+                          <app-button
+                            variant="ghost"
+                            [label]="text.deleteChapter"
+                            [ariaLabel]="text.deleteChapter + ': ' + chapter.title"
+                            [disabled]="busy()"
+                            (pressed)="remove(chapter)"
+                          />
+                        </span>
+                      }
                       @if (chapter.unclear_pages > 0) {
                         <app-button
                           variant="ghost"
@@ -135,6 +169,14 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
                   icon="add"
                   [label]="row.book?.chapters?.length ? text.addChapter : text.addFirstChapter"
                   (pressed)="open(row, 'add-chapter')"
+                />
+              }
+              @if (row.book) {
+                <app-button
+                  variant="ghost"
+                  [label]="text.replaceBook"
+                  [ariaLabel]="text.replaceBook + ': ' + row.subject_name"
+                  (pressed)="open(row, 'replace')"
                 />
               }
             </div>
@@ -226,6 +268,11 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
       font: var(--type-body);
       color: var(--color-text);
     }
+    .chapter__tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+    }
     .row__actions {
       display: flex;
       flex-wrap: wrap;
@@ -238,7 +285,9 @@ export class BooksPage {
   protected readonly rows = signal<readonly SubjectBookRow[] | null>(null);
   protected readonly failure = signal<string | null>(null);
   protected readonly childId = signal<string | null>(null);
+  protected readonly busy = signal(false);
 
+  private readonly dialogs = inject(DialogService);
   private readonly family = inject(FamilyApi);
   private readonly books = inject(BookApi);
   private readonly router = inject(Router);
@@ -319,7 +368,71 @@ export class BooksPage {
   protected readonly isSuggested = (chapter: BookChapter): boolean =>
     chapter.status === 'suggested';
 
-  protected open(row: SubjectBookRow, page: 'upload' | 'add-chapter' | 'chapters'): void {
+  /** Swaps a chapter with its neighbour; the book keeps its chapter numbers (Plan 7.4). */
+  protected move(book: FamilyBook, index: number, step: -1 | 1): void {
+    const ids = book.chapters.map((c) => c.id);
+    [ids[index], ids[index + step]] = [ids[index + step], ids[index]];
+    this.busy.set(true);
+    this.books
+      .reorderChapters(book.id, ids)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (chapters) => {
+          this.busy.set(false);
+          this.rows.update((rows) =>
+            (rows ?? []).map((r) =>
+              r.book?.id === book.id ? { ...r, book: { ...r.book, chapters } } : r,
+            ),
+          );
+          this.toasts.show(this.text.reordered);
+        },
+        error: (error: unknown) => this.fail(error),
+      });
+  }
+
+  /** Deletes a chapter after a confirm; the child's progress on it stays (Plan 7.4). */
+  protected remove(chapter: BookChapter): void {
+    this.dialogs
+      .confirm({
+        title: this.text.deleteTitle(chapter.number, chapter.title),
+        body: this.text.deleteBody,
+        confirmLabel: this.text.deleteConfirm,
+        cancelLabel: this.text.keepChapter,
+        danger: true,
+      })
+      .pipe(
+        filter(Boolean),
+        switchMap(() => {
+          this.busy.set(true);
+          return this.books.deleteChapter(chapter.id);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.busy.set(false);
+          this.toasts.show(this.text.deleted);
+          const id = this.childId();
+          if (id) {
+            this.load(id);
+          }
+        },
+        error: (error: unknown) => this.fail(error),
+      });
+  }
+
+  private fail(error: unknown): void {
+    this.busy.set(false);
+    this.toasts.show(
+      errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent'),
+      { kind: 'error' },
+    );
+  }
+
+  protected open(
+    row: SubjectBookRow,
+    page: 'upload' | 'add-chapter' | 'chapters' | 'replace',
+  ): void {
     void this.router.navigate(['/parent/books', row.subject, page], {
       queryParams: { child: this.childId() },
     });

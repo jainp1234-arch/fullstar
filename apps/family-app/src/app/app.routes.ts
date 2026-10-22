@@ -14,6 +14,7 @@ import { SignInReturnPage } from './auth/sign-in-return.page';
 import { BookUploadPage } from './books/book-upload.page';
 import { CheckChaptersPage } from './books/check-chapters.page';
 import { FixPagesPage } from './books/fix-pages.page';
+import { ReplaceBookPage } from './books/replace-book.page';
 import { LessonPreviewPage } from './books/lesson-preview.page';
 import { MessagesPage } from './messages/messages.page';
 import { ActivityPage } from './kid/activity.page';
@@ -142,6 +143,7 @@ export const routes: Routes = [
         P6: CheckChaptersPage,
         P7: BookUploadPage,
         P8: FixPagesPage,
+        P9: ReplaceBookPage,
         P8a: LessonPreviewPage,
         P10: WorksheetsPage,
         P11: CreateWorksheetPage,
