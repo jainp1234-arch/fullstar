@@ -236,7 +236,14 @@ export async function waitForMessage(page: Page, text: string, timeout = 300_000
   const deadline = Date.now() + timeout;
   for (;;) {
     await navigateInApp(page, '/parent/messages');
-    if (await page.getByText(text, { exact: false }).first().isVisible()) {
+    // The list loads after the screen does
+    const arrived = await page
+      .getByText(text, { exact: false })
+      .first()
+      .waitFor({ state: 'visible', timeout: 5000 })
+      .then(() => true)
+      .catch(() => false);
+    if (arrived) {
       return;
     }
     if (Date.now() > deadline) {

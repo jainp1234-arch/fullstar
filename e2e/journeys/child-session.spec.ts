@@ -90,7 +90,8 @@ test("Child's session: a lesson to K7, tables and the 60-second challenge", asyn
   await expect(page.getByRole('heading', { name: /Well done!/ })).toBeVisible();
 
   // Read → K12 → K13: note today's story for the recording
-  await page.getByRole('link', { name: 'Read' }).first().click();
+  // The challenge's Well done has no tab bar
+  await navigateInApp(page, '/kid/read');
   await expect(page).toHaveURL(/\/kid\/read$/);
   await page.getByRole('button', { name: 'Start reading' }).click();
   await expect(page).toHaveURL(/\/kid\/read\/test/);

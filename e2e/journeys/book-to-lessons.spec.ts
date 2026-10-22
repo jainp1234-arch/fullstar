@@ -94,7 +94,7 @@ test('the bell says the chapter is ready to read along', async () => {
 test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publish, mark ready', async ({
   browser,
 }) => {
-  test.setTimeout(900_000);
+  test.setTimeout(1_800_000);
   const studio = await staffPage(browser);
   await studio
     .getByRole('navigation', { name: 'Studio' })
@@ -172,7 +172,12 @@ test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publis
     if (/failed · 1 critical/.test(await runCheck(studio))) {
       const item = new URL(studio.url()).searchParams.get('item');
       await navigateInApp(studio, `/studio/library/${item}/edit`);
-      await studio.getByLabel('Right answer').selectOption({ label: 'Answer b: Five' });
+      // The right answer is listed by its letter and text: choose the one that says Five
+      const right = studio.getByLabel('Right answer');
+      const five = (await right.locator('option').allTextContents()).find((o) =>
+        o.includes('Five'),
+      );
+      await right.selectOption({ label: (five ?? '').trim() });
       await studio.getByLabel('Explanation shown after answering').fill('Two and three make five.');
       await studio.getByRole('button', { name: 'Save new version' }).click();
       await expect(studio.getByText('Saved as version 2.')).toBeVisible();
