@@ -20,7 +20,7 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api book-reader test-ocr test-reading reading-check voice test-voice narrate-check test-pages family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
+.PHONY: help up down test lint api book-reader test-ocr test-reading reading-check voice test-voice narrate-check test-pages alert-check family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
@@ -41,6 +41,7 @@ help:
 	@echo "make voice             start the voice-maker worker in compose (about 8 GB of memory)"
 	@echo "make test-voice        real voice-maker narration of an English and a Hindi page (Docker)"
 	@echo "make narrate-check DIR= narrate each page .txt in DIR to an MP3 with Audacity word labels"
+	@echo "make alert-check       force a job failure and time the DLQ alert (make up + make api running)"
 	@echo "make vendor-assets    download and convert fonts, icons and illustrations (libs/ui/assets)"
 
 up:
@@ -119,6 +120,12 @@ narrate-check:
 	@test -n "$(DIR)" || { echo "Usage: make narrate-check DIR=<folder with page1.txt page2.txt ...>"; exit 1; }
 	$(VOICE_BUILD) -t fullstar/voice-maker:local workers/voice-maker
 	MSYS_NO_PATHCONV=1 docker run --rm -v "$(abspath $(DIR)):/check" fullstar/voice-maker:local python -m voice_maker.check /check
+
+# Plan 9.1: a message in worksheet-render-dlq must fire "Job in a dead-letter queue" within 5 minutes;
+# with ALERT_EMAIL in .env the alert email follows. Needs make up and make api.
+alert-check:
+	@test -f .env || { echo ".env is missing"; exit 1; }
+	node --env-file=.env tools/monitoring/alert-check.mjs --force-dlq --within 300
 
 # Renders the sample pages of test-ocr (services/book-reader/src/test/resources/pages)
 test-pages:

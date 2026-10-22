@@ -1,0 +1,113 @@
+apiVersion: 1
+
+# Plan 9.1: the four alerts. Evaluated every minute; email goes to ALERT_EMAIL when it is set
+# (contact-points.yml). Grafana expands $VARS in this file, so the rules use none.
+groups:
+  - orgId: 1
+    name: fullstar
+    folder: FullStar
+    interval: 1m
+    rules:
+      - uid: fullstar-api-down
+        title: API down
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model: { refId: A, expr: 'up{job="api"}', instant: true }
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: lt, params: [1] } }]
+        for: 2m
+        noDataState: Alerting
+        execErrState: Error
+        labels: { severity: critical }
+        annotations:
+          summary: The API has not answered Prometheus for 2 minutes.
+          description: Check make api (management port 8091) and the API logs.
+
+      - uid: fullstar-dlq
+        title: Job in a dead-letter queue
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model: { refId: A, expr: 'sum(fullstar_queue_messages{kind="dlq"})', instant: true }
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [0] } }]
+        for: 0s
+        # Without the API there are no queue numbers; "API down" covers that
+        noDataState: OK
+        execErrState: Error
+        labels: { severity: critical }
+        annotations:
+          summary: A job failed 3 times and is in a dead-letter queue.
+          description: Open the Dead-letter queues dashboard to see which queue, then the worker logs.
+
+      - uid: fullstar-error-rate
+        title: API error rate over 2%
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              expr: >-
+                sum(rate(http_server_requests_seconds_count{job="api",status=~"5.."}[5m]))
+                / sum(rate(http_server_requests_seconds_count{job="api"}[5m]))
+              instant: true
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [0.02] } }]
+        for: 5m
+        # No requests means no rate
+        noDataState: OK
+        execErrState: Error
+        labels: { severity: warning }
+        annotations:
+          summary: More than 2% of API requests failed with a 5xx over the last 5 minutes.
+          description: Open the API dashboard and the error logs.
+
+      - uid: fullstar-disk
+        title: Disk over 80%
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              expr: >-
+                max(1 - node_filesystem_avail_bytes{job="node",fstype!~"tmpfs|overlay|squashfs|nsfs"}
+                / node_filesystem_size_bytes{job="node",fstype!~"tmpfs|overlay|squashfs|nsfs"})
+              instant: true
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              refId: B
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [0.8] } }]
+        for: 10m
+        noDataState: Alerting
+        execErrState: Error
+        labels: { severity: warning }
+        annotations:
+          summary: A disk is more than 80% full.
+          description: Free space before uploads, recordings or the database fail.

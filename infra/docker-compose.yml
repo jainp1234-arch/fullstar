@@ -298,11 +298,22 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
+    # make api runs on the laptop; its metrics are on the management port 8091 (Plan 9.1)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:9090/-/healthy"]
       interval: 10s
       timeout: 5s
       retries: 6
+
+  # Plan 9.1: disk use for the "disk over 80%" alert (the Docker disk on the laptop)
+  node-exporter:
+    <<: *restart
+    image: prom/node-exporter:v1.12.1
+    command: ["--path.rootfs=/host"]
+    volumes:
+      - /:/host:ro
 
   grafana:
     <<: *restart
@@ -315,8 +326,18 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      # Plan 9.1: alert email through Brevo only when ALERT_EMAIL is set (trial: off by default)
+      ALERT_EMAIL: ${ALERT_EMAIL:-alerts-off@localhost.invalid}
+      GF_SMTP_ENABLED: ${ALERT_EMAIL:+true}
+      GF_SMTP_HOST: ${SMTP_HOST:-}:${SMTP_PORT:-587}
+      GF_SMTP_USER: ${SMTP_USERNAME:-}
+      GF_SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      GF_SMTP_FROM_ADDRESS: ${MAIL_FROM:-alerts@localhost.invalid}
+      GF_SMTP_FROM_NAME: FullStar alerts
+      GF_SMTP_STARTTLS_POLICY: MandatoryStartTLS
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
       - grafana-data:/var/lib/grafana
     depends_on:
       - loki

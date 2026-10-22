@@ -1,6 +1,7 @@
 package com.fullstar.api.common.jobs;
 
 import com.fullstar.api.common.db.DataSourceConfig;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -50,19 +51,23 @@ public class JobResultsConsumer implements SmartLifecycle {
 
 	private final Map<String, JobResultHandler> handlers;
 
+	private final MeterRegistry meters;
+
 	private volatile boolean running;
 
 	private Thread worker;
 
 	public JobResultsConsumer(SqsClient sqs, QueueUrls queueUrls, QueueProperties properties, JsonMapper json,
 			@Qualifier(DataSourceConfig.SYSTEM) JdbcTemplate system,
-			@Qualifier(DataSourceConfig.SYSTEM) TransactionTemplate systemTransactions, List<JobResultHandler> handlers) {
+			@Qualifier(DataSourceConfig.SYSTEM) TransactionTemplate systemTransactions, List<JobResultHandler> handlers,
+			MeterRegistry meters) {
 		this.sqs = sqs;
 		this.queueUrls = queueUrls;
 		this.properties = properties;
 		this.json = json;
 		this.system = system;
 		this.systemTransactions = systemTransactions;
+		this.meters = meters;
 		this.handlers = handlers.stream().collect(Collectors.toUnmodifiableMap(JobResultHandler::type, Function.identity()));
 	}
 
@@ -83,7 +88,7 @@ public class JobResultsConsumer implements SmartLifecycle {
 		if (handler == null) {
 			throw new IllegalArgumentException("no handler for job type " + result.type());
 		}
-		return systemTransactions.execute(status -> {
+		Outcome outcome = systemTransactions.execute(status -> {
 			int claimed = system.update("""
 					INSERT INTO app.processed_jobs (idempotency_key, job_type) VALUES (?, ?)
 					ON CONFLICT (idempotency_key) DO NOTHING""", JOB_KEY_PREFIX + result.idempotencyKey(), result.type());
@@ -93,6 +98,10 @@ public class JobResultsConsumer implements SmartLifecycle {
 			handler.apply(result, system);
 			return Outcome.APPLIED;
 		});
+		// Plan 9.1: fullstar_job_results_total{type, outcome=success|failure|duplicate}
+		String counted = outcome == Outcome.DUPLICATE ? "duplicate" : result.succeeded() ? "success" : "failure";
+		meters.counter("fullstar.job.results", "type", result.type(), "outcome", counted).increment();
+		return outcome;
 	}
 
 	private void pollLoop() {
@@ -124,6 +133,7 @@ public class JobResultsConsumer implements SmartLifecycle {
 		catch (RuntimeException ex) {
 			// Not deleted: retried after the visibility timeout, then moved to job-results-dlq
 			log.warn("job result {} not applied: {}", message.messageId(), ex.getClass().getSimpleName());
+			meters.counter("fullstar.job.results", "type", "unknown", "outcome", "not_applied").increment();
 		}
 	}
 
