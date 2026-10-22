@@ -41,7 +41,7 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       await page.getByRole('button', { name: 'Asha' }).click();
       await walk(page, [], seen);
       // K3 opens read-along only for book chapters and worksheets arrive in Phase 7 (Plan 6.1)
-      for (const path of ['/kid/read-along/sample', '/kid/worksheet/sample']) {
+      for (const path of ['/kid/read-along/sample', '/kid/worksheet/sample', '/kid/well-done']) {
         await navigateInApp(page, path);
         await walk(page, [], seen);
       }
@@ -67,6 +67,10 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
         '/parent/report',
         // P1 is real (Plan 6.4): reading history arrives with Phase 7; the bell opens P19
         '/parent/progress/reading',
+        // With no worksheets yet, P10 offers Create as a button (Plan 7.2)
+        '/parent/worksheets/new',
+        '/parent/worksheets/sample/print',
+        '/parent/worksheets/sample/solutions',
         '/parent/messages',
       ]) {
         await navigateInApp(page, path);

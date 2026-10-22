@@ -72,6 +72,8 @@ export interface KidActivity {
   readonly lessons: readonly KidLessonCard[];
   readonly read_along: boolean;
   readonly worksheet: boolean;
+  /** The newest worksheet a parent made for this child and chapter or topic (K6, Plan 7.2). */
+  readonly worksheet_id: string | null;
 }
 
 /** Kid mode Learn (Schema §11 /family/kid/**; Plan 6.1). X-Child-Id is added by the interceptor. */
@@ -99,8 +101,13 @@ export class KidApi {
     return this.api.get<KidLesson>(`/family/kid/lessons/${encodeURIComponent(contentItemId)}`);
   }
 
-  practice(): Observable<PracticeHome> {
-    return this.api.get<PracticeHome>('/family/kid/practice');
+  /** childId: for parent mode (P11 picks a practice topic for that child). */
+  practice(childId?: string): Observable<PracticeHome> {
+    return this.api.get<PracticeHome>(
+      '/family/kid/practice',
+      {},
+      childId ? { childId } : undefined,
+    );
   }
 
   /** A new shuffle each time; nothing is stored, so no Idempotency-Key. */

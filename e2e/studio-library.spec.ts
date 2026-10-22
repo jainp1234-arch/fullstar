@@ -36,8 +36,12 @@ test('the library shows the topic tree and topics can be added and renamed', asy
   await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(page.getByRole('button', { name: /^Rain and clouds/ })).toBeVisible();
   await expect(page).toHaveURL(/class=3&subject=evs&topic=/);
-  // The rename dialog's backdrop fades out; checking contrast through it fails at random
-  await expect(page.locator('.cdk-overlay-backdrop')).toHaveCount(0);
+  // The earlier toast fades out as the new one fades in: wait for one, fully shown
+  await expect(page.locator('.mat-mdc-snack-bar-container')).toHaveCount(1);
+  await page
+    .locator('.mat-mdc-snack-bar-container')
+    .last()
+    .evaluate((el) => Promise.all(el.getAnimations({ subtree: true }).map((a) => a.finished)));
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 

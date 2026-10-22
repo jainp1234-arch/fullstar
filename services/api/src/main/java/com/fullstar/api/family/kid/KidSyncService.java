@@ -30,8 +30,8 @@ public class KidSyncService {
 
 	private static final JsonMapper JSON = JsonMapper.builder().build();
 
-	/** Activities with a device-side player so far; worksheets and reading tests come with their steps. */
-	static final Set<String> KINDS = Set.of("lesson", "readalong", "practice", "tables", "tables_challenge");
+	/** Activities with a device-side player so far; reading tests come with Phase 8. */
+	static final Set<String> KINDS = Set.of("lesson", "readalong", "practice", "tables", "tables_challenge", "worksheet");
 
 	/** A device may be offline for a while, but not for ever; minutes from the future are clock errors. */
 	private static final Duration OLDEST = Duration.ofDays(14);

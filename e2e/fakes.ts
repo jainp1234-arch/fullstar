@@ -67,6 +67,8 @@ export interface FakeServer {
     attempts: Record<string, { stars: number; completed_at: string | null }>;
     /** Question ids in the child's open mistakes (Plan 7.1). */
     mistakes: string[];
+    /** Worksheets (Plan 7.2) and how often each PDF was asked for. */
+    worksheets: FakeWorksheet[];
   };
   /** Studio staff list as the fake API holds it (s1 is the signed-in member). */
   readonly staff: FakeStaffMember[];
@@ -175,6 +177,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       syncs: [],
       attempts: {},
       mistakes: [],
+      worksheets: [],
       stored: [],
     },
     staff: [
@@ -436,6 +439,9 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
           : [],
         weak_spots: [],
       });
+    }
+    if (path.startsWith('/family/parent/worksheets')) {
+      return familyWorksheets(route, server, path, method, body);
     }
     if (
       path.startsWith('/family/parent/messages') ||
@@ -1869,12 +1875,28 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
     ],
     4: [practiceQuestion('p-plant', 'Plants need?', 'water', 'stones')],
   };
+  const onScreen = /^\/family\/kid\/worksheets\/([^/]+)\/onscreen$/.exec(path);
+  if (onScreen) {
+    const w = server.family.worksheets.find((x) => x.id === onScreen[1] && x.child_id === child.id);
+    if (!w) {
+      return envelope(route, 404, null, 'NOT_FOUND');
+    }
+    w.printed_at ??= new Date().toISOString();
+    return envelope(route, 200, {
+      worksheet: { ...w, order: undefined, weak_spots: undefined, pdf_requests: undefined },
+      questions: w.order.map((id, i) => ({
+        ...WORKSHEET_QUESTIONS.find((q) => q.id === id)!,
+        position: i + 1,
+      })),
+      weak_spots: [],
+    });
+  }
   if (path === '/family/kid/practice') {
     return envelope(route, 200, {
       subjects: KID_SUBJECTS.map((s) => ({
         ...s,
         questions: sets[s.subject_id]?.length ?? 0,
-        topics: [],
+        topics: [{ id: 't-sample', name: 'Birds and nests', questions: 6 }],
       })),
       mistakes: server.family.mistakes.length,
     });
@@ -2051,6 +2073,10 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
             : [],
         read_along: false,
         worksheet: true,
+        worksheet_id:
+          [...server.family.worksheets]
+            .reverse()
+            .find((w) => w.child_id === child.id && w.topic_id === topic.id)?.id ?? null,
       });
     }
   }
@@ -2066,3 +2092,130 @@ const SILENT_MP3 = (() => {
   }
   return `data:audio/mpeg;base64,${bytes.toString('base64')}`;
 })();
+
+export interface FakeWorksheet {
+  id: string;
+  child_id: string;
+  subject_id: number;
+  subject: string;
+  subject_name: string;
+  source: string;
+  family_chapter_id: string | null;
+  topic_id: string | null;
+  source_title: string;
+  chapter_number: number | null;
+  question_count: number;
+  status: string;
+  printed_at: string | null;
+  created_at: string;
+  /** Question ids in order; a shuffle reverses them. */
+  order: string[];
+  weak_spots: string[];
+  pdf_requests: number;
+}
+
+const WORKSHEET_QUESTIONS = Array.from({ length: 6 }, (_, i) => ({
+  id: `wq-${i + 1}`,
+  version_id: `wq-${i + 1}-v1`,
+  question_type: 'mcq',
+  topic_id: i < 3 ? 't-water' : 't-air',
+  topic_name: i < 3 ? 'Saving water' : 'Air around us',
+  body: {
+    prompt: `Worksheet question ${i + 1}`,
+    image_key: null,
+    options: [
+      { id: 'a', text: `Right ${i + 1}` },
+      { id: 'b', text: `Wrong ${i + 1}` },
+    ],
+  },
+  solution: { correct: ['a'], explanation: `Because ${i + 1}.` },
+}));
+
+/** A tiny PDF for P12 (the real one comes from Gotenberg). */
+const FAKE_PDF = `data:application/pdf;base64,${Buffer.from('%PDF-1.4\n% fake worksheet\n%%EOF\n').toString('base64')}`;
+
+/** P10–P13 (Plan 7.2): the first PDF request is still rendering (202), the next is ready. */
+function familyWorksheets(
+  route: Route,
+  server: FakeServer,
+  path: string,
+  method: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const all = server.family.worksheets;
+  const summary = (w: FakeWorksheet) => {
+    const view: Partial<FakeWorksheet> = { ...w };
+    delete view.order;
+    delete view.weak_spots;
+    delete view.pdf_requests;
+    return view;
+  };
+  const detail = (w: FakeWorksheet, solutions: boolean) => ({
+    worksheet: summary(w),
+    questions: w.order.map((id, i) => {
+      const q = WORKSHEET_QUESTIONS.find((x) => x.id === id)!;
+      return { ...q, position: i + 1, solution: solutions ? q.solution : null };
+    }),
+    weak_spots: w.weak_spots,
+  });
+  if (path === '/family/parent/worksheets' && method === 'GET') {
+    return envelope(route, 200, [...all].reverse().map(summary));
+  }
+  if (path === '/family/parent/worksheets' && method === 'POST') {
+    const count = Number(body['question_count']);
+    if (count > WORKSHEET_QUESTIONS.length) {
+      return envelope(route, 400, null, 'VALIDATION_FAILED', {
+        fields: { question_count: 'OUT_OF_RANGE' },
+      });
+    }
+    const chapter = body['source'] === 'chapter';
+    const w: FakeWorksheet = {
+      id: `ws-${all.length + 1}`,
+      child_id: String(body['child_id']),
+      subject_id: Number(body['subject_id']),
+      subject: 'evs',
+      subject_name: 'EVS',
+      source: String(body['source']),
+      family_chapter_id: chapter ? String(body['family_chapter_id']) : null,
+      topic_id: chapter ? null : String(body['topic_id']),
+      source_title: chapter ? 'Water' : 'Birds and nests',
+      chapter_number: chapter ? 2 : null,
+      question_count: count,
+      status: 'rendering',
+      printed_at: null,
+      created_at: new Date().toISOString(),
+      order: WORKSHEET_QUESTIONS.slice(0, count).map((q) => q.id),
+      weak_spots: [],
+      pdf_requests: 0,
+    };
+    all.push(w);
+    return envelope(route, 201, detail(w, false));
+  }
+  for (const w of all) {
+    const base = `/family/parent/worksheets/${w.id}`;
+    if (path === `${base}/reshuffle` && method === 'POST') {
+      if (w.printed_at) {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      w.order = [...w.order].reverse();
+      return envelope(route, 200, detail(w, false));
+    }
+    if (path === `${base}/pdf` && method === 'GET') {
+      w.printed_at ??= new Date().toISOString();
+      w.pdf_requests++;
+      if (w.pdf_requests === 1) {
+        return envelope(route, 202, { status: 'rendering', url: null, expires_at: null });
+      }
+      w.status = 'ready';
+      return envelope(route, 200, { status: 'ready', url: FAKE_PDF, expires_at: null });
+    }
+    if (path === `${base}/solutions` && method === 'GET') {
+      return envelope(route, 200, detail(w, true));
+    }
+    if (path === `${base}/weak-spots` && method === 'PUT') {
+      w.weak_spots = (body['topic_ids'] as string[]) ?? [];
+      return envelope(route, 200, detail(w, true));
+    }
+  }
+  return envelope(route, 404, null, 'NOT_FOUND');
+}
