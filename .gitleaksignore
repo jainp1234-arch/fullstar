@@ -1,0 +1,3 @@
+# False positives only, each with its reason (gitleaks fingerprint: commit:file:rule:line).
+# Plan 8.2: a public Hugging Face commit hash in "ARG TOKENIZER_REVISION=..." (renamed DESCRIBER_REVISION since)
+ddb72902943b128aa314aff5acdbe54e3c15c4c9:workers/voice-maker/Dockerfile:generic-api-key:27
