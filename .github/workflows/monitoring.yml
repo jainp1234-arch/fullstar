@@ -40,6 +40,8 @@ jobs:
       - name: CI .env (throwaway values; ALERT_EMAIL stays empty)
         run: |
           sed -E '/^ALERT_EMAIL=/!s/^([A-Z0-9_]+)=$/\1=ci-'"$(openssl rand -hex 12)"'/' .env.example > .env
+          # Grafana refuses to start with a sender that is not an email address, even with SMTP off
+          sed -i 's/^MAIL_FROM=.*/MAIL_FROM=alerts@example.com/' .env
           grep -q '^GRAFANA_ADMIN_PASSWORD=ci-' .env
       - name: Start Prometheus, Grafana and node-exporter
         run: docker compose --env-file .env -f infra/docker-compose.yml up -d --wait --wait-timeout 180 prometheus grafana node-exporter
