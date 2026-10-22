@@ -22,7 +22,7 @@ PAGES = {
 }
 
 # Share of the page's words Whisper small must hear again. It hears Hindi less well than the voice
-# speaks it (the first CI run heard 9 of 13, spelling "खिड़की" in Tamil letters), so Hindi needs half.
+# speaks it (the first CI run heard 9 of 13 and wrote one word in Tamil letters): Hindi needs half.
 HEARD = {"en": 0.7, "hi": 0.5}
 
 
