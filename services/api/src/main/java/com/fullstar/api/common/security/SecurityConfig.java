@@ -13,7 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
-import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Deny by default (Tech Stack §10). /api/v1/family/** accepts Keycloak tokens for family-api only,
@@ -27,7 +27,7 @@ public class SecurityConfig {
 	@Bean
 	@Order(1)
 	SecurityFilterChain familySecurity(HttpSecurity http, AuthProperties auth, ErrorResponseWriter errors,
-			CorsConfigurationSource cors) throws Exception {
+			UrlBasedCorsConfigurationSource cors) throws Exception {
 		return tokenChain(http.securityMatcher("/api/v1/family/**"),
 				KeycloakJwtDecoders.forAudience(auth, AuthProperties.FAMILY_AUDIENCE), errors, cors);
 	}
@@ -35,14 +35,14 @@ public class SecurityConfig {
 	@Bean
 	@Order(2)
 	SecurityFilterChain studioSecurity(HttpSecurity http, AuthProperties auth, ErrorResponseWriter errors,
-			CorsConfigurationSource cors) throws Exception {
+			UrlBasedCorsConfigurationSource cors) throws Exception {
 		return tokenChain(http.securityMatcher("/api/v1/studio/**"),
 				KeycloakJwtDecoders.forAudience(auth, AuthProperties.STUDIO_AUDIENCE), errors, cors);
 	}
 
 	@Bean
 	@Order(3)
-	SecurityFilterChain apiSecurity(HttpSecurity http, ErrorResponseWriter errors, CorsConfigurationSource cors)
+	SecurityFilterChain apiSecurity(HttpSecurity http, ErrorResponseWriter errors, UrlBasedCorsConfigurationSource cors)
 			throws Exception {
 		common(http, errors, cors).authorizeHttpRequests(authorize -> authorize
 			.requestMatchers(HttpMethod.GET, "/api/v1/public/**").permitAll()
@@ -57,7 +57,7 @@ public class SecurityConfig {
 	}
 
 	private static SecurityFilterChain tokenChain(HttpSecurity http, JwtDecoder decoder, ErrorResponseWriter errors,
-			CorsConfigurationSource cors) throws Exception {
+			UrlBasedCorsConfigurationSource cors) throws Exception {
 		common(http, errors, cors).authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
 			.oauth2ResourceServer(resource -> resource.jwt(jwt -> jwt.decoder(decoder))
 				.authenticationEntryPoint((request, response, failure) -> errors.write(response,
@@ -67,7 +67,7 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	private static HttpSecurity common(HttpSecurity http, ErrorResponseWriter errors, CorsConfigurationSource cors)
+	private static HttpSecurity common(HttpSecurity http, ErrorResponseWriter errors, UrlBasedCorsConfigurationSource cors)
 			throws Exception {
 		// Bearer tokens, no cookies: no CSRF; cross-origin calls only from the allow-list (Plan 9.2)
 		return http.cors(c -> c.configurationSource(cors))

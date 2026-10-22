@@ -7,7 +7,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
@@ -35,7 +34,7 @@ public class CorsConfig {
 	}
 
 	@Bean
-	CorsConfigurationSource corsConfigurationSource(CorsProperties properties) {
+	UrlBasedCorsConfigurationSource corsConfigurationSource(CorsProperties properties) {
 		CorsConfiguration api = new CorsConfiguration();
 		api.setAllowedOrigins(properties.allowedOrigins());
 		api.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
