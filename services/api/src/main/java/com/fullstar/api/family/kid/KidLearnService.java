@@ -61,10 +61,11 @@ public class KidLearnService {
 
 	/**
 	 * K3. kind: chapter or topic. lessons empty → the Watch lesson card is "Coming soon". readAlong:
-	 * uploaded chapters only. worksheet: when there are published questions to practise.
+	 * uploaded chapters only. worksheet: when there are published questions to practise. worksheetId:
+	 * the newest worksheet a parent made for this child and chapter or topic (K6, Plan 7.2), or null.
 	 */
 	public record Activity(String kind, UUID id, String title, Integer number, int subjectId, String subject,
-			List<LessonCard> lessons, boolean readAlong, boolean worksheet) {
+			List<LessonCard> lessons, boolean readAlong, boolean worksheet, UUID worksheetId) {
 	}
 
 	public Home home(UUID childId) {
@@ -156,7 +157,8 @@ public class KidLearnService {
 				: lessons(childId, "ci.catalog_chapter_id = ?", catalogChapterId);
 		return new Activity("chapter", familyChapterId, (String) row.get("title"), (Integer) row.get("number"),
 				((Number) row.get("subject_id")).intValue(), (String) row.get("code"), lessons, true,
-				catalogChapterId != null && hasQuestions("ci.catalog_chapter_id = ?", catalogChapterId));
+				catalogChapterId != null && hasQuestions("ci.catalog_chapter_id = ?", catalogChapterId),
+				latestWorksheet(childId, "family_chapter_id", familyChapterId));
 	}
 
 	public Activity topic(UUID childId, UUID topicId) {
@@ -177,7 +179,8 @@ public class KidLearnService {
 				  SELECT id FROM tree)""";
 		return new Activity("topic", topicId, (String) row.get("name"), null,
 				((Number) row.get("subject_id")).intValue(), (String) row.get("code"),
-				lessons(childId, inTopic, topicId), false, hasQuestions(inTopic, topicId));
+				lessons(childId, inTopic, topicId), false, hasQuestions(inTopic, topicId),
+				latestWorksheet(childId, "topic_id", topicId));
 	}
 
 	private List<LessonCard> lessons(UUID childId, String where, UUID id) {
@@ -190,6 +193,13 @@ public class KidLearnService {
 				(rs, n) -> new LessonCard(rs.getObject("id", UUID.class), rs.getString("title"),
 						(Integer) rs.getObject("duration_seconds"), rs.getBoolean("done")),
 				childId, id);
+	}
+
+	/** column is family_chapter_id or topic_id. */
+	private UUID latestWorksheet(UUID childId, String column, UUID id) {
+		List<UUID> ids = jdbc.queryForList("SELECT id FROM app.worksheets WHERE child_id = ? AND " + column
+				+ " = ? ORDER BY created_at DESC LIMIT 1", UUID.class, childId, id);
+		return ids.isEmpty() ? null : ids.get(0);
 	}
 
 	private boolean hasQuestions(String where, UUID id) {

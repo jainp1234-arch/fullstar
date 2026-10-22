@@ -8,7 +8,7 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
 /**
  * K3 Chapter / topic (App Flow §5; Schema §11; Plan 6.1): Watch lesson (one card per published
  * lesson, or "Coming soon" while our team prepares it), Read along for uploaded chapters, and
- * Worksheet. Worksheets on screen arrive with Phase 7, so that card is "Coming soon" for now.
+ * Worksheet: the newest one a parent made for this chapter or topic (K6); none yet says to ask a parent.
  * ?type=topic for a grade-level topic; otherwise the id is a chapter of the child's book.
  */
 @Component({
@@ -47,13 +47,22 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
             (pressed)="readAlong(a)"
           />
         }
-        <app-list-card
-          [illustration]="'state-wait'"
-          [title]="text.worksheet"
-          [cornerTab]="{ text: text.comingSoon, tone: 'gold' }"
-          state="locked"
-          (pressed)="soon(text.worksheetSoon)"
-        />
+        @if (a.worksheet_id; as worksheetId) {
+          <app-list-card
+            illustration="act-worksheet"
+            [title]="text.worksheet"
+            [attr.data-screen-link]="linkTo('/kid/worksheet/' + worksheetId)"
+            (pressed)="openWorksheet(worksheetId)"
+          />
+        } @else {
+          <app-list-card
+            illustration="state-wait"
+            [title]="text.worksheet"
+            [cornerTab]="{ text: text.comingSoon, tone: 'gold' }"
+            state="locked"
+            (pressed)="soon(text.worksheetSoon)"
+          />
+        }
       </div>
     } @else if (failed()) {
       <div class="failed" role="alert">
@@ -125,6 +134,13 @@ export class ActivityPage {
   /** Guidelines §11: a locked card is never hidden silently; tapping says why. */
   protected soon(message: string): void {
     this.toasts.show(message);
+  }
+
+  /** K6 with the way back here for K7. */
+  protected openWorksheet(worksheetId: string): void {
+    void this.router.navigate(['/kid/worksheet', worksheetId], {
+      queryParams: { back: this.router.url },
+    });
   }
 
   /** K5 with the way back here for K7. */

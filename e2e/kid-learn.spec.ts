@@ -23,7 +23,7 @@ test('without a book a subject shows Class 3 practice topics and their lesson', 
   await expect(page.getByRole('button', { name: /Watch lesson/ })).toContainText('2 min');
   await expect(page.getByRole('button', { name: /Read along/ })).toHaveCount(0);
   await page.getByRole('button', { name: /Worksheet/ }).click();
-  await expect(page.getByText('Worksheets are coming soon.')).toBeVisible();
+  await expect(page.getByText('Ask Mummy or Papa to make a worksheet for this.')).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 

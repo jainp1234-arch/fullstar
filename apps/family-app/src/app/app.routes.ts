@@ -25,6 +25,11 @@ import { ReadAlongPage } from './kid/read-along.page';
 import { PracticeHomePage } from './kid/practice-home.page';
 import { PracticeSetPage } from './kid/practice-set.page';
 import { TablesPage } from './kid/tables.page';
+import { WorksheetOnscreenPage } from './kid/worksheet-onscreen.page';
+import { CreateWorksheetPage } from './worksheets/create-worksheet.page';
+import { PrintWorksheetPage } from './worksheets/print-worksheet.page';
+import { WorksheetSolutionsPage } from './worksheets/worksheet-solutions.page';
+import { WorksheetsPage } from './worksheets/worksheets.page';
 import { ProgressPage } from './parent/progress.page';
 import { SubjectProgressPage } from './parent/subject-progress.page';
 import { BooksPage } from './books/books.page';
@@ -122,6 +127,7 @@ export const routes: Routes = [
         K3: ActivityPage,
         K4: LessonPlayerPage,
         K5: ReadAlongPage,
+        K6: WorksheetOnscreenPage,
         K7: WellDonePage,
         K8: PracticeHomePage,
         K9: PracticeSetPage,
@@ -136,6 +142,10 @@ export const routes: Routes = [
         P7: BookUploadPage,
         P8: FixPagesPage,
         P8a: LessonPreviewPage,
+        P10: WorksheetsPage,
+        P11: CreateWorksheetPage,
+        P12: PrintWorksheetPage,
+        P13: WorksheetSolutionsPage,
         P14: SettingsPage,
         P15: EditChildPage,
         P16: HelpPage,

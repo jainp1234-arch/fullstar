@@ -26,9 +26,22 @@ const RETRYABLE = new Set([0, 502, 503, 504]);
 export class ApiClient {
   private readonly http = inject(HttpClient);
 
-  get<T>(path: string, params?: QueryParams): Observable<T> {
+  /** childId: a kid-mode read for a child other than the active one (e.g. parent mode P11). */
+  get<T>(
+    path: string,
+    params?: QueryParams,
+    options?: { readonly childId?: string },
+  ): Observable<T> {
+    const context = new HttpContext();
+    if (options?.childId) {
+      context.set(CHILD_ID, options.childId);
+    }
     return this.call(
-      this.http.get<unknown>(this.url(path), { params: clean(params), observe: 'response' }),
+      this.http.get<unknown>(this.url(path), {
+        params: clean(params),
+        context,
+        observe: 'response',
+      }),
       true,
     );
   }

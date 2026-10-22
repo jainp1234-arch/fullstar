@@ -23,3 +23,4 @@ export * from './family/kid-api';
 export * from './family/kid-events';
 export * from './family/read-along';
 export * from './family/progress-api';
+export * from './family/worksheet-api';
