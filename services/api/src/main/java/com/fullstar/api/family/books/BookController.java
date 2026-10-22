@@ -3,6 +3,8 @@ package com.fullstar.api.family.books;
 import com.fullstar.api.common.db.RequestActor;
 import com.fullstar.api.common.error.NotFoundException;
 import com.fullstar.api.common.error.ValidationException;
+import com.fullstar.api.common.ratelimit.RateLimitKind;
+import com.fullstar.api.common.ratelimit.RateLimited;
 import com.fullstar.api.common.web.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -133,6 +135,7 @@ public class BookController {
 	}
 
 	/** A new photo for one page (P8): answers the one-photo upload with its signed PUT URL. */
+	@RateLimited(RateLimitKind.UPLOAD)
 	@PostMapping("/pages/{id}/retake")
 	@ResponseStatus(HttpStatus.CREATED)
 	ApiResponse<UploadService.Upload> retake(HttpServletRequest request, @PathVariable String id,
@@ -141,6 +144,7 @@ public class BookController {
 				new UploadService.FileSpec(body.name().strip(), body.type(), body.size())));
 	}
 
+	@RateLimited(RateLimitKind.UPLOAD)
 	@PostMapping("/books/{id}/uploads")
 	@ResponseStatus(HttpStatus.CREATED)
 	ApiResponse<UploadService.Upload> upload(HttpServletRequest request, @PathVariable String id,

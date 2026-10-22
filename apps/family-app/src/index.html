@@ -9,7 +9,9 @@
     <link rel="manifest" href="manifest.webmanifest" />
   </head>
   <body>
-    <app-root></app-root>
+    <!-- Plan 9.2: Caddy writes this response's CSP nonce here (infra/caddy/security-headers.caddy) -->
+    <!-- prettier-ignore -->
+    <app-root ngCspNonce="{{placeholder `http.request.uuid`}}"></app-root>
     <noscript>Please enable JavaScript to continue using this application.</noscript>
   </body>
 </html>

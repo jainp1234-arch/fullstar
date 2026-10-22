@@ -2,6 +2,8 @@ package com.fullstar.api.family.kid;
 
 import com.fullstar.api.common.db.RequestActor;
 import com.fullstar.api.common.error.NotFoundException;
+import com.fullstar.api.common.ratelimit.RateLimitKind;
+import com.fullstar.api.common.ratelimit.RateLimited;
 import com.fullstar.api.common.security.FamilyGuards;
 import com.fullstar.api.common.web.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,6 +69,7 @@ public class KidPlayController {
 	}
 
 	/** Send with an Idempotency-Key per batch: a retried batch answers the same without counting twice. */
+	@RateLimited(RateLimitKind.SYNC)
 	@PostMapping("/sync")
 	ApiResponse<KidSyncService.Result> sync(HttpServletRequest request, @Valid @RequestBody SyncRequest body) {
 		List<KidSyncService.Attempt> attempts = body.attempts() == null ? List.of()

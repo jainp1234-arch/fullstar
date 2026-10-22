@@ -2,6 +2,8 @@ package com.fullstar.api.family.support;
 
 import com.fullstar.api.common.db.RequestActor;
 import com.fullstar.api.common.error.NotFoundException;
+import com.fullstar.api.common.ratelimit.RateLimitKind;
+import com.fullstar.api.common.ratelimit.RateLimited;
 import com.fullstar.api.common.web.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -43,6 +45,7 @@ public class SupportController {
 	record ReplyRequest(@NotBlank @Size(max = 2000) String body) {
 	}
 
+	@RateLimited(RateLimitKind.SUPPORT)
 	@PostMapping("/problem-reports")
 	@ResponseStatus(HttpStatus.CREATED)
 	ApiResponse<SupportService.Report> report(HttpServletRequest request, @Valid @RequestBody ReportRequest body) {
@@ -55,12 +58,14 @@ public class SupportController {
 		return ApiResponse.success(support.tickets());
 	}
 
+	@RateLimited(RateLimitKind.SUPPORT)
 	@PostMapping("/support-tickets")
 	@ResponseStatus(HttpStatus.CREATED)
 	ApiResponse<SupportService.Ticket> open(HttpServletRequest request, @Valid @RequestBody TicketRequest body) {
 		return ApiResponse.success(support.open(RequestActor.of(request), body.subject().strip(), body.body().strip()));
 	}
 
+	@RateLimited(RateLimitKind.SUPPORT)
 	@PostMapping("/support-tickets/{id}/messages")
 	@ResponseStatus(HttpStatus.CREATED)
 	ApiResponse<SupportService.Ticket> reply(HttpServletRequest request, @PathVariable String id,

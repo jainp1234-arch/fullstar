@@ -1,0 +1,20 @@
+# Plan 9.2: security headers for the family app and Studio pages (not /api or /auth, which send
+# their own). Import with the header name: Content-Security-Policy (built apps) or
+# Content-Security-Policy-Report-Only (ng serve, so a dev build is never blocked).
+#
+# {http.request.uuid} is new for every request: it is the CSP nonce, and the templates directive
+# writes the same value into index.html (ngCspNonce), so Angular's own <style> tags and its
+# critical-CSS script run and no other inline code does.
+templates {
+	mime text/html
+}
+header {
+	{args[0]} "default-src 'self'; script-src 'self' 'nonce-{http.request.uuid}'; style-src 'self' 'nonce-{http.request.uuid}'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+	X-Content-Type-Options nosniff
+	X-Frame-Options DENY
+	Referrer-Policy no-referrer
+	Permissions-Policy "camera=(self), microphone=(self), geolocation=(), payment=(), usb=()"
+	Cross-Origin-Opener-Policy same-origin
+	Cross-Origin-Resource-Policy same-origin
+	-Server
+}

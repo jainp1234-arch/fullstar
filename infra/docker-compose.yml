@@ -15,6 +15,7 @@ services:
       - "127.0.0.1:8080:80"
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/security-headers.caddy:/etc/caddy/security-headers.caddy:ro
       - caddy-data:/data
     environment:
       # The bucket path is proxied to SeaweedFS so browsers upload on the same address (Plan 5.1)

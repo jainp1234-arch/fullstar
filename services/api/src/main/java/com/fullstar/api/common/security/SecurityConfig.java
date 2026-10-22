@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Deny by default (Tech Stack §10). /api/v1/family/** accepts Keycloak tokens for family-api only,
@@ -24,24 +26,25 @@ public class SecurityConfig {
 
 	@Bean
 	@Order(1)
-	SecurityFilterChain familySecurity(HttpSecurity http, AuthProperties auth, ErrorResponseWriter errors)
-			throws Exception {
+	SecurityFilterChain familySecurity(HttpSecurity http, AuthProperties auth, ErrorResponseWriter errors,
+			CorsConfigurationSource cors) throws Exception {
 		return tokenChain(http.securityMatcher("/api/v1/family/**"),
-				KeycloakJwtDecoders.forAudience(auth, AuthProperties.FAMILY_AUDIENCE), errors);
+				KeycloakJwtDecoders.forAudience(auth, AuthProperties.FAMILY_AUDIENCE), errors, cors);
 	}
 
 	@Bean
 	@Order(2)
-	SecurityFilterChain studioSecurity(HttpSecurity http, AuthProperties auth, ErrorResponseWriter errors)
-			throws Exception {
+	SecurityFilterChain studioSecurity(HttpSecurity http, AuthProperties auth, ErrorResponseWriter errors,
+			CorsConfigurationSource cors) throws Exception {
 		return tokenChain(http.securityMatcher("/api/v1/studio/**"),
-				KeycloakJwtDecoders.forAudience(auth, AuthProperties.STUDIO_AUDIENCE), errors);
+				KeycloakJwtDecoders.forAudience(auth, AuthProperties.STUDIO_AUDIENCE), errors, cors);
 	}
 
 	@Bean
 	@Order(3)
-	SecurityFilterChain apiSecurity(HttpSecurity http, ErrorResponseWriter errors) throws Exception {
-		common(http, errors).authorizeHttpRequests(authorize -> authorize
+	SecurityFilterChain apiSecurity(HttpSecurity http, ErrorResponseWriter errors, CorsConfigurationSource cors)
+			throws Exception {
+		common(http, errors, cors).authorizeHttpRequests(authorize -> authorize
 			.requestMatchers(HttpMethod.GET, "/api/v1/public/**").permitAll()
 			.requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
 			// Plan 9.1: only on the management port (127.0.0.1:8091), which Caddy never proxies
@@ -53,9 +56,9 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	private static SecurityFilterChain tokenChain(HttpSecurity http, JwtDecoder decoder, ErrorResponseWriter errors)
-			throws Exception {
-		common(http, errors).authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
+	private static SecurityFilterChain tokenChain(HttpSecurity http, JwtDecoder decoder, ErrorResponseWriter errors,
+			CorsConfigurationSource cors) throws Exception {
+		common(http, errors, cors).authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
 			.oauth2ResourceServer(resource -> resource.jwt(jwt -> jwt.decoder(decoder))
 				.authenticationEntryPoint((request, response, failure) -> errors.write(response,
 						new ApiException(ErrorCode.UNAUTHENTICATED, "Please sign in")))
@@ -64,8 +67,11 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	private static HttpSecurity common(HttpSecurity http, ErrorResponseWriter errors) throws Exception {
-		return http.csrf(csrf -> csrf.disable())
+	private static HttpSecurity common(HttpSecurity http, ErrorResponseWriter errors, CorsConfigurationSource cors)
+			throws Exception {
+		// Bearer tokens, no cookies: no CSRF; cross-origin calls only from the allow-list (Plan 9.2)
+		return http.cors(c -> c.configurationSource(cors))
+			.csrf(csrf -> csrf.disable())
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.httpBasic(basic -> basic.disable())
 			.formLogin(form -> form.disable())
@@ -76,7 +82,9 @@ public class SecurityConfig {
 				.accessDeniedHandler((request, response, failure) -> errors.write(response,
 						new ApiException(ErrorCode.FORBIDDEN, "Not allowed"))))
 			.headers(headers -> headers
-				.contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'")));
+				.contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'"))
+				.referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.NO_REFERRER))
+				.httpStrictTransportSecurity(hsts -> hsts.maxAgeInSeconds(31_536_000).includeSubDomains(true)));
 	}
 
 }
