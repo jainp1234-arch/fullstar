@@ -62,9 +62,15 @@ test("Child's session: a lesson to K7, tables and the 60-second challenge", asyn
   await expect(page).toHaveURL(/\/kid\/practice\/tables/);
   await page.getByRole('button', { name: '7 times table', exact: true }).click();
   await page.getByRole('button', { name: 'Practise' }).click();
+  const sum = page.locator('app-question-card').getByText(/\d+ × \d+ = \?/);
   for (let i = 0; i < 10; i++) {
+    const shown = await sum.textContent();
     await answerTable(page);
     await page.getByRole('button', { name: i < 9 ? 'Next' : 'Finish' }).click();
+    if (i < 9) {
+      // The next sum has replaced this one before it is read
+      await expect(sum).not.toHaveText(shown ?? '');
+    }
   }
   await expect(page.getByRole('heading', { name: /Well done!/ })).toBeVisible();
 

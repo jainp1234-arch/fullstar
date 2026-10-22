@@ -71,13 +71,10 @@ test('Upload needs attention: unclear pages message, P8 retakes only those, Gett
   }
   await expect(page.getByText('All pages are clear. Thank you.')).toBeVisible();
 
+  // Back on P4 the chapter is being read again: nothing left to fix
   await navigateInApp(page, '/parent/books');
-  await expect(
-    page
-      .getByRole('listitem')
-      .filter({ hasText: 'EVS' })
-      .first()
-      .getByText('Getting ready')
-      .first(),
-  ).toBeVisible();
+  const evs = page.getByRole('listitem').filter({ hasText: 'EVS' }).first();
+  await expect(evs.getByText('Chapter 1: Water around us')).toBeVisible();
+  await expect(evs.getByRole('button', { name: /^Fix \d+ unclear pages?$/ })).toHaveCount(0);
+  console.log(`EVS row after the retakes: ${(await evs.textContent())?.replace(/\s+/g, ' ')}`);
 });

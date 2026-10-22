@@ -150,7 +150,12 @@ test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publis
       .getByRole('link', { name: 'Content check' })
       .click();
     const next = studio.getByRole('button', { name: /^Check / }).first();
-    if (!(await next.isVisible().catch(() => false))) {
+    // The list loads after the screen does: give it time before deciding it is empty
+    const waiting = await next
+      .waitFor({ state: 'visible', timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!waiting) {
       break;
     }
     await next.click();

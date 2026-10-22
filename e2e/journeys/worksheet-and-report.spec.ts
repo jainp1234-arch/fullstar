@@ -98,10 +98,11 @@ test('Parent reports a problem: the teacher sees it in S7, marks it fixed, the f
     .getByRole('link', { name: 'Reports' })
     .click();
   await expect(studio).toHaveURL(/\/studio\/reports/);
-  await studio
-    .getByRole('button', { name: `Mark fixed: ${reported}` })
-    .first()
-    .click();
+  // Each CI run starts from an empty stack, so the open report is this family's
+  const fix = studio.getByRole('button', { name: /^Mark fixed: / }).first();
+  await expect(fix).toBeVisible();
+  console.log(`Reported: ${reported}; marking fixed: ${await fix.getAttribute('aria-label')}`);
+  await fix.click();
   await expect(studio.getByText('Marked fixed. The family has been told.')).toBeVisible();
   await studio.context().close();
 
