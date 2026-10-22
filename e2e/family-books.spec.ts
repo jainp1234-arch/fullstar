@@ -26,7 +26,7 @@ test('a parent adds a 10-photo chapter and it is sent for checking', async ({ pa
   await unlockParent(page, '/parent/books');
   await expect(page.getByRole('tab', { name: 'Asha' })).toHaveAttribute('aria-selected', 'true');
   const evs = page.getByRole('listitem').filter({ hasText: 'EVS' }).first();
-  await expect(evs.getByText('No book')).toBeVisible();
+  await expect(evs.locator('app-status-chip').getByText('No book')).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 
   await evs.getByRole('button', { name: 'Add first chapter' }).click();

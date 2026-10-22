@@ -86,7 +86,7 @@ test('P9: Replace book warns both children, removes the book and offers a new up
   await page.getByRole('tab', { name: 'Ravi' }).click();
   await expect(page).toHaveURL(/child=child-ravi/);
   const evs = page.getByRole('listitem').filter({ hasText: 'EVS' }).first();
-  await expect(evs.getByText('No book')).toBeVisible();
+  await expect(evs.locator('app-status-chip').getByText('No book')).toBeVisible();
   await expect(evs.getByRole('button', { name: 'Replace book: EVS' })).toHaveCount(0);
 });
 
