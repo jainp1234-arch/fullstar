@@ -75,7 +75,9 @@ test("Child's session: a lesson to K7, tables and the 60-second challenge", asyn
   await expect(page.getByRole('heading', { name: /Well done!/ })).toBeVisible();
 
   // The 60-second challenge: as many right as possible until the minute is up
-  await page.goBack();
+  // Back to Practice and into Tables again for a fresh choice
+  await navigateInApp(page, '/kid/practice');
+  await page.getByRole('button', { name: /Maths tables/ }).click();
   await page.getByRole('button', { name: '3 times table', exact: true }).click();
   await page.getByRole('button', { name: '60-second challenge' }).click();
   const until = Date.now() + 70_000;

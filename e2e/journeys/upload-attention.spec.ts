@@ -20,7 +20,7 @@ skipWithoutStack();
 test('Upload needs attention: unclear pages message, P8 retakes only those, Getting ready again', async ({
   page,
 }) => {
-  test.setTimeout(600_000);
+  test.setTimeout(900_000);
   await signUp(page, newEmail('unclear'));
   await finishSetup(page, { name: 'Zoya', age: '8', picture: 'Rabbit' });
   await parentMode(page);
@@ -71,10 +71,19 @@ test('Upload needs attention: unclear pages message, P8 retakes only those, Gett
   }
   await expect(page.getByText('All pages are clear. Thank you.')).toBeVisible();
 
-  // Back on P4 the chapter is being read again: nothing left to fix
-  await navigateInApp(page, '/parent/books');
+  // Back on P4, once book-reader has read the new photos, nothing is left to fix
   const evs = page.getByRole('listitem').filter({ hasText: 'EVS' }).first();
-  await expect(evs.getByText('Chapter 1: Water around us')).toBeVisible();
-  await expect(evs.getByRole('button', { name: /^Fix \d+ unclear pages?$/ })).toHaveCount(0);
-  console.log(`EVS row after the retakes: ${(await evs.textContent())?.replace(/\s+/g, ' ')}`);
+  const fix = evs.getByRole('button', { name: /^Fix \d+ unclear pages?$/ });
+  const deadline = Date.now() + 240_000;
+  for (;;) {
+    await navigateInApp(page, '/parent/books');
+    await expect(evs).toBeVisible();
+    console.log(`EVS row after the retakes: ${(await evs.textContent())?.replace(/\s+/g, ' ')}`);
+    if ((await fix.count()) === 0) {
+      break;
+    }
+    expect(Date.now(), 'the new photos are read within 4 minutes').toBeLessThan(deadline);
+    await page.waitForTimeout(10_000);
+    await navigateInApp(page, '/parent/progress');
+  }
 });

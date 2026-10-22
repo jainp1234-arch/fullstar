@@ -138,27 +138,37 @@ test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publis
   // 20 questions: one has a wrong answer, which the check stops until it is fixed in S5
   await navigateInApp(studio, prepare);
   await studio.getByRole('button', { name: 'Draft questions with Claude' }).click();
+  // The drafts go to the topic chosen here; the loop below finds them there in the Library
+  const topic = await studio
+    .getByRole('combobox', { name: 'Topic' })
+    .evaluate((el: HTMLSelectElement) => el.selectedOptions[0]?.textContent?.trim() ?? '');
   await studio.getByRole('combobox', { name: 'Number of questions' }).selectOption('20');
   await studio.getByRole('button', { name: 'Draft with AI', exact: true }).click();
   await studio.getByRole('button', { name: 'Save 20 ready questions as drafts' }).click();
   await expect(studio.getByText('Saved 20 questions as drafts.')).toBeVisible();
 
+  // Each draft: S3 → open it (S5) → Content check (S11) → publish (S6)
   let fixed = 0;
-  for (let i = 0; i < 45; i++) {
+  for (let i = 0; i < 25; i++) {
     await studio
       .getByRole('navigation', { name: 'Studio' })
-      .getByRole('link', { name: 'Content check' })
+      .getByRole('link', { name: 'Library' })
       .click();
-    const next = studio.getByRole('button', { name: /^Check / }).first();
-    // The list loads after the screen does: give it time before deciding it is empty
-    const waiting = await next
+    await studio.getByRole('combobox', { name: 'Class' }).selectOption('3');
+    await studio.getByRole('combobox', { name: 'Subject' }).selectOption('hindi');
+    await studio.getByRole('button', { name: new RegExp(`^${topic}`) }).click();
+    const draft = studio.getByRole('row').filter({ hasText: 'Draft' }).first();
+    // The table loads after the screen does: give it time before deciding no draft is left
+    const left = await draft
       .waitFor({ state: 'visible', timeout: 10_000 })
       .then(() => true)
       .catch(() => false);
-    if (!waiting) {
+    if (!left) {
       break;
     }
-    await next.click();
+    await draft.getByRole('button', { name: /^Open / }).click();
+    await expect(studio).toHaveURL(/\/studio\/library\/[^/]+\/edit/);
+    await studio.getByRole('button', { name: 'Content check' }).click();
     if (/failed · 1 critical/.test(await runCheck(studio))) {
       const item = new URL(studio.url()).searchParams.get('item');
       await navigateInApp(studio, `/studio/library/${item}/edit`);
