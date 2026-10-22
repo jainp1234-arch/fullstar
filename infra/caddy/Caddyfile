@@ -20,10 +20,12 @@
 	}
 	handle /studio/* {
 		# make studio (ng serve content-studio on 4201, base href /studio/)
+		import security-headers.caddy Content-Security-Policy-Report-Only
 		reverse_proxy host.docker.internal:4201
 	}
 	handle {
 		# make family (ng serve family-app on 4200)
+		import security-headers.caddy Content-Security-Policy-Report-Only
 		reverse_proxy host.docker.internal:4200
 	}
 }

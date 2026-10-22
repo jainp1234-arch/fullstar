@@ -3,6 +3,8 @@ package com.fullstar.api.family.worksheets;
 import com.fullstar.api.common.db.RequestActor;
 import com.fullstar.api.common.error.NotFoundException;
 import com.fullstar.api.common.error.ValidationException;
+import com.fullstar.api.common.ratelimit.RateLimitKind;
+import com.fullstar.api.common.ratelimit.RateLimited;
 import com.fullstar.api.common.security.FamilyGuards;
 import com.fullstar.api.common.web.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +52,7 @@ public class WorksheetController {
 		return ApiResponse.success(worksheets.list(childId));
 	}
 
+	@RateLimited(RateLimitKind.WORKSHEET_CREATE)
 	@PostMapping("/api/v1/family/parent/worksheets")
 	@ResponseStatus(HttpStatus.CREATED)
 	ApiResponse<WorksheetService.Detail> create(HttpServletRequest request,
@@ -65,6 +68,7 @@ public class WorksheetController {
 						body.familyChapterId(), body.topicId(), body.questionCount())));
 	}
 
+	@RateLimited(RateLimitKind.WORKSHEET_CREATE)
 	@PostMapping("/api/v1/family/parent/worksheets/{id}/reshuffle")
 	ApiResponse<WorksheetService.Detail> reshuffle(@PathVariable String id) {
 		return ApiResponse.success(worksheets.reshuffle(uuid(id)));

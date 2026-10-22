@@ -68,7 +68,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /(pwa-offline|studio-[a-z-]+|real-sign-in)\.spec\.ts/,
+      testIgnore: /(pwa-offline|studio-[a-z-]+|real-sign-in|csp-headers)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4200' },
     },
     {
@@ -82,6 +82,12 @@ export default defineConfig({
       name: 'real',
       testMatch: /real-sign-in\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:8080' },
+    },
+    {
+      // Opt-in (Plan 9.2): the production builds behind Caddy's CSP, in the ZAP stack on :8088
+      name: 'csp',
+      testMatch: /csp-headers\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:8088' },
     },
     {
       // Production build with the service worker (Plan 2.1: fonts load offline)

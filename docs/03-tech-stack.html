@@ -239,6 +239,7 @@ flowchart LR
       <tr><td class="hi">Prometheus</td><td class="tool">prom/prometheus:v3.13.4</td><td>Metrics</td><td>LTS line.</td></tr>
       <tr><td class="hi">Grafana Alloy</td><td class="tool">grafana/alloy:v1.20.0</td><td>Ship logs to Loki</td><td>Replaces Promtail.</td></tr>
       <tr><td class="hi">node-exporter</td><td class="tool">prom/node-exporter:v1.12.1</td><td>Disk use for the "disk over 80%" alert</td><td>Plan 9.1 (decided 22 Oct 2026): Apache-2.0, part of Prometheus, released 14 Jul 2026, multi-arch. Reads the host (on the laptop, Docker's disk) read-only; internal only.</td></tr>
+      <tr><td class="hi">OWASP ZAP</td><td class="tool">zaproxy/zap-stable:2.17.0</td><td>Baseline security scan in CI</td><td>Plan 9.2 (decided 22 Oct 2026): Apache-2.0, the OWASP project, released 15 Dec 2025, multi-arch. <code>zap-baseline.py</code> (passive) on every PR against the built apps and the API (<code>infra/zap/docker-compose.yml</code>, no Keycloak); a medium or high alert fails the job. CI only.</td></tr>
       <tr><td class="hi">Caddy</td><td class="tool">caddy:2.11.4</td><td>HTTPS reverse proxy on the demo server</td><td>Automatic certificates for <code>api.</code> and <code>auth.</code>; ~60k stars, since 2015.</td></tr>
       <tr><td class="hi">Docker Engine / Compose</td><td class="tool">29.8.2 / v5.6.0</td><td>Local and demo runtime</td><td>Compose is now v5.</td></tr>
     </tbody>
@@ -362,6 +363,7 @@ flowchart LR
   <div class="tbl"><table>
     <thead><tr><th>Item</th><th>Date</th><th>Action</th></tr></thead>
     <tbody>
+      <tr><td>Pillow 13.0.0 (tools/vendor-assets)</td><td>30 Oct 2026</td><td>Plan 9.2: 12.3.0 has 9 Dependabot alerts (1 critical); 13.0.0 fixes them and passes the 14-day rule on this date. Dev tool only, never shipped; upgrade it then.</td></tr>
       <tr><td>Node.js 26 becomes Active LTS</td><td>28 Oct 2026</td><td>Plan the move from Node 24 after the first build is stable.</td></tr>
       <tr><td>AWS free-plan account</td><td>6 months after sign-up</td><td>Upgrade the account or switch queues before it is suspended.</td></tr>
       <tr><td>Spring Boot 4.1 support ends</td><td>about Jul 2027</td><td>Move to the next 4.x line.</td></tr>

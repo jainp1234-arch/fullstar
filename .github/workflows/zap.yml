@@ -1,0 +1,95 @@
+name: zap
+
+on:
+  pull_request:
+    paths: &paths
+      - 'apps/**'
+      - 'libs/**'
+      - 'services/api/**'
+      - 'infra/caddy/**'
+      - 'infra/zap/**'
+      - 'infra/db/**'
+      - 'tools/zap/**'
+      - 'e2e/csp-headers.spec.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'angular.json'
+      - 'playwright.config.ts'
+      - '.github/workflows/zap.yml'
+  push:
+    branches: [main]
+    paths: *paths
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Plan 9.2: OWASP ZAP baseline (passive) against the built apps and the API, not signed in;
+  # no medium or high alert may remain. Keycloak is not in the stack (decided 22 Oct 2026).
+  baseline:
+    name: ZAP baseline on the local stack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Production builds of both apps
+        run: npm run build
+      - name: Throwaway secret for the stack
+        run: |
+          secret=$(openssl rand -hex 24)
+          echo "::add-mask::$secret"
+          echo "ZAP_SECRET=$secret" >> "$GITHUB_ENV"
+      - name: Start the stack
+        run: docker compose -f infra/zap/docker-compose.yml up -d --build
+      - name: Wait for the API through Caddy
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS -o /dev/null http://127.0.0.1:8088/api/v1/public/health && exit 0
+            sleep 5
+          done
+          docker compose -f infra/zap/docker-compose.yml ps -a
+          exit 1
+      - id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - id: pw-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - name: Both apps start under the strict CSP
+        run: npx playwright test --project=csp
+        env:
+          CI: 'true'
+          ZAP_STACK: '1'
+      - name: ZAP baseline
+        run: |
+          mkdir -p zap-out && chmod 777 zap-out
+          scan() {
+            docker run --rm --network fullstar-zap_default -v "$PWD/zap-out:/zap/wrk:rw" \
+              zaproxy/zap-stable:2.17.0 zap-baseline.py -t "$1" -J "$2.json" -m 2 -I
+          }
+          scan http://web/ family
+          scan http://web/studio/ studio
+          scan http://web/api/v1/public/config api
+      - name: No medium or high alerts
+        run: node tools/zap/check-report.mjs zap-out/family.json zap-out/studio.json zap-out/api.json
+      - name: Stack logs
+        if: failure()
+        run: docker compose -f infra/zap/docker-compose.yml logs --tail 80 api-migrate api web
+      - if: always()
+        run: docker compose -f infra/zap/docker-compose.yml down -v

@@ -1,0 +1,25 @@
+# Plan 9.2: the built family app and Studio with the real security headers, and the API, for the
+# OWASP ZAP baseline scan (infra/zap/docker-compose.yml). Keycloak is not part of the scan.
+{
+	auto_https off
+	admin off
+}
+
+:80 {
+	handle /api/* {
+		reverse_proxy api:8081
+	}
+	redir /studio /studio/
+	handle_path /studio/* {
+		root * /srv/studio
+		import /etc/caddy/security-headers.caddy Content-Security-Policy
+		try_files {path} /index.html
+		file_server
+	}
+	handle {
+		root * /srv/family
+		import /etc/caddy/security-headers.caddy Content-Security-Policy
+		try_files {path} /index.html
+		file_server
+	}
+}
