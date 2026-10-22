@@ -443,6 +443,8 @@ footer{font-size:13px;color:var(--color-text-muted)}
     <li>Logical focus order, visible focus ring, all actions reachable by keyboard; dialogs trap focus and return it on close.</li>
     <li>Screen-reader live region announces stars earned, upload status changes and toasts.</li>
     <li><code>lang="hi"</code> on every Hindi text element so screen readers pronounce it correctly.</li>
+    <li>Plan 9.4: after a move to another screen the focus goes to its heading; a change that only rewrites the query (a filter such as Studio's class or subject) keeps the focus where it is (WCAG 3.2.2). At 200% zoom (1280×800 seen as 640×400) no screen scrolls sideways.</li>
+    <li>Plan 9.4 checks, on every PR: axe (WCAG 2.1 AA) on every family-app and Studio screen, Devanagari text outside <code>lang="hi"</code>, 200% zoom reflow (<code>e2e/accessibility.spec.ts</code>, <code>e2e/studio-accessibility.spec.ts</code>), and keyboard-only walkthroughs with a visible focus ring on every control reached by Tab (<code>e2e/keyboard.spec.ts</code>, <code>e2e/studio-keyboard.spec.ts</code>).</li>
   </ul>
 </section>
 

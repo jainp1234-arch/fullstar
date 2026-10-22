@@ -98,16 +98,24 @@ export class CurrentScreen {
         mode.set(screen.mode);
       }
     });
-    // Guidelines §14: after moving to another screen, focus its heading so screen readers start there
+    // Guidelines §14: after moving to another screen, focus its heading so screen readers start there.
+    // Plan 9.4: only when the path changes; a filter that only rewrites the query (a Studio class
+    // or subject select) keeps the focus where the user is (WCAG 3.2.2)
     const injector = inject(Injector);
+    let path: string | null = null;
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() =>
+      .subscribe((event) => {
+        const next = event.urlAfterRedirects.split(/[?#]/)[0];
+        if (next === path) {
+          return;
+        }
+        path = next;
         afterNextRender(
           () => document.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true }),
           { injector },
-        ),
-      );
+        );
+      });
   }
 
   urlOf(id: ScreenId): string {

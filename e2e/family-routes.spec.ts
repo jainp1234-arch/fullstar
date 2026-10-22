@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { enterPin, signInFamily, unlockParent } from './fakes';
-import { WIDTHS, WidthName, navigateInApp, onScreen, walk } from './routes';
+import { signInFamily, unlockParent } from './fakes';
+import { walkFamilyApp } from './family-walk';
+import { WIDTHS, WidthName, navigateInApp } from './routes';
 
 /**
  * App Flow §4–§6 screen IDs and their shells (Guidelines §10), walked signed in. A1 (signed out
@@ -35,66 +36,7 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       page,
     }) => {
       test.setTimeout(180_000);
-      await signInFamily(page);
-      // Kid mode needs a picked child and parent mode the PIN, both in memory: no reloads
-      const seen = await walk(page);
-      await page.getByRole('button', { name: 'Asha' }).click();
-      await onScreen(page, 'K1');
-      await walk(page, [], seen);
-      // K3 opens read-along only for book chapters and worksheets arrive in Phase 7 (Plan 6.1)
-      // K12 opens K13 with a button, and K14 needs a test id (Plan 8.3)
-      for (const path of [
-        '/kid/read-along/sample',
-        '/kid/worksheet/sample',
-        '/kid/well-done',
-        '/kid/read/test',
-        '/kid/read/result',
-      ]) {
-        await navigateInApp(page, path);
-        await walk(page, [], seen);
-      }
-      await navigateInApp(page, '/kid/learn');
-      await page.getByRole('button', { name: 'Parent mode' }).click();
-      await onScreen(page, 'P0');
-      await walk(page, [], seen);
-      await enterPin(page);
-      await expect(page).toHaveURL(/\/parent\/progress$/);
-      await onScreen(page, 'P1');
-      await walk(page, [], seen);
-      // P14 opens these with buttons, not links
-      for (const path of [
-        '/parent/settings/children/child-asha',
-        '/parent/settings/help',
-        '/parent/settings/privacy',
-        // P4 opens the book screens with buttons (Plan 5.1)
-        '/parent/books/english/upload',
-        '/parent/books/english/add-chapter',
-        '/parent/books/english/chapters',
-        '/parent/books/english/fix-pages',
-        '/parent/books/english/preview',
-        '/parent/books/english/replace',
-        // P18 opens from a P13 question button (Plan 7.3)
-        '/parent/report',
-        // P1 is real (Plan 6.4): reading history arrives with Phase 7; the bell opens P19
-        '/parent/progress/reading',
-        // With no worksheets yet, P10 offers Create as a button (Plan 7.2)
-        '/parent/worksheets/new',
-        '/parent/worksheets/sample/print',
-        '/parent/worksheets/sample/solutions',
-        '/parent/messages',
-      ]) {
-        await navigateInApp(page, path);
-        await walk(page, [], seen);
-      }
-      // Setup and sign-up screens need only a family; B4 also asks for the PIN
-      await walk(page, ['/sign-up', '/parent/forgot-pin', '/setup/pin', '/setup/child'], seen);
-      await walk(page, ['/setup/books', '/setup/done'], seen);
-      await page.goto('/setup/time-limit');
-      await expect(page).toHaveURL(/\/parent\/pin\?next=%2Fsetup%2Ftime-limit$/);
-      await enterPin(page);
-      await expect(page).toHaveURL(/\/setup\/time-limit$/);
-      await onScreen(page, 'B4');
-      await walk(page, [], seen);
+      const seen = await walkFamilyApp(page);
       expect([...seen.keys()].sort()).toEqual(EXPECTED.map((e) => e.id).sort());
       for (const { id, shell } of EXPECTED) {
         const visit = seen.get(id);
