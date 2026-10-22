@@ -48,6 +48,40 @@ def to_woff2(data: bytes) -> bytes:
     return out.getvalue()
 
 
+# Plan 9.3: Poppins in two files per weight, chosen by the browser through unicode-range, so an
+# English screen never downloads the Devanagari glyphs (Google Fonts' latin and devanagari ranges;
+# the rupee sign stays in latin). Keep these equal to libs/ui/styles/fonts.css.
+RANGES = {
+    "latin": "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,"
+    "U+2074,U+20AC,U+20B9,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD",
+    "devanagari": "U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20A8,U+25CC,U+A830-A839,U+A8E0-A8FF",
+}
+
+
+def unicodes(ranges: str) -> list[int]:
+    out: list[int] = []
+    for part in ranges.split(","):
+        start, _, end = part.removeprefix("U+").partition("-")
+        out.extend(range(int(start, 16), int(end or start, 16) + 1))
+    return out
+
+
+def woff2_subset(data: bytes, script: str) -> bytes:
+    """One script's glyphs with every layout feature, so Devanagari conjuncts still shape."""
+    font = TTFont(io.BytesIO(data))
+    options = subset.Options()
+    options.layout_features = ["*"]
+    options.name_IDs = ["*"]
+    options.notdef_outline = True
+    subsetter = subset.Subsetter(options=options)
+    subsetter.populate(unicodes=unicodes(RANGES[script]))
+    subsetter.subset(font)
+    font.flavor = "woff2"
+    out = io.BytesIO()
+    font.save(out)
+    return out.getvalue()
+
+
 def to_webp_256(data: bytes) -> bytes:
     image = Image.open(io.BytesIO(data)).convert("RGBA")
     image = image.resize((256, 256), Image.Resampling.LANCZOS)
@@ -92,15 +126,23 @@ def write_icon_codepoints(chosen: dict[str, str]) -> None:
 
 
 def main() -> int:
+    # --only <prefix>: refresh just those outputs (e.g. --only fonts/poppins), keep the rest
+    only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else ""
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     sources = manifest["sources"]
-    lock = {}
+    lock_file = ASSETS / "assets.lock.json"
+    lock = json.loads(lock_file.read_text(encoding="utf-8")) if only and lock_file.exists() else {}
+    lock = {out: digest for out, digest in lock.items() if any(f["out"] == out for f in manifest["files"])}
     for item in manifest["files"]:
+        if not item["out"].startswith(only):
+            continue
         source = sources[item["source"]]
         data = fetch(source["repo"], source["commit"], item["path"])
         converter = item.get("convert")
         if converter == "woff2":
             data = to_woff2(data)
+        elif converter in ("woff2-latin", "woff2-devanagari"):
+            data = woff2_subset(data, converter.removeprefix("woff2-"))
         elif converter == "webp256":
             data = to_webp_256(data)
         elif converter == "symbols-subset":
@@ -112,7 +154,7 @@ def main() -> int:
         target.write_bytes(data)
         lock[item["out"]] = hashlib.sha256(data).hexdigest()
         print(f"ok  {item['out']}  ({len(data)} bytes)")
-    (ASSETS / "assets.lock.json").write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    lock_file.write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0
 
 

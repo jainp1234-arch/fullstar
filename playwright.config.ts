@@ -68,7 +68,8 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: /(pwa-offline|studio-[a-z-]+|real-sign-in|csp-headers)\.spec\.ts/,
+      testIgnore:
+        /(pwa-offline|first-load-budget|installable|studio-[a-z-]+|real-sign-in|csp-headers)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4200' },
     },
     {
@@ -90,9 +91,9 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:8088' },
     },
     {
-      // Production build with the service worker (Plan 2.1: fonts load offline)
+      // Production build with the service worker (Plan 2.1: fonts offline; 9.3: budget, installable)
       name: 'pwa',
-      testMatch: /pwa-offline\.spec\.ts/,
+      testMatch: /(pwa-offline|first-load-budget|installable)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: 'http://127.0.0.1:4300' },
     },
   ],

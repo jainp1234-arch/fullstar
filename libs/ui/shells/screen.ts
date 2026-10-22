@@ -73,6 +73,8 @@ export const SCREEN_DATA = 'screen';
 export interface ScreenRouteOptions {
   /** Built screens; every other screen shows the placeholder page. */
   readonly pages?: Partial<Record<ScreenId, Type<unknown>>>;
+  /** Built screens loaded on first visit, each in its own chunk (Plan 9.3); wins over pages. */
+  readonly lazyPages?: Partial<Record<ScreenId, () => Promise<Type<unknown>>>>;
   /** Guards per screen, e.g. sign-in required. */
   readonly guards?: (screen: ScreenDef) => CanActivateFn[];
 }
@@ -100,13 +102,22 @@ export function screenRoutes(
         .filter((screen) => screen.shell === kind)
         .map((screen) => ({
           path: screen.path,
-          component: options.pages?.[screen.id] ?? page,
+          ...pageOf(screen.id, options, page),
           canActivate: options.guards?.(screen) ?? [],
           title: EN.placeholder.pageTitle(EN.screens[screen.id], config.appName),
           data: { [SCREEN_DATA]: screen },
         })),
     };
   });
+}
+
+function pageOf(
+  id: ScreenId,
+  options: ScreenRouteOptions,
+  page: Type<unknown>,
+): { component: Type<unknown> } | { loadComponent: () => Promise<Type<unknown>> } {
+  const lazy = options.lazyPages?.[id];
+  return lazy ? { loadComponent: lazy } : { component: options.pages?.[id] ?? page };
 }
 
 /** Minutes used today and the daily limit for the kid-mode time indicator (Plan 6.4); null hides it. */

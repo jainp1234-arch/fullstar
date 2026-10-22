@@ -5,18 +5,19 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withPreloading } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideFullstarCore } from '@fullstar/core';
 import { KID_TIME, SCREEN_CONFIG } from '@fullstar/ui';
 import { routes } from './app.routes';
+import { IdlePreloading } from './idle-preloading';
 import { KidTime } from './kid/kid-time';
 import { FAMILY_SCREENS } from './screens';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    provideRouter(routes, withPreloading(IdlePreloading)),
     { provide: SCREEN_CONFIG, useValue: FAMILY_SCREENS },
     // Plan 6.4: kid-mode minutes are counted from the start; the header shows them
     { provide: KID_TIME, useFactory: () => inject(KidTime).today },

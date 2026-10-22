@@ -30,7 +30,7 @@ const MAX_DOTS = 12;
       <span class="q__count">{{ progressLabel() }}</span>
     </div>
     @if (picture(); as pic) {
-      <img class="q__picture" [src]="pic.src" [alt]="pic.alt" />
+      <img class="q__picture" [src]="pic.src" [alt]="pic.alt" decoding="async" />
     }
     <h2 class="q__text" [attr.lang]="lang()">{{ question() }}</h2>
     <div class="q__answers"><ng-content /></div>

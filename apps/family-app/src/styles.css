@@ -29,3 +29,8 @@ body {
   background: var(--color-page);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Plan 9.3: the splash inside <app-root> (index.html), painted before Angular starts. */
+.boot {
+  min-height: 100dvh;
+}

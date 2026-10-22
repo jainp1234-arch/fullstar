@@ -8,6 +8,8 @@ import { EN } from '../strings/en';
   template: `
     <figure class="thumb">
       <img
+        loading="lazy"
+        decoding="async"
         class="thumb__img"
         [class.thumb__img--unclear]="unclear()"
         [src]="src()"

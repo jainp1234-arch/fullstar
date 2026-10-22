@@ -20,7 +20,7 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api book-reader test-ocr test-reading reading-check voice test-voice narrate-check test-pages alert-check family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
+.PHONY: help up down test lint api book-reader test-ocr test-reading reading-check voice test-voice narrate-check test-pages alert-check family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets app-icons
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
@@ -43,6 +43,7 @@ help:
 	@echo "make narrate-check DIR= narrate each page .txt in DIR to an MP3 with Audacity word labels"
 	@echo "make alert-check       force a job failure and time the DLQ alert (make up + make api running)"
 	@echo "make vendor-assets    download and convert fonts, icons and illustrations (libs/ui/assets)"
+	@echo "make app-icons        the family app home-screen icons from the owl (apps/family-app/public/icons)"
 
 up:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }
@@ -141,6 +142,11 @@ vendor-assets:
 		"pip install -q --root-user-action=ignore --disable-pip-version-check -r tools/vendor-assets/requirements.txt && python tools/vendor-assets/vendor.py"
 	node tools/vendor-assets/sky-stars.mjs
 	node scripts/check-assets.mjs
+
+# Plan 9.3: home-screen icons, the owl on --color-primary-600
+app-icons:
+	MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -w /w python:3.12.15-slim sh -c \
+		"pip install -q --root-user-action=ignore --disable-pip-version-check -r tools/vendor-assets/requirements.txt && python tools/vendor-assets/app_icons.py"
 
 bootstrap:
 	@test -f .env || { echo ".env is missing: copy .env.example to .env and fill in the values"; exit 1; }

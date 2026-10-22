@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { Page, expect, test } from '@playwright/test';
 import { FakeServer, signInFamily } from './fakes';
+import { screensLoaded } from './offline';
 
 /** Plan 6.3: K5 with stand-in audio; the highlight follows the word timings. */
 
@@ -87,6 +88,7 @@ test('an opened chapter reads again offline', async ({ page, context }) => {
   await openReadAlong(page);
   await page.getByRole('button', { name: 'Close' }).click();
   // The fake API answers even offline, so its pages call fails as a lost connection would
+  await screensLoaded(page);
   await context.setOffline(true);
   await page.route(/\/family\/kid\/chapters\/ch-water\/pages/, (route) =>
     route.abort('internetdisconnected'),

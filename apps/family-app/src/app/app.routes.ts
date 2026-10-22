@@ -9,50 +9,7 @@ import {
   SkySheetShell,
   screenRoutes,
 } from '@fullstar/ui';
-import { ConsentPage } from './auth/consent.page';
-import { SignInReturnPage } from './auth/sign-in-return.page';
-import { BookUploadPage } from './books/book-upload.page';
-import { CheckChaptersPage } from './books/check-chapters.page';
-import { FixPagesPage } from './books/fix-pages.page';
-import { ReplaceBookPage } from './books/replace-book.page';
-import { LessonPreviewPage } from './books/lesson-preview.page';
-import { MessagesPage } from './messages/messages.page';
-import { ActivityPage } from './kid/activity.page';
-import { LearnHomePage } from './kid/learn-home.page';
-import { SubjectPage } from './kid/subject.page';
-import { LessonPlayerPage } from './kid/lesson-player.page';
-import { WellDonePage } from './kid/well-done.page';
-import { ReadAlongPage } from './kid/read-along.page';
-import { PracticeHomePage } from './kid/practice-home.page';
-import { PracticeSetPage } from './kid/practice-set.page';
-import { TablesPage } from './kid/tables.page';
-import { WorksheetOnscreenPage } from './kid/worksheet-onscreen.page';
-import { CreateWorksheetPage } from './worksheets/create-worksheet.page';
-import { PrintWorksheetPage } from './worksheets/print-worksheet.page';
-import { WorksheetSolutionsPage } from './worksheets/worksheet-solutions.page';
-import { WorksheetsPage } from './worksheets/worksheets.page';
-import { ReportPage } from './settings/report.page';
-import { ProgressPage } from './parent/progress.page';
-import { SubjectProgressPage } from './parent/subject-progress.page';
-import { ReadingHistoryPage } from './parent/reading-history.page';
-import { ReadingHomePage } from './kid/reading-home.page';
-import { ReadingResultPage } from './kid/reading-result.page';
-import { ReadingTestPage } from './kid/reading-test.page';
-import { BooksPage } from './books/books.page';
-import { WelcomePage } from './auth/welcome.page';
-import { ForgotPinPage } from './parent/forgot-pin.page';
-import { ParentPinPage } from './parent/parent-pin.page';
 import { FAMILY_SCREENS } from './screens';
-import { EditChildPage } from './settings/edit-child.page';
-import { HelpPage } from './settings/help.page';
-import { PrivacyPage } from './settings/privacy.page';
-import { SettingsPage } from './settings/settings.page';
-import { SetupBooksPage } from './setup/setup-books.page';
-import { SetupChildPage } from './setup/setup-child.page';
-import { SetupDonePage } from './setup/setup-done.page';
-import { SetupPinPage } from './setup/setup-pin.page';
-import { SetupTimeLimitPage } from './setup/setup-time-limit.page';
-import { WhoPage } from './who/who.page';
 
 const CONSENT = '/sign-up';
 const PIN = '/parent/pin';
@@ -117,52 +74,54 @@ export const routes: Routes = [
     },
     PlaceholderPage,
     {
-      pages: {
-        A1: WelcomePage,
-        A2: ConsentPage,
-        A3: SignInReturnPage,
-        A4: ForgotPinPage,
-        B1: SetupPinPage,
-        B2: SetupChildPage,
-        B3: SetupBooksPage,
-        B4: SetupTimeLimitPage,
-        B5: SetupDonePage,
-        C1: WhoPage,
-        K1: LearnHomePage,
-        K2: SubjectPage,
-        K3: ActivityPage,
-        K4: LessonPlayerPage,
-        K5: ReadAlongPage,
-        K6: WorksheetOnscreenPage,
-        K7: WellDonePage,
-        K8: PracticeHomePage,
-        K9: PracticeSetPage,
-        K10: TablesPage,
-        K11: PracticeSetPage,
-        K12: ReadingHomePage,
-        K13: ReadingTestPage,
-        K14: ReadingResultPage,
-        P0: ParentPinPage,
-        P1: ProgressPage,
-        P2: SubjectProgressPage,
-        P3: ReadingHistoryPage,
-        P4: BooksPage,
-        P5: BookUploadPage,
-        P6: CheckChaptersPage,
-        P7: BookUploadPage,
-        P8: FixPagesPage,
-        P9: ReplaceBookPage,
-        P8a: LessonPreviewPage,
-        P10: WorksheetsPage,
-        P11: CreateWorksheetPage,
-        P12: PrintWorksheetPage,
-        P13: WorksheetSolutionsPage,
-        P14: SettingsPage,
-        P15: EditChildPage,
-        P16: HelpPage,
-        P17: PrivacyPage,
-        P18: ReportPage,
-        P19: MessagesPage,
+      // Plan 9.3: each screen is its own chunk, so the first load carries only the first screen
+      lazyPages: {
+        A1: () => import('./auth/welcome.page').then((m) => m.WelcomePage),
+        A2: () => import('./auth/consent.page').then((m) => m.ConsentPage),
+        A3: () => import('./auth/sign-in-return.page').then((m) => m.SignInReturnPage),
+        A4: () => import('./parent/forgot-pin.page').then((m) => m.ForgotPinPage),
+        B1: () => import('./setup/setup-pin.page').then((m) => m.SetupPinPage),
+        B2: () => import('./setup/setup-child.page').then((m) => m.SetupChildPage),
+        B3: () => import('./setup/setup-books.page').then((m) => m.SetupBooksPage),
+        B4: () => import('./setup/setup-time-limit.page').then((m) => m.SetupTimeLimitPage),
+        B5: () => import('./setup/setup-done.page').then((m) => m.SetupDonePage),
+        C1: () => import('./who/who.page').then((m) => m.WhoPage),
+        K1: () => import('./kid/learn-home.page').then((m) => m.LearnHomePage),
+        K2: () => import('./kid/subject.page').then((m) => m.SubjectPage),
+        K3: () => import('./kid/activity.page').then((m) => m.ActivityPage),
+        K4: () => import('./kid/lesson-player.page').then((m) => m.LessonPlayerPage),
+        K5: () => import('./kid/read-along.page').then((m) => m.ReadAlongPage),
+        K6: () => import('./kid/worksheet-onscreen.page').then((m) => m.WorksheetOnscreenPage),
+        K7: () => import('./kid/well-done.page').then((m) => m.WellDonePage),
+        K8: () => import('./kid/practice-home.page').then((m) => m.PracticeHomePage),
+        K9: () => import('./kid/practice-set.page').then((m) => m.PracticeSetPage),
+        K10: () => import('./kid/tables.page').then((m) => m.TablesPage),
+        K11: () => import('./kid/practice-set.page').then((m) => m.PracticeSetPage),
+        K12: () => import('./kid/reading-home.page').then((m) => m.ReadingHomePage),
+        K13: () => import('./kid/reading-test.page').then((m) => m.ReadingTestPage),
+        K14: () => import('./kid/reading-result.page').then((m) => m.ReadingResultPage),
+        P0: () => import('./parent/parent-pin.page').then((m) => m.ParentPinPage),
+        P1: () => import('./parent/progress.page').then((m) => m.ProgressPage),
+        P2: () => import('./parent/subject-progress.page').then((m) => m.SubjectProgressPage),
+        P3: () => import('./parent/reading-history.page').then((m) => m.ReadingHistoryPage),
+        P4: () => import('./books/books.page').then((m) => m.BooksPage),
+        P5: () => import('./books/book-upload.page').then((m) => m.BookUploadPage),
+        P6: () => import('./books/check-chapters.page').then((m) => m.CheckChaptersPage),
+        P7: () => import('./books/book-upload.page').then((m) => m.BookUploadPage),
+        P8: () => import('./books/fix-pages.page').then((m) => m.FixPagesPage),
+        P9: () => import('./books/replace-book.page').then((m) => m.ReplaceBookPage),
+        P8a: () => import('./books/lesson-preview.page').then((m) => m.LessonPreviewPage),
+        P10: () => import('./worksheets/worksheets.page').then((m) => m.WorksheetsPage),
+        P11: () => import('./worksheets/create-worksheet.page').then((m) => m.CreateWorksheetPage),
+        P12: () => import('./worksheets/print-worksheet.page').then((m) => m.PrintWorksheetPage),
+        P13: () =>
+          import('./worksheets/worksheet-solutions.page').then((m) => m.WorksheetSolutionsPage),
+        P14: () => import('./settings/settings.page').then((m) => m.SettingsPage),
+        P15: () => import('./settings/edit-child.page').then((m) => m.EditChildPage),
+        P16: () => import('./settings/help.page').then((m) => m.HelpPage),
+        P17: () => import('./settings/privacy.page').then((m) => m.PrivacyPage),
+        P18: () => import('./settings/report.page').then((m) => m.ReportPage),
+        P19: () => import('./messages/messages.page').then((m) => m.MessagesPage),
       },
       guards: guardsFor,
     },
