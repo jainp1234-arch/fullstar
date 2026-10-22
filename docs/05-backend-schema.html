@@ -1153,8 +1153,8 @@ sequenceDiagram
       <tr><td class="m">GET</td><td class="p">/family/kid/reading-tests/{id}</td><td>K</td><td>Status and result (poll every 2 s, max 60 s)</td><td>K14</td></tr>
 
       <tr class="grp"><td colspan="5">Family: parent mode — progress</td></tr>
-      <tr><td class="m">GET</td><td class="p">/family/parent/children/{id}/week?start=YYYY-MM-DD</td><td>P</td><td>This week card and areas to work on (child_week_summary)</td><td>P1</td></tr>
-      <tr><td class="m">GET</td><td class="p">/family/parent/children/{id}/subjects/{subject_id}</td><td>P</td><td>Chapters done, accuracy by topic, weak spots</td><td>P2</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/children/{id}/week?start=YYYY-MM-DD</td><td>P</td><td>This week card and areas to work on (child_week_summary). Plan 6.4: <code>start</code> is any day of the week (default this week; weeks start on Monday in Asia/Kolkata); answers <code>{start, minutes, active_days, chapters_done, worksheets_done, areas, subjects: [{subject_id, code, name, chapters_done, chapters_total, lessons_done}], any_activity}</code>. <code>subjects</code> (added) are the child's class subjects with book chapters done of those ready and lessons finished that week; <code>any_activity</code> false shows the getting-started checklist. Another family's child → 404</td><td>P1</td></tr>
+      <tr><td class="m">GET</td><td class="p">/family/parent/children/{id}/subjects/{subject_id}</td><td>P</td><td>Chapters done, accuracy by topic, weak spots. Plan 6.4: <code>{subject_id, code, name, chapters: [{id, number, title, done}], accuracy: [{topic_id, name, correct, answered}], weak_spots: [{topic_id, name, ticks}]}</code>; accuracy counts recorded (first) answers; weak spots are worksheet ticks of the last 30 days</td><td>P2</td></tr>
       <tr><td class="m">GET</td><td class="p">/family/parent/children/{id}/reading-tests</td><td>P</td><td>Reading history with recording URLs (if not expired)</td><td>P3</td></tr>
 
       <tr class="grp"><td colspan="5">Family: parent mode — books and uploads</td></tr>

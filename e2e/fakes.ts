@@ -364,6 +364,76 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
     if (path.startsWith('/family/kid/')) {
       return familyKid(route, server, path);
     }
+    const progress = /^\/family\/parent\/children\/([^/]+)\/(week|subjects\/(\d+))$/.exec(path);
+    if (progress && method === 'GET') {
+      // P1 and P2 (Plan 6.4): Asha has a week of activity; others have none yet
+      const active = progress[1] === 'child-asha';
+      if (!server.family.children.some((c) => c.id === progress[1])) {
+        return envelope(route, 404, null, 'NOT_FOUND');
+      }
+      if (progress[2] === 'week') {
+        return envelope(route, 200, {
+          start: '2026-10-19',
+          minutes: active ? 95 : 0,
+          active_days: active ? 4 : 0,
+          chapters_done: active ? 2 : 0,
+          worksheets_done: 0,
+          areas: active
+            ? [{ topic_id: 't-water', name: 'Saving water', subject: 'evs', score: 2 }]
+            : [],
+          subjects: [
+            {
+              subject_id: 1,
+              code: 'english',
+              name: 'English',
+              chapters_done: 0,
+              chapters_total: 0,
+              lessons_done: active ? 3 : 0,
+            },
+            {
+              subject_id: 2,
+              code: 'hindi',
+              name: 'Hindi',
+              chapters_done: 0,
+              chapters_total: 0,
+              lessons_done: 0,
+            },
+            {
+              subject_id: 3,
+              code: 'maths',
+              name: 'Maths',
+              chapters_done: 0,
+              chapters_total: 0,
+              lessons_done: 0,
+            },
+            {
+              subject_id: 4,
+              code: 'evs',
+              name: 'EVS',
+              chapters_done: active ? 2 : 0,
+              chapters_total: active ? 5 : 0,
+              lessons_done: active ? 2 : 0,
+            },
+          ],
+          any_activity: active,
+        });
+      }
+      return envelope(route, 200, {
+        subject_id: Number(progress[3]),
+        code: 'evs',
+        name: 'EVS',
+        chapters: active
+          ? [
+              { id: 'ch-1', number: 1, title: 'Plants', done: true },
+              { id: 'ch-2', number: 2, title: 'Water', done: false },
+            ]
+          : [],
+        accuracy: active
+          ? [{ topic_id: 't-water', name: 'Saving water', correct: 7, answered: 10 }]
+          : [],
+        weak_spots: [],
+      });
+    }
     if (
       path.startsWith('/family/parent/messages') ||
       path.startsWith('/family/parent/lessons/') ||

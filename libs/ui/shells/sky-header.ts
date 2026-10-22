@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { Router } from '@angular/router';
 import { IconButton } from '../components/icon-button';
 import { ReadAloud } from '../components/read-aloud';
+import { TimeIndicator } from '../components/time-indicator';
 import { IconName } from '../icons/icons';
 import { EN } from '../strings/en';
 import { CurrentScreen } from './current-screen';
-import { SCREEN_CONFIG } from './screen';
+import { KID_TIME, SCREEN_CONFIG } from './screen';
 
 interface HeaderAction {
   readonly icon: IconName;
@@ -20,7 +21,7 @@ interface HeaderAction {
 @Component({
   selector: 'app-sky-header',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IconButton, ReadAloud],
+  imports: [IconButton, ReadAloud, TimeIndicator],
   template: `
     <header class="row" [class.row--focus]="focus()">
       <div class="row__side">
@@ -50,6 +51,9 @@ interface HeaderAction {
           }
         }
       </div>
+      @if (time(); as t) {
+        <app-time-indicator class="row__time" [used]="t.used" [limit]="t.limit" />
+      }
     </header>
   `,
   styles: `
@@ -65,6 +69,10 @@ interface HeaderAction {
       min-height: var(--header-row);
       padding: var(--space-2) var(--space-4);
       box-sizing: border-box;
+    }
+    /* Guidelines §10: the 4 px time bar runs along the bottom of the header row */
+    .row__time {
+      grid-column: 1 / -1;
     }
     .row--focus {
       min-height: 64px;
@@ -94,6 +102,11 @@ export class SkyHeader {
   protected readonly current = inject(CurrentScreen);
   private readonly config = inject(SCREEN_CONFIG);
   private readonly router = inject(Router);
+  private readonly kidTime = inject(KID_TIME);
+  /** Guidelines §10: kid mode only, a 4 px bar along the bottom of the header row. */
+  protected readonly time = computed(() =>
+    this.current.screen()?.mode === 'kid' ? this.kidTime() : null,
+  );
 
   protected readonly left = computed<HeaderAction | null>(() => {
     const screen = this.current.screen();

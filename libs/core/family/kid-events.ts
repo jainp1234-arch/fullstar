@@ -106,6 +106,12 @@ export class KidEvents {
     await this.put({ key: `minute:${childId}:${minute}`, childId, type: 'minute', event: minute });
   }
 
+  /** Server counts from another answer, e.g. K1 home, until the next sync. */
+  seed(childId: string, stars: number, minutesToday: number): void {
+    this.stars.update((s) => ({ ...s, [childId]: stars }));
+    this.minutesToday.update((m) => ({ ...m, [childId]: minutesToday }));
+  }
+
   /** Sends everything queued; concurrent calls share one run. Never throws. */
   flush(): Promise<void> {
     this.flushing ??= this.run().finally(() => {

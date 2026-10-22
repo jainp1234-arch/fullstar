@@ -2,7 +2,7 @@ import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { ContinueCard, KidApi, KidHome, KidSubjectTile } from '@fullstar/core';
+import { ContinueCard, KidApi, KidEvents, KidHome, KidSubjectTile } from '@fullstar/core';
 import {
   BannerCard,
   Button,
@@ -114,6 +114,7 @@ export class LearnHomePage {
   protected readonly failed = signal(false);
 
   private readonly api = inject(KidApi);
+  private readonly events = inject(KidEvents);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly destroyRef = inject(DestroyRef);
@@ -128,7 +129,10 @@ export class LearnHomePage {
       .home()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (home) => this.home.set(home),
+        next: (home) => {
+          this.home.set(home);
+          this.events.seed(home.child.id, home.stars, home.minutes_today);
+        },
         error: () => this.failed.set(true),
       });
   }

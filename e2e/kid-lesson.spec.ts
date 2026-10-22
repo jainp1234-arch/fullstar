@@ -23,7 +23,7 @@ test('a lesson plays scene by scene, the quiz counts the first answer, and K7 sh
 }) => {
   const server = await signInFamily(page);
   await openLesson(page);
-  await expect(page.getByRole('progressbar')).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: /^Part 1 of/ })).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 
   await page.getByRole('button', { name: 'Next' }).click();

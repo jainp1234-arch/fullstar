@@ -22,6 +22,8 @@ import { SubjectPage } from './kid/subject.page';
 import { LessonPlayerPage } from './kid/lesson-player.page';
 import { WellDonePage } from './kid/well-done.page';
 import { ReadAlongPage } from './kid/read-along.page';
+import { ProgressPage } from './parent/progress.page';
+import { SubjectProgressPage } from './parent/subject-progress.page';
 import { BooksPage } from './books/books.page';
 import { WelcomePage } from './auth/welcome.page';
 import { ForgotPinPage } from './parent/forgot-pin.page';
@@ -119,6 +121,8 @@ export const routes: Routes = [
         K5: ReadAlongPage,
         K7: WellDonePage,
         P0: ParentPinPage,
+        P1: ProgressPage,
+        P2: SubjectProgressPage,
         P4: BooksPage,
         P5: BookUploadPage,
         P6: CheckChaptersPage,
