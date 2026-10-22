@@ -63,7 +63,7 @@ onnxruntime==1.30.0
 packaging==26.3
 parso==0.8.7
 pexpect==4.9.0
-pillow==12.3.0
+pillow==13.0.0
 platformdirs==4.12.4
 pooch==1.9.0
 prompt_toolkit==3.0.53
