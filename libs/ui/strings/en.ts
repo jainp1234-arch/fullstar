@@ -854,6 +854,42 @@ export const EN = {
     previewLessons: 'Preview lessons',
   },
 
+  /** P1 Progress and P2 Subject detail (App Flow §6; Plan 6.4). */
+  progress: {
+    childTabs: 'Whose progress',
+    thisWeek: 'This week',
+    minutes: (minutes: number) => `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} learning`,
+    activeDays: (days: number) => `on ${days} ${days === 1 ? 'day' : 'days'}`,
+    chaptersDone: (count: number) => `${count} ${count === 1 ? 'chapter' : 'chapters'} done`,
+    worksheetsDone: (count: number) => `${count} ${count === 1 ? 'worksheet' : 'worksheets'} done`,
+    areas: 'Areas to work on',
+    noAreas: 'Nothing to work on right now.',
+    bySubject: 'By subject',
+    subjectLine: (done: number, total: number, lessons: number) =>
+      total
+        ? `${done} of ${total} chapters done · ${lessons} ${lessons === 1 ? 'lesson' : 'lessons'} this week`
+        : `${lessons} ${lessons === 1 ? 'lesson' : 'lessons'} this week`,
+    reading: 'Reading',
+    noReading: 'Reading results will appear after the first test.',
+    firstSteps: 'Getting started',
+    stepBooks: 'Add the school books',
+    stepLesson: 'Watch the first lesson together',
+    stepReading: 'Take the first reading test',
+    chapters: 'Chapters',
+    noChapters: 'No chapters yet. Upload the book to see them here.',
+    chapterLine: (number: number, title: string) => `Chapter ${number}: ${title}`,
+    done: 'Done',
+    notYet: 'Not yet',
+    accuracy: 'Practice accuracy by topic',
+    accuracyLine: (correct: number, answered: number) =>
+      `${Math.round((correct * 100) / answered)}% right first time (${correct} of ${answered})`,
+    noAnswers: 'No practice answers yet.',
+    weakSpots: 'Weak spots you ticked',
+    noWeakSpots: 'None ticked. You can tick weak spots when checking a worksheet.',
+    weakLine: (ticks: number) => `Ticked ${ticks} ${ticks === 1 ? 'time' : 'times'}`,
+    loadFailed: "We couldn't load the progress.",
+  },
+
   /** P19 Messages (App Flow §6, §9). */
   messages: {
     empty: "You're all caught up.",

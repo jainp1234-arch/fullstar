@@ -45,6 +45,10 @@ describe('app-read-aloud', () => {
 
 describe('app-time-indicator', () => {
   it.each([
+    // Plan 6.4: the states at 0%, 85% and 110% of the daily limit
+    [0, 30, 'ok', '0%'],
+    [17, 20, 'near', '85%'],
+    [33, 30, 'over', '100%'],
     [15, 30, 'ok', '50%'],
     [24, 30, 'near', '80%'],
     [30, 30, 'over', '100%'],

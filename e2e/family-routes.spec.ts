@@ -65,6 +65,9 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
         '/parent/books/english/replace',
         // P8a reports inline (Plan 5.5); P18 from any lesson arrives with Plan 7.3
         '/parent/report',
+        // P1 is real (Plan 6.4): reading history arrives with Phase 7; the bell opens P19
+        '/parent/progress/reading',
+        '/parent/messages',
       ]) {
         await navigateInApp(page, path);
         await walk(page, [], seen);

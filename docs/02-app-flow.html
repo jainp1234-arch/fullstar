@@ -147,7 +147,7 @@ flowchart TD
       <tr><td class="hi">Back button</td><td>Goes one step back inside the current tab. On the first screen of a tab, it does nothing in kid mode (so children do not leave the app by accident).</td></tr>
       <tr><td class="hi">Leaving midway</td><td>A lesson, practice set or worksheet left halfway shows <em>Continue where you left off</em> the next time.</td></tr>
       <tr><td class="hi">Switching child</td><td>A picture in the kid-mode header goes back to <em>Who is learning?</em>. No PIN needed.</td></tr>
-      <tr><td class="hi">Time indicator</td><td>A small bar in the kid-mode header. Green while under the limit, turning amber near it and red when over. No pop-ups, no lock.</td></tr>
+      <tr><td class="hi">Time indicator</td><td>A small bar in the kid-mode header. Green while under the limit, turning amber near it and red when over. No pop-ups, no lock. Implemented in Plan 6.4: every minute in kid mode with the app on screen counts (synced with the other kid events); the bar turns at 80% and 100% of the daily limit.</td></tr>
       <tr><td class="hi">Read aloud</td><td>Every kid-mode screen has a 🔊 button. Kid-mode buttons use pictures and short words.</td></tr>
       <tr><td class="hi">Messages</td><td>A bell in parent mode shows in-app messages (book ready, upload needs attention, problem report fixed).</td></tr>
     </tbody>
@@ -207,7 +207,7 @@ flowchart TD
     <tbody>
       <tr><td class="id">P0</td><td class="hi">Parent PIN</td><td>4-digit PIN pad, <em>Forgot PIN</em> link (A4).</td></tr>
       <tr><td colspan="3"><strong>Progress tab</strong></td></tr>
-      <tr><td class="id">P1</td><td class="hi">Progress</td><td>Child switcher at the top (one child at a time, no comparison). <strong>This week</strong> card: time spent, chapters done, worksheets done, and <strong>areas to work on</strong>. Below: progress by subject and reading trend.</td></tr>
+      <tr><td class="id">P1</td><td class="hi">Progress</td><td>Child switcher at the top (one child at a time, no comparison). <strong>This week</strong> card: time spent, chapters done, worksheets done, and <strong>areas to work on</strong>. Below: progress by subject and reading trend. Implemented in Plan 6.4: with two children, tabs choose whose progress (?child=); each subject card opens P2; the reading trend says "Reading results will appear after the first test." until reading tests (Phase 7).</td></tr>
       <tr><td class="id">P2</td><td class="hi">Subject detail</td><td>Chapters done, practice accuracy by topic, weak spots ticked by the parent from worksheets.</td></tr>
       <tr><td class="id">P3</td><td class="hi">Reading history</td><td>Reading speed and accuracy over time. Each test can be played back until the recording is deleted after 7 days.</td></tr>
       <tr><td colspan="3"><strong>Books tab</strong></td></tr>

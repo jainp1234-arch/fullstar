@@ -1,4 +1,4 @@
-import { InjectionToken, Type } from '@angular/core';
+import { InjectionToken, Signal, Type, signal } from '@angular/core';
 import { CanActivateFn, Routes } from '@angular/router';
 import { IconName } from '../icons/icons';
 import { DisplayMode } from '../mode/display-mode';
@@ -108,3 +108,14 @@ export function screenRoutes(
     };
   });
 }
+
+/** Minutes used today and the daily limit for the kid-mode time indicator (Plan 6.4); null hides it. */
+export interface KidTimeToday {
+  readonly used: number;
+  readonly limit: number;
+}
+
+/** The app provides the child's time today; the kid header shows it as app-time-indicator. */
+export const KID_TIME = new InjectionToken<Signal<KidTimeToday | null>>('KID_TIME', {
+  factory: () => signal(null),
+});
