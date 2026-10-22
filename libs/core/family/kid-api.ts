@@ -99,6 +99,23 @@ export class KidApi {
     return this.api.get<KidLesson>(`/family/kid/lessons/${encodeURIComponent(contentItemId)}`);
   }
 
+  practice(): Observable<PracticeHome> {
+    return this.api.get<PracticeHome>('/family/kid/practice');
+  }
+
+  /** A new shuffle each time; nothing is stored, so no Idempotency-Key. */
+  practiceSet(subjectId: number, topicId?: string): Observable<PracticeSet> {
+    return this.api.post<PracticeSet>(
+      '/family/kid/practice-sets',
+      { subject_id: subjectId, kind: 'practice', ...(topicId ? { topic_id: topicId } : {}) },
+      { idempotent: false },
+    );
+  }
+
+  mistakes(): Observable<PracticeSet> {
+    return this.api.get<PracticeSet>('/family/kid/mistakes');
+  }
+
   readAlong(familyChapterId: string): Observable<ReadAlongChapter> {
     return this.api.get<ReadAlongChapter>(
       `/family/kid/chapters/${encodeURIComponent(familyChapterId)}/pages`,
@@ -158,4 +175,28 @@ export interface ReadAlongChapter {
   readonly lang: 'en' | 'hi';
   readonly pages: readonly ReadAlongPage[];
   readonly resume: { readonly attempt_id: string; readonly resume_state: unknown } | null;
+}
+
+/** K8 (Plan 7.1): subjects with their question counts and topics, and open mistakes. */
+export interface PracticeHome {
+  readonly subjects: readonly {
+    readonly subject_id: number;
+    readonly code: KidSubjectTile['code'];
+    readonly name: string;
+    readonly questions: number;
+    readonly topics: readonly {
+      readonly id: string;
+      readonly name: string;
+      readonly questions: number;
+    }[];
+  }[];
+  readonly mistakes: number;
+}
+
+/** K9/K11: up to 10 shuffled questions (or open mistakes) with solutions for offline checking. */
+export interface PracticeSet {
+  readonly kind: 'practice' | 'mistakes';
+  readonly subject_id: number;
+  readonly topic_id: string | null;
+  readonly questions: readonly KidQuizQuestion[];
 }

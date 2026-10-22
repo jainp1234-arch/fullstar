@@ -168,7 +168,7 @@ class KidSyncTest extends ApiTestSupport {
 		// The same id from another child, an unknown lesson, a kind without a player, a future minute
 		String batch = """
 				{ "attempts": [%s, %s,
-				    { "id": "%s", "kind": "tables", "subject_id": 3, "started_at": "2026-10-22T08:00:00Z" } ],
+				    { "id": "%s", "kind": "worksheet", "subject_id": 3, "started_at": "2026-10-22T08:00:00Z" } ],
 				  "minutes": ["%s"] }""".formatted(attempt(attemptId, lesson, "2026-10-22T08:05:00Z", 0, 1, "null"),
 				attempt(UUID.randomUUID(), new UUID[] { UUID.randomUUID(), UUID.randomUUID() }, null, 0, 0, "null"),
 				UUID.randomUUID(), Instant.now().plus(1, ChronoUnit.HOURS).truncatedTo(ChronoUnit.MINUTES));

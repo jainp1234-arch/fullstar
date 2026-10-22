@@ -65,6 +65,8 @@ export interface FakeServer {
     /** Bodies of POST /family/kid/sync and the attempts kept, by id (Plan 6.2). */
     syncs: { childId: string; body: Record<string, unknown[]> }[];
     attempts: Record<string, { stars: number; completed_at: string | null }>;
+    /** Question ids in the child's open mistakes (Plan 7.1). */
+    mistakes: string[];
   };
   /** Studio staff list as the fake API holds it (s1 is the signed-in member). */
   readonly staff: FakeStaffMember[];
@@ -172,6 +174,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       reports: [],
       syncs: [],
       attempts: {},
+      mistakes: [],
       stored: [],
     },
     staff: [
@@ -1841,6 +1844,58 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
         minutes: (body['minutes'] ?? []).length,
       },
       rejected: { attempts: 0, answers: 0, minutes: 0 },
+    });
+  }
+  // K8–K11 (Plan 7.1): English and EVS have questions, Hindi none yet; mistakes as the server holds them
+  const practiceQuestion = (id: string, prompt: string, right: string, wrong: string) => ({
+    id,
+    version_id: `${id}-v1`,
+    question_type: 'mcq',
+    topic_id: 't-sample',
+    body: {
+      prompt,
+      image_key: null,
+      options: [
+        { id: 'a', text: right },
+        { id: 'b', text: wrong },
+      ],
+    },
+    solution: { correct: ['a'], explanation: `${right} is right.` },
+  });
+  const sets: Record<number, ReturnType<typeof practiceQuestion>[]> = {
+    1: [
+      practiceQuestion('p-noun', 'Which word is a noun?', 'bird', 'run'),
+      practiceQuestion('p-verb', 'Which word is a verb?', 'jump', 'blue'),
+    ],
+    4: [practiceQuestion('p-plant', 'Plants need?', 'water', 'stones')],
+  };
+  if (path === '/family/kid/practice') {
+    return envelope(route, 200, {
+      subjects: KID_SUBJECTS.map((s) => ({
+        ...s,
+        questions: sets[s.subject_id]?.length ?? 0,
+        topics: [],
+      })),
+      mistakes: server.family.mistakes.length,
+    });
+  }
+  if (path === '/family/kid/practice-sets' && route.request().method() === 'POST') {
+    const subjectId = Number(
+      (route.request().postDataJSON() as Record<string, unknown>)['subject_id'],
+    );
+    return envelope(route, 200, {
+      kind: 'practice',
+      subject_id: subjectId,
+      topic_id: null,
+      questions: sets[subjectId] ?? [],
+    });
+  }
+  if (path === '/family/kid/mistakes') {
+    return envelope(route, 200, {
+      kind: 'mistakes',
+      subject_id: server.family.mistakes.length ? 1 : 0,
+      topic_id: null,
+      questions: sets[1].filter((q) => server.family.mistakes.includes(q.id)),
     });
   }
   if (path === '/family/kid/lessons/sample') {
