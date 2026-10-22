@@ -68,9 +68,17 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore:
+      testIgnore: [
         /(pwa-offline|first-load-budget|installable|studio-[a-z-]+|real-sign-in|csp-headers)\.spec\.ts/,
+        /journeys[\\/]/,
+      ],
       use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4200' },
+    },
+    {
+      // Opt-in (Plan 9.5): App Flow §8 journeys on the full stack (infra/journeys) at :8080
+      name: 'journeys',
+      testMatch: /journeys[\\/].*\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:8080' },
     },
     {
       // Content Studio dev server under its base href (Plan 2.3 routes)

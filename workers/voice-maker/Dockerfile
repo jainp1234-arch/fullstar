@@ -52,4 +52,16 @@ COPY tests tests
 USER 10001
 CMD ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "-m", "image"]
 
+# Plan 9.5: the journey tests' narration worker: the real jobs and MP3s, silent speech, no model
+FROM python:3.12.15-slim AS stand-in
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 VOICE_STAND_IN=true
+WORKDIR /app
+COPY requirements-stand-in.txt .
+RUN pip install --no-cache-dir --root-user-action=ignore --disable-pip-version-check --no-deps \
+      -r requirements-stand-in.txt \
+    && pip check
+COPY voice_maker voice_maker
+USER 10001
+CMD ["python", "-m", "voice_maker"]
+
 FROM app

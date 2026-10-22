@@ -100,7 +100,9 @@ class RealmExportTest {
 		assertThat(realm.getSmtpServer()).containsEntry("host", "${SMTP_HOST}")
 			.containsEntry("password", "${SMTP_PASSWORD}")
 			.containsEntry("from", "${MAIL_FROM}")
-			.containsEntry("starttls", "true");
+			// Plan 9.5: TLS and auth stay on unless the journey stack (Mailpit) turns them off
+			.containsEntry("auth", "${SMTP_AUTH:true}")
+			.containsEntry("starttls", "${SMTP_STARTTLS:true}");
 	}
 
 	@Test

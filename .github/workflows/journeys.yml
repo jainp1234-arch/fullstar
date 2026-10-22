@@ -1,0 +1,147 @@
+name: journeys
+
+# Plan 9.5 (decided 23 Oct 2026): every App Flow §8 journey on the full local stack, three runs in a
+# row, nightly, on demand and on main; on a PR only when the journeys themselves change.
+on:
+  schedule:
+    - cron: '30 21 * * *' # 03:00 India time
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'e2e/journeys/**'
+      - 'infra/journeys/**'
+      - 'tools/journeys/**'
+      - '.github/workflows/journeys.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  COMPOSE: docker compose --env-file .env -f infra/docker-compose.yml -f infra/journeys/compose.yml
+  SERVICES: >-
+    caddy keycloak keycloak-db gotenberg clamav seaweedfs elasticmq book-reader reading-checker
+    mailpit app-db api claude narrator
+
+jobs:
+  journeys:
+    name: App Flow journeys on the full stack (3 runs)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free runner disk
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL && df -h /
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Production builds of both apps
+        run: npm run build
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          driver-opts: image=moby/buildkit:v0.33.1
+      # Images from the docker workflow's cache (amd64)
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: services/api/Dockerfile
+          load: true
+          tags: fullstar/api:journeys
+          cache-from: type=gha,scope=api
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: infra/keycloak/Dockerfile
+          load: true
+          tags: fullstar/keycloak:local
+          cache-from: type=gha,scope=keycloak
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: services/book-reader/Dockerfile
+          load: true
+          tags: fullstar/book-reader:local
+          cache-from: type=gha,scope=book-reader
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: workers/reading-checker
+          load: true
+          tags: fullstar/reading-checker:local
+          cache-from: type=gha,scope=reading-checker
+      # Its test target has espeak-ng, which speaks the passage the child "reads" (K13)
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: workers/reading-checker
+          target: test
+          load: true
+          tags: fullstar/reading-checker:test
+          cache-from: type=gha,scope=reading-checker
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: workers/voice-maker
+          target: stand-in
+          load: true
+          tags: fullstar/voice-maker:stand-in
+      - name: Throwaway .env
+        run: node tools/journeys/make-env.mjs .env
+      - name: Start the stack
+        run: $COMPOSE up -d --no-build $SERVICES
+      - name: Wait for the API and Keycloak through Caddy
+        run: |
+          for i in $(seq 1 90); do
+            if curl -fsS -o /dev/null http://127.0.0.1:8080/api/v1/public/health &&
+               curl -fsS -o /dev/null http://127.0.0.1:8080/auth/realms/fullstar; then
+              exit 0
+            fi
+            sleep 5
+          done
+          $COMPOSE ps -a
+          exit 1
+      - name: Studio admin and the Class 3 starter content
+        run: |
+          $COMPOSE run --rm --no-deps api --spring.profiles.active=bootstrap-admin \
+            --email=admin@fullstar.test '--name=Journey Admin'
+          $COMPOSE run --rm --no-deps api --spring.profiles.active=seed-content --dir=/seed/class3
+      - name: Wait for ClamAV and the workers
+        run: |
+          for i in $(seq 1 60); do
+            $COMPOSE ps --format '{{.Service}} {{.Health}}' | grep -q '^book-reader healthy' && exit 0
+            sleep 10
+          done
+          $COMPOSE ps -a
+          exit 1
+      - id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - id: pw-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+      - if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - name: Journeys, three runs in a row (no retries)
+        env:
+          CI: 'true'
+          JOURNEYS: '1'
+        run: |
+          for run in 1 2 3; do
+            echo "::group::run $run"
+            npx playwright test --project=journeys --workers=1 --retries=0 || exit 1
+            echo "::endgroup::"
+          done
+      - name: Stack logs
+        if: failure()
+        run: $COMPOSE logs --tail 60 api book-reader reading-checker narrator claude keycloak caddy
+      - if: always()
+        run: $COMPOSE down -v

@@ -8,6 +8,12 @@ from .narrate import Narrator
 
 
 def narrator_from_env() -> Narrator:
+    # Plan 9.5: the journey stack runs without the model (voice_maker/stand_in.py)
+    if (os.environ.get("VOICE_STAND_IN") or "").lower() == "true":
+        from .stand_in import StandInAligner, StandInVoice
+
+        return Narrator(StandInVoice(), StandInAligner())
+
     from .align import WhisperAligner
     from .speech import ParlerVoice
 
