@@ -51,6 +51,8 @@ export interface FakeServer {
     dailyLimitMinutes: number;
     /** Plan 8.2: the sample lesson has narration audio (voice-maker has run). */
     lessonNarrated: boolean;
+    /** Plan 9.4: the sample lesson, read-along pages and reading passage are in Hindi. */
+    hindi: boolean;
     deletionRequests: number;
     deletionRequestedAt: string | null;
     /** Books, chapters and uploads (Plan 5.1). */
@@ -176,6 +178,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       children: [...(initial ?? [])],
       dailyLimitMinutes: 30,
       lessonNarrated: false,
+      hindi: false,
       deletionRequests: 0,
       deletionRequestedAt: null,
       books: [],
@@ -1988,8 +1991,8 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
     return envelope(route, 200, {
       id: 'sample',
       version_id: 'sample-v1',
-      title: 'Birds build nests',
-      lang: 'en',
+      title: server.family.hindi ? 'चिड़िया का घोंसला' : 'Birds build nests',
+      lang: server.family.hindi ? 'hi' : 'en',
       duration_seconds: 20,
       subject_id: 1,
       topic_id: 't-sample',
@@ -1999,11 +2002,16 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
           {
             id: 's1',
             duration_ms: 60000,
-            text: 'A bird builds a nest.',
+            text: server.family.hindi ? 'चिड़िया घोंसला बनाती है।' : 'A bird builds a nest.',
             visual: { illustration: 'subject-evs', animation: 'fade-up' },
           },
           { id: 'q1', duration_ms: 0, quiz: { question_item_id: 'q-nest' } },
-          { id: 's2', duration_ms: 60000, text: 'Now the eggs are safe.', visual: null },
+          {
+            id: 's2',
+            duration_ms: 60000,
+            text: server.family.hindi ? 'अब अंडे सुरक्षित हैं।' : 'Now the eggs are safe.',
+            visual: null,
+          },
         ],
       },
       questions: [
@@ -2013,14 +2021,19 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
           question_type: 'mcq',
           topic_id: 't-sample',
           body: {
-            prompt: 'What does a bird build?',
+            prompt: server.family.hindi ? 'चिड़िया क्या बनाती है?' : 'What does a bird build?',
             image_key: null,
             options: [
-              { id: 'a', text: 'A nest' },
-              { id: 'b', text: 'A car' },
+              { id: 'a', text: server.family.hindi ? 'घोंसला' : 'A nest' },
+              { id: 'b', text: server.family.hindi ? 'गाड़ी' : 'A car' },
             ],
           },
-          solution: { correct: ['a'], explanation: 'Birds build nests for their eggs.' },
+          solution: {
+            correct: ['a'],
+            explanation: server.family.hindi
+              ? 'चिड़िया अंडों के लिए घोंसला बनाती है।'
+              : 'Birds build nests for their eggs.',
+          },
         },
       ],
       resume: null,
@@ -2071,24 +2084,30 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
           number: chapter.number,
           title: chapter.title,
           subject_id: subject.subject_id,
-          lang: 'en',
+          lang: server.family.hindi ? 'hi' : 'en',
           pages: [
             {
               id: `${chapter.id}-p1`,
               page_no: 1,
-              text: 'Rain falls down.',
+              text: server.family.hindi ? 'बारिश होती है।' : 'Rain falls down.',
               image_url: PAGE_IMAGE,
               audio_url: SILENT_MP3,
-              word_timings: [
-                { w: 'Rain', start_ms: 300, end_ms: 620 },
-                { w: 'falls', start_ms: 700, end_ms: 1020 },
-                { w: 'down.', start_ms: 1100, end_ms: 1420 },
-              ],
+              word_timings: server.family.hindi
+                ? [
+                    { w: 'बारिश', start_ms: 300, end_ms: 620 },
+                    { w: 'होती', start_ms: 700, end_ms: 1020 },
+                    { w: 'है।', start_ms: 1100, end_ms: 1420 },
+                  ]
+                : [
+                    { w: 'Rain', start_ms: 300, end_ms: 620 },
+                    { w: 'falls', start_ms: 700, end_ms: 1020 },
+                    { w: 'down.', start_ms: 1100, end_ms: 1420 },
+                  ],
             },
             {
               id: `${chapter.id}-p2`,
               page_no: 2,
-              text: 'The pond is full.',
+              text: server.family.hindi ? 'तालाब भर गया।' : 'The pond is full.',
               image_url: PAGE_IMAGE,
               audio_url: null,
               word_timings: [],

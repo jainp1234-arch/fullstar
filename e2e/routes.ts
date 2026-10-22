@@ -75,15 +75,22 @@ async function readScreen(page: Page): Promise<Visit> {
  * going back through history after each branch (no reloads, so in-memory sessions survive).
  * Starts from the current page when no start path is given.
  */
+/** Runs on each screen the walk reaches, once (Plan 9.4: accessibility checks). */
+export type OnVisit = (page: Page, visit: Visit) => Promise<void>;
+
 export async function walk(
   page: Page,
   starts: readonly string[] = [],
   seen = new Map<string, Visit>(),
+  onVisit?: OnVisit,
 ): Promise<Map<string, Visit>> {
   const seenPaths = new Set<string>([...seen.values()].map((visit) => visit.path));
 
   async function visit(): Promise<void> {
     const here = await readScreen(page);
+    if (onVisit && !seen.has(here.id)) {
+      await onVisit(page, here);
+    }
     seen.set(here.id, here);
     seenPaths.add(here.path);
     // Placeholder links, navigation, and built screens' cards that carry data-screen-link
