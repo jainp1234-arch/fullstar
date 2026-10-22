@@ -186,4 +186,46 @@ class KidLearnTest extends ApiTestSupport {
 		kid("/topics/" + UUID.randomUUID()).andExpect(status().isNotFound());
 	}
 
+	@Test
+	void readAlongPagesCarrySignedImagesAudioAndTimingsAndTheAttemptSyncs() throws Exception {
+		UUID[] chapters = book("processing", "readalong_ready");
+		UUID uploadId = systemQuery("""
+				INSERT INTO app.uploads (family_id, family_book_id, family_chapter_id, source, status, file_count)
+				SELECT family_id, family_book_id, id, 'photos', 'processed', 1 FROM app.family_chapters WHERE id = ?
+				RETURNING id""", chapters[1]);
+		UUID fileId = systemQuery("""
+				INSERT INTO app.upload_files (upload_id, family_id, object_key, content_type, byte_size)
+				VALUES (?, ?, ?, 'image/jpeg', 3) RETURNING id""", uploadId, familyId, "k-" + uploadId);
+		systemQuery("""
+				INSERT INTO app.pages (family_chapter_id, family_id, upload_file_id, page_no, image_key, ocr_text,
+				                       narration_audio_key, word_timings)
+				VALUES (?, ?, ?, 1, ?, 'Rain falls.', ?, '[{"w":"Rain","start_ms":300,"end_ms":620},{"w":"falls.","start_ms":700,"end_ms":1020}]')
+				RETURNING id""", chapters[1], familyId, fileId, "families/" + familyId + "/pages/p1.webp",
+				"families/" + familyId + "/audio/p1.mp3");
+
+		kid("/chapters/" + chapters[1] + "/pages").andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.title").value("Chapter 2"))
+			.andExpect(jsonPath("$.data.lang").value("en"))
+			.andExpect(jsonPath("$.data.pages[0].text").value("Rain falls."))
+			.andExpect(jsonPath("$.data.pages[0].image_url").value(org.hamcrest.Matchers.containsString("X-Amz-Signature")))
+			.andExpect(jsonPath("$.data.pages[0].audio_url").value(org.hamcrest.Matchers.containsString("p1.mp3")))
+			.andExpect(jsonPath("$.data.pages[0].word_timings[1].w").value("falls."))
+			.andExpect(jsonPath("$.data.resume").doesNotExist());
+		kid("/chapters/" + chapters[0] + "/pages").andExpect(status().isNotFound());
+
+		UUID attempt = UUID.randomUUID();
+		mvc.perform(post("/api/v1/family/kid/sync").header(HttpHeaders.AUTHORIZATION, bearer)
+			.header("X-Child-Id", childId.toString())
+			.header("Idempotency-Key", UUID.randomUUID().toString())
+			.contentType(MediaType.APPLICATION_JSON)
+			.content("""
+					{ "attempts": [ { "id": "%s", "kind": "readalong", "subject_id": 4, "family_chapter_id": "%s",
+					    "started_at": "2026-10-22T08:00:00Z", "resume_state": {"page": 1} } ] }"""
+				.formatted(attempt, chapters[1])))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.accepted.attempts").value(1));
+		kid("/chapters/" + chapters[1] + "/pages").andExpect(jsonPath("$.data.resume.attempt_id").value(attempt.toString()))
+			.andExpect(jsonPath("$.data.resume.resume_state.page").value(1));
+	}
+
 }

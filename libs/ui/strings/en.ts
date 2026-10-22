@@ -689,6 +689,19 @@ export const EN = {
       showPairs: 'Show the pairs',
       backToSubject: 'Back to subject',
     },
+    /** K5 read-along (Plan 6.3). */
+    readAlong: {
+      page: (page: number, total: number) => `Page ${page} of ${total}`,
+      pageImage: (page: number) => `Page ${page} of the book`,
+      play: 'Read to me',
+      pause: 'Pause',
+      previous: 'Previous page',
+      next: 'Next page',
+      finish: 'Finish',
+      word: (word: string) => `Hear "${word}" again`,
+      offline: 'Reading from this device.',
+      noAudio: 'This page is not read aloud yet.',
+    },
   },
 
   parent: {

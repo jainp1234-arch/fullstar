@@ -96,8 +96,8 @@ function choicesOf(question: QuestionContent): readonly Choice[] {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AnswerButton, Button, ProgressBar, QuestionCard, ReadAloud, Skeleton, SpeechBubble],
   template: `
+    <h1 class="title" tabindex="-1" [attr.lang]="lang()">{{ lesson()?.title ?? screenTitle }}</h1>
     @if (lesson(); as l) {
-      <h1 class="title" tabindex="-1" [attr.lang]="lang()">{{ l.title }}</h1>
       <app-progress-bar
         [value]="index() + 1"
         [max]="scenes().length"
@@ -252,6 +252,7 @@ function choicesOf(question: QuestionContent): readonly Choice[] {
 export class LessonPlayerPage {
   protected readonly text = EN.kid.player;
   protected readonly kid = EN.kid;
+  protected readonly screenTitle = EN.screens.K4;
   protected readonly lesson = signal<KidLesson | null>(null);
   protected readonly failed = signal(false);
   protected readonly index = signal(0);

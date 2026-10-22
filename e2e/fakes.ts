@@ -1845,6 +1845,38 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
       });
     }
     for (const chapter of readyChapters(subject.subject_id)) {
+      if (path === `/family/kid/chapters/${chapter.id}/pages`) {
+        return envelope(route, 200, {
+          id: chapter.id,
+          number: chapter.number,
+          title: chapter.title,
+          subject_id: subject.subject_id,
+          lang: 'en',
+          pages: [
+            {
+              id: `${chapter.id}-p1`,
+              page_no: 1,
+              text: 'Rain falls down.',
+              image_url: PAGE_IMAGE,
+              audio_url: SILENT_MP3,
+              word_timings: [
+                { w: 'Rain', start_ms: 300, end_ms: 620 },
+                { w: 'falls', start_ms: 700, end_ms: 1020 },
+                { w: 'down.', start_ms: 1100, end_ms: 1420 },
+              ],
+            },
+            {
+              id: `${chapter.id}-p2`,
+              page_no: 2,
+              text: 'The pond is full.',
+              image_url: PAGE_IMAGE,
+              audio_url: null,
+              word_timings: [],
+            },
+          ],
+          resume: null,
+        });
+      }
       if (path === `/family/kid/chapters/${chapter.id}`) {
         const lessons = server.content.items.filter(
           (i) =>
@@ -1899,3 +1931,13 @@ function familyKid(route: Route, server: FakeServer, path: string): Promise<void
   }
   return envelope(route, 404, null, 'NOT_FOUND');
 }
+
+/** About 2 s of silence as MPEG-1 Layer III frames, like the read-along stand-in (Plan 5.4). */
+const SILENT_MP3 = (() => {
+  const frames = 80;
+  const bytes = Buffer.alloc(frames * 104);
+  for (let f = 0; f < frames; f++) {
+    bytes.set([0xff, 0xfb, 0x10, 0xc0], f * 104);
+  }
+  return `data:audio/mpeg;base64,${bytes.toString('base64')}`;
+})();
