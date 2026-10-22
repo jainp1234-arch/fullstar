@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { Page, expect, test } from '@playwright/test';
 import { navigateInApp } from '../routes';
 import {
@@ -52,15 +53,11 @@ test('Parent prints and checks a worksheet: P10 → P11 → P12 PDF → P13 weak
   await expect(parent).toHaveURL(/\/parent\/worksheets\/[^/]+\/print$/);
   const download = parent.getByRole('link', { name: 'Download PDF' });
   await expect(download).toBeVisible({ timeout: 60_000 });
-  // The app hands the downloaded PDF over as a blob: URL, so read its first bytes in the page
-  const head = await parent.evaluate(
-    async (href) => {
-      const bytes = new Uint8Array(await (await fetch(href)).arrayBuffer());
-      return new TextDecoder().decode(bytes.slice(0, 4));
-    },
-    (await download.getAttribute('href')) ?? '',
-  );
-  expect(head).toBe('%PDF');
+  // The link is a blob: URL (the CSP keeps fetch to 'self'), so take the file as a download
+  const saved = parent.waitForEvent('download');
+  await download.click();
+  const file = await (await saved).path();
+  expect(readFileSync(file).subarray(0, 4).toString()).toBe('%PDF');
 
   // P13: after the child has done it, the parent ticks a weak spot
   const print = new URL(parent.url()).pathname;

@@ -4,7 +4,8 @@
 //   "Write N practice questions ..."      N multiple-choice questions
 //   "Write a reading passage ..."         a short passage
 //   "You check learning content ..."      flags (see FLAGS below)
-// A chapter draft (the prompt has <chapter>) gets one wrong answer and one misspelling on purpose, so
+// A chapter lesson (the prompt has <chapter>) gets a misspelling and a 20-question draft one wrong
+// answer on purpose, so
 // the admin journey sees the content check flag them (App Flow §8 "Admin prepares an uploaded book").
 // Run: node tools/journeys/claude-stand-in.mjs [port]   (default 8090)
 import { createServer } from 'node:http';
@@ -79,7 +80,8 @@ function questions(user) {
   const chapter = user.includes('<chapter>');
   return {
     questions: Array.from({ length: count }, (_, i) => {
-      const wrong = chapter && i === 0;
+      // The 20-question draft of an uploaded chapter (the admin journey) has one wrong answer
+      const wrong = (chapter || count === 20) && i === 0;
       return {
         title: `${topic} ${i + 1}`,
         question_type: 'mcq',

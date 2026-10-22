@@ -25,9 +25,12 @@ async function answerTable(page: Page): Promise<void> {
   const sum = await page
     .locator('app-question-card')
     .getByText(/\d+ × \d+ = \?/)
-    .textContent();
+    .textContent({ timeout: 5000 });
   const [a, b] = (sum ?? '').match(/\d+/g)?.map(Number) ?? [0, 0];
-  await page.getByRole('button', { name: new RegExp(`^[A-D]\\s?${a * b}$`) }).click();
+  // Short timeouts: the challenge can end while a sum is being answered
+  await page
+    .getByRole('button', { name: new RegExp(`^[A-D]\\s?${a * b}$`) })
+    .click({ timeout: 5000 });
 }
 
 test("Child's session: a lesson to K7, tables and the 60-second challenge", async ({ page }) => {

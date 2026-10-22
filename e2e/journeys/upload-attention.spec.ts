@@ -73,6 +73,11 @@ test('Upload needs attention: unclear pages message, P8 retakes only those, Gett
 
   await navigateInApp(page, '/parent/books');
   await expect(
-    page.locator('app-books-page .row').filter({ hasText: 'EVS' }).getByText('Getting ready'),
+    page
+      .getByRole('listitem')
+      .filter({ hasText: 'EVS' })
+      .first()
+      .getByText('Getting ready')
+      .first(),
   ).toBeVisible();
 });
