@@ -11,3 +11,15 @@ scrape_configs:
   - job_name: alloy
     static_configs:
       - targets: ["alloy:12345"]
+  # Plan 9.1: make api on the laptop (management port, never proxied by Caddy)
+  - job_name: api
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["host.docker.internal:8091"]
+  - job_name: book-reader
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ["book-reader:8082"]
+  - job_name: node
+    static_configs:
+      - targets: ["node-exporter:9100"]

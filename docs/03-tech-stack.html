@@ -205,6 +205,7 @@ flowchart LR
       <tr><td class="tool">Eclipse Temurin JDK 21</td><td class="v">21.0.12.1+1</td><td>Runtime</td><td>Docker: <code>eclipse-temurin:21.0.12.1_1-jre</code> (runtime), <code>eclipse-temurin:21.0.12.1_1-jdk</code> (Maven build stage only). Java 21 LTS.</td></tr>
       <tr><td class="tool">Apache Maven</td><td class="v">3.9.16</td><td>Build</td><td>Use the Maven Wrapper pinned to this version. Not Maven 4 (not GA).</td></tr>
       <tr><td class="tool">org.springframework.boot:spring-boot-starter-parent</td><td class="v">4.1.1</td><td>Framework</td><td>Spring Framework 7.0.9. Generate starters with Spring Initializr for 4.1.1. <code>api</code>: Web MVC, Security, OAuth2 Resource Server, Validation, Data JPA, Actuator, Flyway, PostgreSQL driver. <code>book-reader</code>: Web MVC, Validation, Actuator only (it never touches the database); since Plan 5.2 also the AWS SDK <code>s3</code>, <code>sqs</code>, <code>url-connection-client</code> and <code>resilience4j-spring-boot4</code> at the versions below, to read files and run its jobs. ClamAV is reached over clamd's own INSTREAM protocol (no client library). Group <code>com.fullstar</code>.</td></tr>
+      <tr><td class="tool">io.micrometer:micrometer-registry-prometheus</td><td class="v">1.17.1 (Boot-managed)</td><td>Prometheus metrics from Actuator</td><td>Plan 9.1: <code>api</code> and <code>book-reader</code>, version from the Spring Boot 4.1.1 BOM (prometheus-metrics 1.7.0). The API serves <code>/actuator/health</code> and <code>/actuator/prometheus</code> on its management port (<code>MANAGEMENT_PORT</code>, default 8091, bound to 127.0.0.1), which Caddy never proxies; it adds <code>fullstar_queue_messages{queue, kind=main|dlq}</code> (every Schema §12 queue and DLQ, read every 30 s), <code>fullstar_job_results_total{type, outcome}</code> and the prep gauges <code>fullstar_prep_tasks{status}</code>, <code>fullstar_prep_oldest_age</code>, <code>fullstar_prep_turnaround</code> (seconds, counts only).</td></tr>
       <tr><td class="tool">io.github.resilience4j:resilience4j-spring-boot4</td><td class="v">2.4.0</td><td>Retry with backoff, circuit breaker, time limiter</td><td>Use the <code>-spring-boot4</code> artifact, not <code>-spring-boot3</code>.</td></tr>
       <tr><td class="tool">org.postgresql:postgresql</td><td class="v">42.7.13</td><td>Database driver</td><td>Boot-managed.</td></tr>
       <tr><td class="tool">org.flywaydb:flyway-core + flyway-database-postgresql</td><td class="v">12.4.0</td><td>Database migrations</td><td>Boot-managed. Do not override to 13.x.</td></tr>
@@ -237,6 +238,7 @@ flowchart LR
       <tr><td class="hi">Loki</td><td class="tool">grafana/loki:3.7.8</td><td>Log storage</td><td>AGPL-3.0; internal use only.</td></tr>
       <tr><td class="hi">Prometheus</td><td class="tool">prom/prometheus:v3.13.4</td><td>Metrics</td><td>LTS line.</td></tr>
       <tr><td class="hi">Grafana Alloy</td><td class="tool">grafana/alloy:v1.20.0</td><td>Ship logs to Loki</td><td>Replaces Promtail.</td></tr>
+      <tr><td class="hi">node-exporter</td><td class="tool">prom/node-exporter:v1.12.1</td><td>Disk use for the "disk over 80%" alert</td><td>Plan 9.1 (decided 22 Oct 2026): Apache-2.0, part of Prometheus, released 14 Jul 2026, multi-arch. Reads the host (on the laptop, Docker's disk) read-only; internal only.</td></tr>
       <tr><td class="hi">Caddy</td><td class="tool">caddy:2.11.4</td><td>HTTPS reverse proxy on the demo server</td><td>Automatic certificates for <code>api.</code> and <code>auth.</code>; ~60k stars, since 2015.</td></tr>
       <tr><td class="hi">Docker Engine / Compose</td><td class="tool">29.8.2 / v5.6.0</td><td>Local and demo runtime</td><td>Compose is now v5.</td></tr>
     </tbody>
@@ -295,7 +297,7 @@ flowchart LR
       <tr><td>Content check</td><td class="tool">Manual check: admin completes the same checklist as the agent and records flags (S11 "Manual check")</td><td class="was">Automatic content-check agent (Claude API)</td><td><code>FEATURE_AI_CHECK=true</code> + API key</td></tr>
       <tr><td>Sign-in emails</td><td class="tool">Brevo free, sender = project Gmail address (verified single sender); testers check spam</td><td class="was">Brevo with own domain (SPF, DKIM, DMARC)</td><td>Domain + DNS records</td></tr>
       <tr><td>Narration, reading test</td><td class="tool">Run locally on the laptop CPU (Indic Parler-TTS, faster-whisper) — slower, free</td><td class="was">Same, on the server</td><td>None</td></tr>
-      <tr><td>Monitoring</td><td class="tool">Grafana stack locally; alerts off</td><td class="was">Alerts by email</td><td>Turn on alert rules</td></tr>
+      <tr><td>Monitoring</td><td class="tool">Grafana stack locally; alert rules on, email only when <code>ALERT_EMAIL</code> is set (Plan 9.1)</td><td class="was">Alerts by email</td><td>Turn on alert rules</td></tr>
     </tbody>
   </table></div>
   <h3>Local addresses (make up)</h3>
@@ -305,7 +307,7 @@ flowchart LR
       <tr><td class="v">http://localhost:8080</td><td>Caddy: family app <code>/</code> (ng serve :4200), Studio <code>/studio/</code> (ng serve :4201, base href <code>/studio/</code>), API <code>/api/</code> (Spring Boot :8081, <code>API_PORT</code>), Keycloak <code>/auth/</code></td></tr>
       <tr><td class="v">localhost:8333 · :9324 (UI :9325)</td><td>SeaweedFS S3 API · ElasticMQ SQS API (queues and DLQs from <code>infra/elasticmq.conf</code>)</td></tr>
       <tr><td class="v">localhost:3000 · :3310</td><td>Gotenberg · ClamAV (clamd)</td></tr>
-      <tr><td class="v">localhost:3001 · :9090 · :12345</td><td>Grafana · Prometheus · Alloy UI. Loki is internal only.</td></tr>
+      <tr><td class="v">localhost:3001 · :9090 · :12345</td><td>Grafana · Prometheus · Alloy UI. Loki and node-exporter are internal only. Plan 9.1: Grafana has the FullStar dashboards (API, Jobs, Dead-letter queues, Prep turnaround) and alert rules; <code>make api</code> serves metrics on <code>localhost:8091</code></td></tr>
     </tbody>
   </table></div>
   <p>All host ports bind to 127.0.0.1. Alloy reads container logs through the Docker socket (local only).</p>

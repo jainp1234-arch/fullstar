@@ -1,0 +1,55 @@
+name: monitoring
+
+on:
+  pull_request:
+    paths: &paths
+      - 'infra/docker-compose.yml'
+      - 'infra/prometheus/**'
+      - 'infra/grafana/**'
+      - 'infra/loki/**'
+      - 'tools/grafana/**'
+      - 'tools/monitoring/**'
+      - '.github/workflows/monitoring.yml'
+  push:
+    branches: [main]
+    paths: *paths
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Plan 9.1: the compose Prometheus, Grafana and node-exporter load the dashboards and the four
+  # alert rules, and "API down" fires within 5 minutes (no API runs here)
+  alerts:
+    name: alerts fire in the local stack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - name: Dashboards are generated
+        run: node tools/grafana/make-dashboards.mjs && git diff --exit-code infra/grafana/dashboards
+      - name: CI .env (throwaway values; ALERT_EMAIL stays empty)
+        run: |
+          sed -E '/^ALERT_EMAIL=/!s/^([A-Z0-9_]+)=$/\1=ci-'"$(openssl rand -hex 12)"'/' .env.example > .env
+          grep -q '^GRAFANA_ADMIN_PASSWORD=ci-' .env
+      - name: Start Prometheus, Grafana and node-exporter
+        run: docker compose --env-file .env -f infra/docker-compose.yml up -d --wait --wait-timeout 180 prometheus grafana node-exporter
+      - name: Rules, dashboards and contact point load; "API down" fires
+        run: node --env-file=.env tools/monitoring/alert-check.mjs --firing "API down" --within 300
+      - name: Prometheus targets
+        if: always()
+        run: curl -s http://127.0.0.1:9090/api/v1/targets | jq -r '.data.activeTargets[] | .labels.job + " " + .health'
+      - name: Grafana logs
+        if: failure()
+        run: docker compose --env-file .env -f infra/docker-compose.yml logs grafana | tail -80
+      - if: always()
+        run: docker compose --env-file .env -f infra/docker-compose.yml down -v

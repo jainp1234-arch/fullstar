@@ -15,8 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * Deny by default (Tech Stack §10). /api/v1/family/** accepts Keycloak tokens for family-api only,
- * /api/v1/studio/** for studio-api only (Schema §8.1, §8.3). Public endpoints and Actuator health are
- * open; everything else is 401.
+ * /api/v1/studio/** for studio-api only (Schema §8.1, §8.3). Public endpoints and Actuator health and
+ * Prometheus metrics (management port only) are open; everything else is 401.
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -44,6 +44,8 @@ public class SecurityConfig {
 		common(http, errors).authorizeHttpRequests(authorize -> authorize
 			.requestMatchers(HttpMethod.GET, "/api/v1/public/**").permitAll()
 			.requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/health/**").permitAll()
+			// Plan 9.1: only on the management port (127.0.0.1:8091), which Caddy never proxies
+			.requestMatchers(HttpMethod.GET, "/actuator/prometheus").permitAll()
 			.requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**")
 			.permitAll()
 			.anyRequest()

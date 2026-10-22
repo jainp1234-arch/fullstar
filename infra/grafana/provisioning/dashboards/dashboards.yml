@@ -1,0 +1,11 @@
+apiVersion: 1
+
+# Plan 9.1: API, jobs, DLQs and prep turnaround (infra/grafana/dashboards, read-only in Grafana)
+providers:
+  - name: fullstar
+    folder: FullStar
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards
