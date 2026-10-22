@@ -307,9 +307,10 @@ export class CreateWorksheetPage {
     const options =
       this.form.controls.source.value === 'chapter' ? this.chapterOptions() : this.topicOptions();
     const current = this.form.controls.sourceId.value;
-    if (!options.some((o) => o.value === current)) {
-      this.form.controls.sourceId.setValue(options[0]?.value ?? '', { emitEvent: false });
-      this.form.updateValueAndValidity();
+    const next = options[0]?.value ?? '';
+    // Only a real change emits, so the valueChanges subscription settles (no options → stays '')
+    if (current !== next && !options.some((o) => o.value === current)) {
+      this.form.controls.sourceId.setValue(next);
     }
   }
 

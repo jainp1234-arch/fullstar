@@ -266,7 +266,17 @@ export const EN = {
     subject: 'Subject',
     message: 'Message',
     send: 'Send',
-    contactSoon: 'Sending messages opens in a later update. Replies will appear in your messages.',
+    contactHint: 'Our team replies within two working days. The reply appears in your messages.',
+    sent: 'Thank you. We will reply in your messages.',
+    yourMessages: 'Your messages to us',
+    you: 'You',
+    team: 'Our team',
+    reply: 'Reply',
+    sendReply: 'Send reply',
+    statuses: { open: 'Waiting for our team', answered: 'Answered', closed: 'Closed' } as Record<
+      string,
+      string
+    >,
   },
 
   /** Privacy (App Flow P17; Schema §13 retention). Facts only; the full notice is linked. */
@@ -322,6 +332,37 @@ export const EN = {
       empty: 'No staff yet.',
       columns: { name: 'Name', role: 'Role', status: 'Status', since: 'Added', change: 'Change' },
       statusOn: 'Active',
+    },
+    /** S7 Problem reports (Plan 7.3). */
+    reports: {
+      intro: 'Problems parents reported, oldest first. Open the item, fix it, then mark it fixed.',
+      openTab: 'Open',
+      fixedTab: 'Fixed',
+      dismissedTab: 'Dismissed',
+      line: (kind: string, title: string, version: number) =>
+        `${kind} · ${title} (version ${version})`,
+      from: (ref: string, date: string) => `Family ${ref} · ${date}`,
+      openItem: 'Open item',
+      fixed: 'Mark fixed',
+      dismiss: 'Dismiss',
+      markedFixed: 'Marked fixed. The family has been told.',
+      dismissed: 'Dismissed.',
+      empty: 'No reports here.',
+      loadFailed: "We couldn't load the reports.",
+    },
+    /** S12 Support inbox (Plan 7.3). */
+    support: {
+      intro: 'Contact us messages from parents, newest first.',
+      family: (ref: string) => `Family ${ref}`,
+      parent: 'Parent',
+      team: 'Our team',
+      reply: 'Reply',
+      send: 'Send reply',
+      sent: 'Reply sent. The family sees it in their messages.',
+      empty: 'No messages waiting.',
+      back: 'Back to the inbox',
+      statuses: { open: 'Open', answered: 'Answered', closed: 'Closed' } as Record<string, string>,
+      loadFailed: "We couldn't load the support inbox.",
     },
     /** S8 Uploaded books queue. */
     uploads: {
@@ -950,6 +991,17 @@ export const EN = {
     trueLabel: 'True',
     falseLabel: 'False',
     loadFailed: "We couldn't load the worksheets.",
+  },
+
+  /** P18 Report a problem (App Flow §6; Plan 7.3). */
+  report: {
+    intro: 'What is wrong with this? Our team will look at it and tell you when it is fixed.',
+    reason: 'Reason',
+    note: 'What did you notice? (optional)',
+    send: 'Send report',
+    sent: 'Thank you. We will let you know when it is fixed.',
+    back: 'Back',
+    noItem: 'Open Report a problem from a lesson or a worksheet question.',
   },
 
   /** P19 Messages (App Flow §6, §9). */

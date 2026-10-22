@@ -119,18 +119,16 @@ test('P15: Class 5 cannot move up; removing a child asks first, then a new one c
   await expect(page.getByRole('button', { name: /Meena.*Class 1 · 6 years/ })).toBeVisible();
 });
 
-test('P16 shows the FAQs and the Contact us form, which cannot send yet', async ({ page }) => {
+// Sending, replies and P18: family-support.spec.ts (Plan 7.3)
+test('P16 shows the FAQs and the Contact us form', async ({ page }) => {
   await signInFamily(page);
   await unlockParent(page, '/parent/settings');
   await page.getByRole('button', { name: 'Help' }).click();
   await expect(page).toHaveURL(/\/parent\/settings\/help$/);
   await page.getByText('How many children can I add?').click();
   await expect(page.getByText(/Up to 2\./)).toBeVisible();
-  await page.getByLabel('Subject').fill('A question');
-  await expect(page.getByRole('button', { name: 'Send' })).toBeDisabled();
-  await expect(
-    page.getByText('Sending messages opens in a later update.', { exact: false }),
-  ).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Subject' })).toBeVisible();
+  await expect(page.getByText(/^Our team replies within two working days\./)).toBeVisible();
   await expectNoAxeViolations(page);
 });
 

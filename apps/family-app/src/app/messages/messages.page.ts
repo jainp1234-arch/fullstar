@@ -192,6 +192,10 @@ export class MessagesPage {
     if (!link) {
       return of(null);
     }
+    // A reply from our team opens the conversation (Plan 7.3)
+    if (link.screen === 'P16') {
+      return of('/parent/settings/help');
+    }
     const page = BOOK_PAGES[link.screen];
     if (link.screen !== 'P4' && !page) {
       return of(null);

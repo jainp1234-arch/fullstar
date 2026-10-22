@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiError, WorksheetApi, WorksheetDetail, WorksheetQuestion } from '@fullstar/core';
 import {
   Button,
@@ -42,6 +42,13 @@ import { choicesOf, pairsOf } from '../kid/question-choices';
             @if (explanationOf(q); as why) {
               <span class="why">{{ why }}</span>
             }
+            <app-button
+              variant="ghost"
+              icon="flag"
+              [label]="reportLabel"
+              [ariaLabel]="reportLabel + ': ' + promptOf(q)"
+              (pressed)="report(q)"
+            />
           </li>
         }
       </ol>
@@ -135,6 +142,7 @@ export class WorksheetSolutionsPage {
   });
 
   private readonly api = inject(WorksheetApi);
+  private readonly router = inject(Router);
   private readonly toasts = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly id = inject(ActivatedRoute).snapshot.paramMap.get('worksheetId') ?? '';
@@ -150,6 +158,15 @@ export class WorksheetSolutionsPage {
         },
         error: (error: unknown) => this.fail(error),
       });
+  }
+
+  protected readonly reportLabel = EN.lessonPreview.report;
+
+  /** P18 for this question, coming back here. */
+  protected report(q: WorksheetQuestion): void {
+    void this.router.navigate(['/parent/report'], {
+      queryParams: { item: q.id, back: this.router.url },
+    });
   }
 
   protected promptOf(q: WorksheetQuestion): string {

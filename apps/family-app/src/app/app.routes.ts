@@ -30,6 +30,7 @@ import { CreateWorksheetPage } from './worksheets/create-worksheet.page';
 import { PrintWorksheetPage } from './worksheets/print-worksheet.page';
 import { WorksheetSolutionsPage } from './worksheets/worksheet-solutions.page';
 import { WorksheetsPage } from './worksheets/worksheets.page';
+import { ReportPage } from './settings/report.page';
 import { ProgressPage } from './parent/progress.page';
 import { SubjectProgressPage } from './parent/subject-progress.page';
 import { BooksPage } from './books/books.page';
@@ -150,6 +151,7 @@ export const routes: Routes = [
         P15: EditChildPage,
         P16: HelpPage,
         P17: PrivacyPage,
+        P18: ReportPage,
         P19: MessagesPage,
       },
       guards: guardsFor,
