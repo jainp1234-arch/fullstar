@@ -356,6 +356,9 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       const dueBy = new Date(Date.parse(requestedAt) + 30 * 24 * 3600 * 1000).toISOString();
       return envelope(route, first ? 201 : 200, { requested_at: requestedAt, due_by: dueBy });
     }
+    if (path.startsWith('/family/kid/')) {
+      return familyKid(route, server, path);
+    }
     if (
       path.startsWith('/family/parent/messages') ||
       path.startsWith('/family/parent/lessons/') ||
@@ -1708,6 +1711,116 @@ function familyMessages(
       }
       family.previews[item.id] = result;
       return envelope(route, 200, preview());
+    }
+  }
+  return envelope(route, 404, null, 'NOT_FOUND');
+}
+
+const KID_SUBJECTS = [
+  { subject_id: 1, code: 'english', name: 'English' },
+  { subject_id: 2, code: 'hindi', name: 'Hindi' },
+  { subject_id: 3, code: 'maths', name: 'Maths' },
+  { subject_id: 4, code: 'evs', name: 'EVS' },
+];
+
+/** Grade-level topics of every subject in the fake: one with the "sample" lesson (the K4 route sample). */
+const KID_TOPICS = [
+  { id: 't-first', title: 'First steps', done: true },
+  { id: 't-sample', title: 'Birds and nests', done: false },
+];
+
+/** K1–K3 (Plan 6.1). A subject is "My book" once the child's book has a chapter ready to read along. */
+function familyKid(route: Route, server: FakeServer, path: string): Promise<void> {
+  const childId = route.request().headers()['x-child-id'];
+  const child = server.family.children.find((c) => c.id === childId);
+  if (!child) {
+    return envelope(route, 403, null, 'CHILD_NOT_IN_FAMILY');
+  }
+  const ready = ['readalong_ready', 'lessons_being_prepared', 'lessons_ready'];
+  const bookOf = (subjectId: number) =>
+    server.family.books.find((b) => b.subject_id === subjectId && b.child_ids.includes(child.id));
+  const readyChapters = (subjectId: number) =>
+    (bookOf(subjectId)?.chapters ?? []).filter((c) => ready.includes(c.status));
+  if (path === '/family/kid/home') {
+    return envelope(route, 200, {
+      child: {
+        id: child.id,
+        first_name: child.first_name,
+        class_level: child.class_level ?? 3,
+        avatar_key: child.avatar_key,
+      },
+      stars: 12,
+      minutes_today: 5,
+      daily_limit_minutes: server.family.dailyLimitMinutes,
+      subjects: KID_SUBJECTS.map((s) => ({
+        ...s,
+        mode: readyChapters(s.subject_id).length ? 'book' : 'practice',
+      })),
+      continue_card: null,
+    });
+  }
+  for (const subject of KID_SUBJECTS) {
+    if (path === `/family/kid/subjects/${subject.subject_id}`) {
+      const chapters = readyChapters(subject.subject_id);
+      return envelope(route, 200, {
+        ...subject,
+        mode: chapters.length ? 'book' : 'practice',
+        entries: chapters.length
+          ? chapters.map((c) => ({ id: c.id, number: c.number, title: c.title, done: false }))
+          : KID_TOPICS.map((t) => ({ id: t.id, number: null, title: t.title, done: t.done })),
+      });
+    }
+    for (const chapter of readyChapters(subject.subject_id)) {
+      if (path === `/family/kid/chapters/${chapter.id}`) {
+        const lessons = server.content.items.filter(
+          (i) =>
+            i.kind === 'lesson' &&
+            i.status === 'published' &&
+            !!chapter.catalog_chapter_id &&
+            i.catalog_chapter_id === chapter.catalog_chapter_id,
+        );
+        return envelope(route, 200, {
+          kind: 'chapter',
+          id: chapter.id,
+          title: chapter.title,
+          number: chapter.number,
+          subject_id: subject.subject_id,
+          subject: subject.code,
+          lessons: lessons.map((i) => ({
+            content_item_id: i.id,
+            title: i.versions.find((v) => v.id === i.published_version_id)?.title ?? '',
+            duration_seconds: 60,
+            done: false,
+          })),
+          read_along: true,
+          worksheet: false,
+        });
+      }
+    }
+  }
+  for (const topic of KID_TOPICS) {
+    if (path === `/family/kid/topics/${topic.id}`) {
+      return envelope(route, 200, {
+        kind: 'topic',
+        id: topic.id,
+        title: topic.title,
+        number: null,
+        subject_id: 1,
+        subject: 'english',
+        lessons:
+          topic.id === 't-sample'
+            ? [
+                {
+                  content_item_id: 'sample',
+                  title: 'Birds build nests',
+                  duration_seconds: 120,
+                  done: false,
+                },
+              ]
+            : [],
+        read_along: false,
+        worksheet: true,
+      });
     }
   }
   return envelope(route, 404, null, 'NOT_FOUND');

@@ -40,6 +40,12 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       const seen = await walk(page);
       await page.getByRole('button', { name: 'Asha' }).click();
       await walk(page, [], seen);
+      // K3 opens read-along only for book chapters and worksheets arrive in Phase 7 (Plan 6.1)
+      for (const path of ['/kid/read-along/sample', '/kid/worksheet/sample']) {
+        await navigateInApp(page, path);
+        await walk(page, [], seen);
+      }
+      await navigateInApp(page, '/kid/learn');
       await page.getByRole('button', { name: 'Parent mode' }).click();
       await walk(page, [], seen);
       await enterPin(page);
@@ -95,16 +101,16 @@ test.describe('headers', () => {
     await expect(page).toHaveURL(/\/parent\/pin$/);
     await page.goBack();
 
-    await page.locator('a[href$="/kid/learn/english"]').first().click();
-    await expect(page.getByRole('button', { name: 'Read aloud' })).toBeVisible();
+    await page.getByRole('button', { name: /English/ }).click();
+    await expect(page.getByRole('heading', { name: 'Topics' })).toBeVisible();
     await page.getByRole('button', { name: 'Back' }).click();
     await expect(page).toHaveURL(/\/kid\/learn$/);
 
-    await page.locator('a[href$="/kid/learn/english"]').first().click();
-    await page.locator('a[href$="/kid/learn/english/1"]').first().click();
-    await page.locator('a[href$="/kid/lesson/sample"]').first().click();
+    await page.getByRole('button', { name: /English/ }).click();
+    await page.getByRole('button', { name: /Birds and nests/ }).click();
+    await page.getByRole('button', { name: /Watch lesson/ }).click();
     await page.getByRole('button', { name: 'Close' }).click();
-    await expect(page).toHaveURL(/\/kid\/learn\/english\/1$/);
+    await expect(page).toHaveURL(/\/kid\/learn\/english\/t-sample\?type=topic$/);
     await expect(page.locator('html')).toHaveAttribute('data-mode', 'kid');
   });
 

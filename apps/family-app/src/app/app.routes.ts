@@ -16,6 +16,9 @@ import { CheckChaptersPage } from './books/check-chapters.page';
 import { FixPagesPage } from './books/fix-pages.page';
 import { LessonPreviewPage } from './books/lesson-preview.page';
 import { MessagesPage } from './messages/messages.page';
+import { ActivityPage } from './kid/activity.page';
+import { LearnHomePage } from './kid/learn-home.page';
+import { SubjectPage } from './kid/subject.page';
 import { BooksPage } from './books/books.page';
 import { WelcomePage } from './auth/welcome.page';
 import { ForgotPinPage } from './parent/forgot-pin.page';
@@ -106,6 +109,9 @@ export const routes: Routes = [
         B4: SetupTimeLimitPage,
         B5: SetupDonePage,
         C1: WhoPage,
+        K1: LearnHomePage,
+        K2: SubjectPage,
+        K3: ActivityPage,
         P0: ParentPinPage,
         P4: BooksPage,
         P5: BookUploadPage,
