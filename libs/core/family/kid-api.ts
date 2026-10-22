@@ -161,7 +161,11 @@ export interface KidLesson {
 /** One MP3 (signed for 10 minutes) and where each narration scene is in it. */
 export interface LessonNarration {
   readonly audio_url: string;
-  readonly scenes: readonly { readonly id: string; readonly start_ms: number; readonly end_ms: number }[];
+  readonly scenes: readonly {
+    readonly id: string;
+    readonly start_ms: number;
+    readonly end_ms: number;
+  }[];
 }
 
 /** Schema §4.3 pages.word_timings. */
