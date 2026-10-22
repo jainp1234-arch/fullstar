@@ -69,6 +69,8 @@ export interface FakeServer {
     mistakes: string[];
     /** Worksheets (Plan 7.2) and how often each PDF was asked for. */
     worksheets: FakeWorksheet[];
+    /** Ids of books removed by Replace book (P9, Plan 7.4). */
+    replaced: string[];
   };
   /** Studio staff list as the fake API holds it (s1 is the signed-in member). */
   readonly staff: FakeStaffMember[];
@@ -180,6 +182,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       attempts: {},
       mistakes: [],
       worksheets: [],
+      replaced: [],
       stored: [],
     },
     staff: [
@@ -1297,6 +1300,38 @@ function familyBooks(
     return envelope(route, 201, bookView(book));
   }
   for (const book of books) {
+    // P9 (Plan 7.4): the book goes for every child; replaced books are kept for checks
+    if (path === `/family/parent/books/${book.id}/replace` && method === 'POST') {
+      books.splice(books.indexOf(book), 1);
+      server.family.replaced.push(book.id);
+      return envelope(route, 200, {
+        id: book.id,
+        child_ids: book.child_ids,
+        chapters: book.chapters.length,
+        attempts: 0,
+      });
+    }
+    if (path === `/family/parent/books/${book.id}/chapter-order` && method === 'PUT') {
+      const ids = (body['chapter_ids'] ?? []) as string[];
+      if (book.upload_mode !== 'chapterwise') {
+        return envelope(route, 409, null, 'CONFLICT');
+      }
+      const known = new Set(book.chapters.map((c) => c.id));
+      if (ids.length !== known.size || !ids.every((id) => known.delete(id))) {
+        return envelope(route, 400, null, 'VALIDATION_FAILED', {
+          fields: { chapter_ids: 'INVALID' },
+        });
+      }
+      const numbers = book.chapters.map((c) => c.number).sort((a, b) => a - b);
+      ids.forEach((id, i) => {
+        const chapter = book.chapters.find((c) => c.id === id);
+        if (chapter) {
+          chapter.number = numbers[i];
+        }
+      });
+      book.chapters.sort((a, b) => a.number - b.number);
+      return envelope(route, 200, book.chapters.map(chapterView));
+    }
     if (path === `/family/parent/books/${book.id}/share` && method === 'POST') {
       const childId = String(body['child_id']);
       const child = server.family.children.find((c) => c.id === childId);
@@ -1404,6 +1439,10 @@ function familyBooks(
       return envelope(route, 200, book.chapters.map(chapterView));
     }
     for (const chapter of book.chapters) {
+      if (path === `/family/parent/chapters/${chapter.id}` && method === 'DELETE') {
+        book.chapters.splice(book.chapters.indexOf(chapter), 1);
+        return envelope(route, 200, { id: chapter.id });
+      }
       if (path === `/family/parent/chapters/${chapter.id}/pages` && method === 'GET') {
         const quality = url.searchParams.get('quality');
         return envelope(

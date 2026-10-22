@@ -251,6 +251,68 @@ public class BookService {
 		log.info("Chapter deleted chapterId={} files={}", chapterId, keys.size());
 	}
 
+	/** What Replace book removed: the book and the children who had it (P9). */
+	public record Replaced(UUID id, List<UUID> childIds, int chapters, int attempts) {
+	}
+
+	/**
+	 * Replace book (P9, Plan 7.4, decided 22 Oct 2026): removes the book for every child sharing it, its
+	 * chapters, uploads, pages and worksheets, and the children's progress on those chapters (attempts with
+	 * their answers, and the mistakes those answers opened). Stars already earned stay. The subject is then
+	 * back to "No book", so the parent can upload it again, whole or chapter by chapter.
+	 */
+	public Replaced replace(RequestActor actor, UUID bookId) {
+		Book book = book(bookId);
+		List<UUID> chapterIds = book.chapters().stream().map(Chapter::id).toList();
+		UUID[] chapters = chapterIds.toArray(UUID[]::new);
+		List<String> keys = jdbc.queryForList("""
+				SELECT f.object_key FROM app.upload_files f JOIN app.uploads u ON u.id = f.upload_id
+				 WHERE u.family_book_id = ?
+				UNION ALL
+				SELECT image_key FROM app.pages WHERE family_chapter_id = ANY (?)
+				UNION ALL
+				SELECT narration_audio_key FROM app.pages WHERE family_chapter_id = ANY (?) AND narration_audio_key IS NOT NULL
+				UNION ALL
+				SELECT pdf_key FROM app.worksheets WHERE family_chapter_id = ANY (?) AND pdf_key IS NOT NULL""",
+				String.class, bookId, chapters, chapters, chapters);
+		jdbc.update("""
+				DELETE FROM app.mistakes m
+				 USING app.answer_events e JOIN app.activity_attempts a ON a.id = e.attempt_id
+				 WHERE a.family_chapter_id = ANY (?)
+				   AND m.child_id = e.child_id AND m.question_item_id = e.question_item_id""", (Object) chapters);
+		int attempts = jdbc.update("DELETE FROM app.activity_attempts WHERE family_chapter_id = ANY (?)",
+				(Object) chapters);
+		// Cascades child_books, chapters, uploads and their files' rows, pages, prep tasks and worksheets
+		jdbc.update("DELETE FROM app.family_books WHERE id = ?", bookId);
+		deleteAfterCommit(keys);
+		log.info("Book replaced familyId={} bookId={} chapters={} attempts={} files={}", actor.familyId(), bookId,
+				chapterIds.size(), attempts, keys.size());
+		return new Replaced(bookId, book.childIds(), chapterIds.size(), attempts);
+	}
+
+	/**
+	 * Reorders a chapter-by-chapter book (P4, Plan 7.4, decided 22 Oct 2026): chapterIds is every chapter
+	 * in the new order; the book keeps its set of chapter numbers and hands them out in that order.
+	 */
+	public List<Chapter> reorderChapters(UUID bookId, List<UUID> chapterIds) {
+		Book book = book(bookId);
+		if (!"chapterwise".equals(book.uploadMode())) {
+			throw new ApiException(ErrorCode.CONFLICT, "Only a book uploaded chapter by chapter can be reordered");
+		}
+		List<UUID> current = book.chapters().stream().map(Chapter::id).toList();
+		if (chapterIds.size() != current.size() || !new HashSet<>(chapterIds).equals(new HashSet<>(current))) {
+			throw new ValidationException("chapter_ids must list every chapter once", Map.of("chapter_ids", "INVALID"));
+		}
+		List<Integer> numbers = book.chapters().stream().map(Chapter::number).sorted().toList();
+		// family_chapter_number_uq is deferred, so numbers can swap inside the transaction
+		for (int i = 0; i < chapterIds.size(); i++) {
+			jdbc.update("UPDATE app.family_chapters SET number = ? WHERE id = ? AND number <> ?", numbers.get(i),
+					chapterIds.get(i), numbers.get(i));
+		}
+		log.info("Chapters reordered bookId={} chapters={}", bookId, chapterIds.size());
+		return chaptersOf(bookId);
+	}
+
 	public Book book(UUID bookId) {
 		List<Map<String, Object>> rows = jdbc.queryForList(
 				"SELECT id, subject_id, upload_mode, status, class_level FROM app.family_books WHERE id = ?", bookId);

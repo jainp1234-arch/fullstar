@@ -914,6 +914,32 @@ export const EN = {
     checkChapters: 'Check chapters',
     fixPages: (count: number) => `Fix ${count} unclear ${count === 1 ? 'page' : 'pages'}`,
     previewLessons: 'Preview lessons',
+    // Book management (Plan 7.4): P4 chapter actions and P9 Replace book
+    replaceBook: 'Replace book',
+    moveUp: 'Move up',
+    moveDown: 'Move down',
+    deleteChapter: 'Delete',
+    reordered: 'Chapter order saved.',
+    deleteTitle: (number: number, title: string) => `Delete Chapter ${number}: ${title}?`,
+    deleteBody:
+      'Its pages and photos are removed. Lessons your child already did stay in their progress.',
+    deleteConfirm: 'Delete chapter',
+    keepChapter: 'Keep chapter',
+    deleted: 'Chapter deleted.',
+    // Guidelines §16 destructive confirm: the title states the result
+    replaceIntro: (subject: string) => `Remove the ${subject} book and its progress?`,
+    replaceWarning: (names: string) =>
+      `${names}'s progress on this book's chapters will be removed: lessons, read-along, worksheets and mistakes to fix. Stars already earned stay.`,
+    replaceChapters: (count: number) =>
+      `This book has ${count} ${count === 1 ? 'chapter' : 'chapters'}. Its pages and photos are removed too.`,
+    replaceConfirm: 'Remove the old book',
+    keepBook: 'Keep the book',
+    replaced: 'The old book is removed. Upload the new one.',
+    uploadWhole: 'Upload the whole book',
+    uploadByChapter: 'Upload chapter by chapter',
+    noBookToReplace: 'This subject has no book yet.',
+    and: (names: readonly string[]) =>
+      names.length < 2 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`,
   },
 
   /** P1 Progress and P2 Subject detail (App Flow §6; Plan 6.4). */

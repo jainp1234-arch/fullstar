@@ -91,6 +91,23 @@ public class BookController {
 		return ApiResponse.success(books.share(RequestActor.of(request), path(id), field(body.childId(), "child_id")));
 	}
 
+	record ChapterOrderRequest(@NotEmpty @Size(max = 99) List<@NotBlank String> chapterIds) {
+	}
+
+	/** P9: removes the book, its chapters and the children's progress on them (Plan 7.4). */
+	@PostMapping("/books/{id}/replace")
+	ApiResponse<BookService.Replaced> replace(HttpServletRequest request, @PathVariable String id) {
+		return ApiResponse.success(books.replace(RequestActor.of(request), path(id)));
+	}
+
+	/** P4: every chapter of a chapter-by-chapter book in the new order (Plan 7.4). */
+	@PutMapping("/books/{id}/chapter-order")
+	ApiResponse<List<BookService.Chapter>> reorder(@PathVariable String id,
+			@Valid @RequestBody ChapterOrderRequest body) {
+		return ApiResponse.success(books.reorderChapters(path(id),
+				body.chapterIds().stream().map(c -> field(c, "chapter_ids")).toList()));
+	}
+
 	@GetMapping("/books/{id}/chapters")
 	ApiResponse<List<BookService.Chapter>> chapters(@PathVariable String id) {
 		return ApiResponse.success(books.chapters(path(id)));

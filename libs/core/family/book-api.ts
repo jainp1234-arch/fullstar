@@ -67,6 +67,14 @@ export interface FamilyBook {
   readonly latest_upload: LatestUpload | null;
 }
 
+/** POST /family/parent/books/{id}/replace (P9): what was removed. */
+export interface ReplacedBook {
+  readonly id: string;
+  readonly child_ids: readonly string[];
+  readonly chapters: number;
+  readonly attempts: number;
+}
+
 /** GET /family/parent/books?child_id= (P4): one row per subject of the child's class. */
 export interface SubjectBookRow {
   readonly subject_id: number;
@@ -150,6 +158,25 @@ export class BookApi {
   deleteChapter(chapterId: string): Observable<{ readonly id: string }> {
     return this.api.delete<{ readonly id: string }>(
       `/family/parent/chapters/${encodeURIComponent(chapterId)}`,
+    );
+  }
+
+  /** P4: every chapter of a chapter-by-chapter book in the new order; numbers stay (Plan 7.4). */
+  reorderChapters(
+    bookId: string,
+    chapterIds: readonly string[],
+  ): Observable<readonly BookChapter[]> {
+    return this.api.put<readonly BookChapter[]>(
+      `/family/parent/books/${encodeURIComponent(bookId)}/chapter-order`,
+      { chapter_ids: chapterIds },
+    );
+  }
+
+  /** P9: removes the book, its chapters and the children's progress on them (Plan 7.4). */
+  replace(bookId: string): Observable<ReplacedBook> {
+    return this.api.post<ReplacedBook>(
+      `/family/parent/books/${encodeURIComponent(bookId)}/replace`,
+      {},
     );
   }
 
