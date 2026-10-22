@@ -76,6 +76,8 @@ export interface FakeServer {
   readonly content: FakeContent;
   /** S8 queue and prepared books (Plan 5.5); task "sample" is the S9 route sample. */
   readonly prep: FakePrep;
+  /** P18/S7 problem reports and P16/S12 tickets (Plan 7.3); "r1" and "tk1" are samples. */
+  readonly support: FakeSupport;
 }
 
 const CONSENT = '2026-10-v1';
@@ -191,6 +193,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
     ],
     content: sampleContent(),
     prep: samplePrep(),
+    support: sampleSupport(),
   };
   let nextStaff = 2;
   let hasFamily = initial !== null;
@@ -444,6 +447,12 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       return familyWorksheets(route, server, path, method, body);
     }
     if (
+      path.startsWith('/family/parent/problem-reports') ||
+      path.startsWith('/family/parent/support-tickets')
+    ) {
+      return familySupport(route, server, path, method, body);
+    }
+    if (
       path.startsWith('/family/parent/messages') ||
       path.startsWith('/family/parent/lessons/') ||
       /^\/family\/parent\/chapters\/[^/]+\/lessons$/.test(path)
@@ -575,6 +584,9 @@ function studio(
     path.startsWith('/studio/family-chapters/')
   ) {
     return studioPrep(route, server, path, method, newId);
+  }
+  if (path.startsWith('/studio/problem-reports') || path.startsWith('/studio/support-tickets')) {
+    return studioSupport(route, server, path, method);
   }
   if (path === '/studio/dashboard') {
     return envelope(route, 200, {
@@ -2215,6 +2227,244 @@ function familyWorksheets(
     if (path === `${base}/weak-spots` && method === 'PUT') {
       w.weak_spots = (body['topic_ids'] as string[]) ?? [];
       return envelope(route, 200, detail(w, true));
+    }
+  }
+  return envelope(route, 404, null, 'NOT_FOUND');
+}
+
+export interface FakeProblemReport {
+  id: string;
+  status: 'open' | 'fixed' | 'dismissed';
+  reason: string;
+  note: string | null;
+  created_at: string;
+  content_item_id: string;
+  kind: 'lesson' | 'question' | 'passage';
+  title: string;
+  version_no: number;
+  family_ref: string;
+  handled_at: string | null;
+}
+
+export interface FakeTicket {
+  id: string;
+  subject: string;
+  status: 'open' | 'answered' | 'closed';
+  family_ref: string;
+  created_at: string;
+  updated_at: string;
+  messages: { id: string; author: 'parent' | 'staff'; body: string; created_at: string }[];
+}
+
+export interface FakeSupport {
+  reports: FakeProblemReport[];
+  tickets: FakeTicket[];
+}
+
+function sampleSupport(): FakeSupport {
+  return {
+    reports: [
+      {
+        id: 'r1',
+        status: 'open',
+        reason: 'wrong_answer',
+        note: 'The answer should be 12.',
+        created_at: '2026-10-20T09:00:00Z',
+        content_item_id: 'sample',
+        kind: 'lesson',
+        title: 'Birds and nests',
+        version_no: 1,
+        family_ref: 'F-1a2b',
+        handled_at: null,
+      },
+    ],
+    tickets: [
+      {
+        id: 'tk1',
+        subject: 'Lessons will not load',
+        status: 'open',
+        family_ref: 'F-1a2b',
+        created_at: '2026-10-21T09:00:00Z',
+        updated_at: '2026-10-21T09:00:00Z',
+        messages: [
+          {
+            id: 'tm1',
+            author: 'parent',
+            body: 'The English lessons show a spinner.',
+            created_at: '2026-10-21T09:00:00Z',
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function ticketSummary(t: FakeTicket) {
+  const last = t.messages.at(-1);
+  return {
+    id: t.id,
+    subject: t.subject,
+    status: t.status,
+    family_ref: t.family_ref,
+    updated_at: t.updated_at,
+    last_message: last?.body ?? null,
+    last_author: last?.author ?? null,
+  };
+}
+
+function addTicketMessage(t: FakeTicket, author: 'parent' | 'staff', body: string): void {
+  const now = new Date().toISOString();
+  t.messages.push({ id: `${t.id}-m${t.messages.length + 1}`, author, body, created_at: now });
+  t.updated_at = now;
+  t.status = author === 'staff' ? 'answered' : 'open';
+}
+
+function trimmed(body: Record<string, unknown>, key: string, max: number): string | null {
+  const raw = body[key];
+  const value = typeof raw === 'string' ? raw.trim() : '';
+  return value && value.length <= max ? value : null;
+}
+
+/** P18 Report a problem and P16 Contact us (Plan 7.3); this family is "F-you". */
+function familySupport(
+  route: Route,
+  server: FakeServer,
+  path: string,
+  method: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const support = server.support;
+  if (path === '/family/parent/problem-reports' && method === 'POST') {
+    const item = String(body['content_item_id'] ?? '');
+    const report: FakeProblemReport = {
+      id: `r${support.reports.length + 1}`,
+      status: 'open',
+      reason: String(body['reason']),
+      note: (body['note'] as string | undefined) ?? null,
+      created_at: new Date().toISOString(),
+      content_item_id: item,
+      kind: 'question',
+      title: 'Question',
+      version_no: 1,
+      family_ref: 'F-you',
+      handled_at: null,
+    };
+    support.reports.push(report);
+    const { id, content_item_id, reason, note, status, created_at } = report;
+    return envelope(route, 201, { id, content_item_id, reason, note, status, created_at });
+  }
+  if (path === '/family/parent/support-tickets' && method === 'GET') {
+    return envelope(
+      route,
+      200,
+      support.tickets
+        .filter((t) => t.family_ref === 'F-you')
+        .sort((a, b) => b.updated_at.localeCompare(a.updated_at)),
+    );
+  }
+  if (path === '/family/parent/support-tickets' && method === 'POST') {
+    const subject = trimmed(body, 'subject', 120);
+    const message = trimmed(body, 'body', 2000);
+    if (!subject || !message) {
+      return envelope(route, 400, null, 'VALIDATION_FAILED', {
+        fields: {
+          ...(subject ? {} : { subject: 'REQUIRED' }),
+          ...(message ? {} : { body: 'REQUIRED' }),
+        },
+      });
+    }
+    const now = new Date().toISOString();
+    const ticket: FakeTicket = {
+      id: `tk${support.tickets.length + 1}`,
+      subject,
+      status: 'open',
+      family_ref: 'F-you',
+      created_at: now,
+      updated_at: now,
+      messages: [],
+    };
+    addTicketMessage(ticket, 'parent', message);
+    support.tickets.push(ticket);
+    return envelope(route, 201, ticket);
+  }
+  const ticket = support.tickets.find(
+    (t) => t.family_ref === 'F-you' && path === `/family/parent/support-tickets/${t.id}/messages`,
+  );
+  if (ticket && method === 'POST') {
+    const message = trimmed(body, 'body', 2000);
+    if (!message) {
+      return envelope(route, 400, null, 'VALIDATION_FAILED', { fields: { body: 'REQUIRED' } });
+    }
+    addTicketMessage(ticket, 'parent', message);
+    return envelope(route, 201, ticket);
+  }
+  return envelope(route, 404, null, 'NOT_FOUND');
+}
+
+/** S7 problem reports and S12 support inbox (Plan 7.3); a reply also lands in P19. */
+function studioSupport(
+  route: Route,
+  server: FakeServer,
+  path: string,
+  method: string,
+): Promise<void> {
+  const support = server.support;
+  const query = new URL(route.request().url()).searchParams;
+  const body = (method === 'GET' ? {} : (route.request().postDataJSON() ?? {})) as Record<
+    string,
+    unknown
+  >;
+  if (path === '/studio/problem-reports' && method === 'GET') {
+    const status = query.get('status') ?? 'open';
+    return envelope(
+      route,
+      200,
+      support.reports
+        .filter((r) => r.status === status)
+        .sort((a, b) => a.created_at.localeCompare(b.created_at)),
+    );
+  }
+  const report = support.reports.find((r) => path === `/studio/problem-reports/${r.id}`);
+  if (report && method === 'PATCH') {
+    if (report.status !== 'open') {
+      return envelope(route, 409, null, 'CONFLICT');
+    }
+    report.status = body['status'] === 'fixed' ? 'fixed' : 'dismissed';
+    report.handled_at = new Date().toISOString();
+    return envelope(route, 200, report);
+  }
+  if (path === '/studio/support-tickets' && method === 'GET') {
+    const statuses = (query.get('status') ?? 'open').split(',');
+    return envelope(
+      route,
+      200,
+      support.tickets
+        .filter((t) => statuses.includes(t.status))
+        .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+        .map(ticketSummary),
+    );
+  }
+  const view = (t: FakeTicket) => ({ ticket: ticketSummary(t), messages: t.messages });
+  for (const ticket of support.tickets) {
+    if (path === `/studio/support-tickets/${ticket.id}` && method === 'GET') {
+      return envelope(route, 200, view(ticket));
+    }
+    if (path === `/studio/support-tickets/${ticket.id}/messages` && method === 'POST') {
+      const message = trimmed(body, 'body', 2000);
+      if (!message) {
+        return envelope(route, 400, null, 'VALIDATION_FAILED', { fields: { body: 'REQUIRED' } });
+      }
+      addTicketMessage(ticket, 'staff', message);
+      server.family.messages.push({
+        id: `${ticket.id}-reply-${ticket.messages.length}`,
+        kind: 'support_reply',
+        title: 'Reply from our team',
+        body: message,
+        link: { screen: 'P16', ticket_id: ticket.id },
+        read_at: null,
+        created_at: new Date().toISOString(),
+      });
+      return envelope(route, 201, view(ticket));
     }
   }
   return envelope(route, 404, null, 'NOT_FOUND');
