@@ -41,7 +41,14 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       await page.getByRole('button', { name: 'Asha' }).click();
       await walk(page, [], seen);
       // K3 opens read-along only for book chapters and worksheets arrive in Phase 7 (Plan 6.1)
-      for (const path of ['/kid/read-along/sample', '/kid/worksheet/sample', '/kid/well-done']) {
+      // K12 opens K13 with a button, and K14 needs a test id (Plan 8.3)
+      for (const path of [
+        '/kid/read-along/sample',
+        '/kid/worksheet/sample',
+        '/kid/well-done',
+        '/kid/read/test',
+        '/kid/read/result',
+      ]) {
         await navigateInApp(page, path);
         await walk(page, [], seen);
       }

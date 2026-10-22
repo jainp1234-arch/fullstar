@@ -193,6 +193,30 @@ services:
       retries: 8
       start_period: 40s
 
+  # Plan 8.3: the reading-score worker, faster-whisper small (CPU, int8) built into the image.
+  # It reads recordings from storage and answers on job-results; it never touches the database.
+  reading-checker:
+    <<: *restart
+    build:
+      context: ../workers/reading-checker
+    image: fullstar/reading-checker:local
+    environment:
+      SQS_ENDPOINT: http://elasticmq:9324
+      SQS_ACCESS_KEY_ID: ${SQS_ACCESS_KEY_ID:-local}
+      SQS_SECRET_ACCESS_KEY: ${SQS_SECRET_ACCESS_KEY:-local}
+      QUEUE_PREFIX: ${QUEUE_PREFIX:-}
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_REGION: ${S3_REGION:-auto}
+      S3_BUCKET: ${S3_BUCKET:?set S3_BUCKET in .env}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?set S3_ACCESS_KEY_ID in .env}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?set S3_SECRET_ACCESS_KEY in .env}
+      WHISPER_THREADS: ${WHISPER_THREADS:-2}
+    depends_on:
+      elasticmq:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+
   loki:
     <<: *restart
     image: grafana/loki:3.7.8

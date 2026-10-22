@@ -698,11 +698,38 @@ export const EN = {
     lessonNotReady: 'Coming soon! Read along for now.',
     offline: 'This needs the internet.',
     needsParent: 'Ask Mummy or Papa to help.',
-    /** K12–K14 reading test (App Flow §9, §10); the screens arrive with Plan 8.3. */
+    /** K12–K14 reading test (App Flow §5, §9, §10; Plan 8.3). */
     reading: {
       firstStory: "Let's read your first story!",
       micOff: 'Ask Mummy/Papa to turn on the microphone.',
+      micSteps:
+        'For a parent: tap the lock next to the web address, open Permissions and turn on Microphone. Then tap Try again.',
       notUnderstood: "Let's try again.",
+      noScore: "We couldn't hear the reading clearly, so there is no score this time.",
+      todaysStory: "Today's story",
+      language: { en: 'English', hi: 'Hindi' } as Record<string, string>,
+      start: 'Start reading',
+      wordsToPractise: 'Words to practise',
+      noWords: 'Read a story to find words to practise.',
+      level: (level: number) => `Reading level ${level}`,
+      levelPicture: ['A small seedling', 'A growing plant', 'A big tree'] as readonly string[],
+      testsLeft: (left: number) =>
+        left === 0
+          ? 'Come back tomorrow for the next story.'
+          : `${left} ${left === 1 ? 'try' : 'tries'} left today`,
+      noPassage: 'No story yet. Come back soon!',
+      instructions: 'Tap the microphone, then read the story aloud. Tap again when you finish.',
+      record: 'Start recording',
+      stop: "I'm done",
+      timeLeft: (seconds: number) =>
+        `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')} left`,
+      recording: 'Recording…',
+      sending: 'Sending your reading…',
+      checking: 'Listening to your reading…',
+      readWell: (read: number, total: number) => `You read ${read} of ${total} words well.`,
+      readAgain: 'Read again',
+      backToReading: 'Back to reading',
+      tooLong: 'Checking takes longer today. Look at your result later on Reading.',
     },
     /** K1–K3 Learn (Plan 6.1). */
     learn: {
@@ -823,6 +850,9 @@ export const EN = {
     'state-retry': 'Thinking face',
     'state-wait': 'Coming soon',
     'mascot-owl': 'The owl',
+    'level-seed': 'A small seedling',
+    'level-plant': 'A growing plant',
+    'level-tree': 'A big tree',
     'avatar-cat': 'Cat',
     'avatar-dog': 'Dog',
     'avatar-lion': 'Lion',
@@ -971,6 +1001,19 @@ export const EN = {
         : `${lessons} ${lessons === 1 ? 'lesson' : 'lessons'} this week`,
     reading: 'Reading',
     noReading: 'Reading results will appear after the first test.',
+    /** P1 reading summary and P3 Reading history (Plan 8.3). */
+    latestReading: (wpm: number, accuracy: number) =>
+      `Latest: ${Math.round(wpm)} words a minute, ${Math.round(accuracy)}% read well`,
+    readingHistory: 'Reading history',
+    readingLine: (wpm: number, accuracy: number) =>
+      `${Math.round(wpm)} words a minute · ${Math.round(accuracy)}% read well`,
+    readingNotUnderstood: 'Not understood, so no score',
+    readingFailed: 'Could not be checked',
+    readingChecking: 'Being checked',
+    playRecording: (date: string) => `Play the recording of ${date}`,
+    keptUntil: (date: string) => `Recording kept until ${date}`,
+    recordingDeleted: 'The recording was deleted after 7 days.',
+    practiseWords: (words: string) => `Words to practise: ${words}`,
     firstSteps: 'Getting started',
     stepBooks: 'Add the school books',
     stepLesson: 'Watch the first lesson together',

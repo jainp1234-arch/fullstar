@@ -34,6 +34,10 @@ import { WorksheetsPage } from './worksheets/worksheets.page';
 import { ReportPage } from './settings/report.page';
 import { ProgressPage } from './parent/progress.page';
 import { SubjectProgressPage } from './parent/subject-progress.page';
+import { ReadingHistoryPage } from './parent/reading-history.page';
+import { ReadingHomePage } from './kid/reading-home.page';
+import { ReadingResultPage } from './kid/reading-result.page';
+import { ReadingTestPage } from './kid/reading-test.page';
 import { BooksPage } from './books/books.page';
 import { WelcomePage } from './auth/welcome.page';
 import { ForgotPinPage } from './parent/forgot-pin.page';
@@ -135,9 +139,13 @@ export const routes: Routes = [
         K9: PracticeSetPage,
         K10: TablesPage,
         K11: PracticeSetPage,
+        K12: ReadingHomePage,
+        K13: ReadingTestPage,
+        K14: ReadingResultPage,
         P0: ParentPinPage,
         P1: ProgressPage,
         P2: SubjectProgressPage,
+        P3: ReadingHistoryPage,
         P4: BooksPage,
         P5: BookUploadPage,
         P6: CheckChaptersPage,

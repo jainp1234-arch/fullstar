@@ -80,6 +80,8 @@ export interface FakeServer {
   readonly prep: FakePrep;
   /** P18/S7 problem reports and P16/S12 tickets (Plan 7.3); "r1" and "tk1" are samples. */
   readonly support: FakeSupport;
+  /** K12–K14 reading tests and P3 history (Plan 8.3). */
+  readonly reading: FakeReading;
 }
 
 const CONSENT = '2026-10-v1';
@@ -197,6 +199,7 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
     content: sampleContent(),
     prep: samplePrep(),
     support: sampleSupport(),
+    reading: sampleReading(),
   };
   let nextStaff = 2;
   let hasFamily = initial !== null;
@@ -372,6 +375,13 @@ export async function installFakes(page: Page, options: FakeOptions = {}): Promi
       const requestedAt = server.family.deletionRequestedAt ?? '';
       const dueBy = new Date(Date.parse(requestedAt) + 30 * 24 * 3600 * 1000).toISOString();
       return envelope(route, first ? 201 : 200, { requested_at: requestedAt, due_by: dueBy });
+    }
+    if (
+      path === '/family/kid/reading' ||
+      path.startsWith('/family/kid/reading-tests') ||
+      /^\/family\/parent\/children\/[^/]+\/reading-tests$/.test(path)
+    ) {
+      return familyReading(route, server, path, method, body);
     }
     if (path.startsWith('/family/kid/')) {
       return familyKid(route, server, path);
@@ -2504,6 +2514,191 @@ function studioSupport(
         created_at: new Date().toISOString(),
       });
       return envelope(route, 201, view(ticket));
+    }
+  }
+  return envelope(route, 404, null, 'NOT_FOUND');
+}
+
+export interface FakeReadingTest {
+  id: string;
+  child_id: string;
+  passage_item_id: string;
+  status: 'awaiting_audio' | 'processing' | 'scored' | 'not_understood' | 'failed';
+  test_date: string;
+  stars: number;
+  accuracy_pct: number | null;
+  words_per_minute: number | null;
+  words_read: number | null;
+  word_count: number | null;
+  words_to_practise: string[];
+  recording_type: string | null;
+}
+
+export interface FakeReading {
+  /** What "the worker" gives the next submitted test. */
+  outcome: 'scored' | 'not_understood' | 'failed';
+  level: number;
+  tests: FakeReadingTest[];
+  /** Set to null for a class without passages. */
+  passage: {
+    id: string;
+    version_id: string;
+    title: string;
+    lang: 'en' | 'hi';
+    text: string;
+    word_count: number;
+    level: number;
+  } | null;
+}
+
+function sampleReading(): FakeReading {
+  return {
+    outcome: 'scored',
+    level: 1,
+    tests: [],
+    passage: {
+      id: 'passage-kite',
+      version_id: 'passage-kite-v1',
+      title: "Ravi's red kite",
+      lang: 'en',
+      text: 'Ravi has a red kite. On Sunday, he goes to the park with his sister Asha.',
+      word_count: 16,
+      level: 1,
+    },
+  };
+}
+
+const TODAY = () => new Date().toISOString().slice(0, 10);
+
+/** K12–K14 and P3 (Plan 8.3). A submitted test is scored on the next poll, as the worker would. */
+function familyReading(
+  route: Route,
+  server: FakeServer,
+  path: string,
+  method: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const reading = server.reading;
+  const history = /^\/family\/parent\/children\/([^/]+)\/reading-tests$/.exec(path);
+  if (history && method === 'GET') {
+    const childId = history[1];
+    if (!server.family.children.some((c) => c.id === childId)) {
+      return envelope(route, 404, null, 'NOT_FOUND');
+    }
+    return envelope(
+      route,
+      200,
+      reading.tests
+        .filter((t) => t.child_id === childId && t.status !== 'awaiting_audio')
+        .reverse()
+        .map((t) => ({
+          id: t.id,
+          test_date: t.test_date,
+          title: reading.passage?.title ?? 'Story',
+          lang: reading.passage?.lang ?? 'en',
+          status: t.status,
+          accuracy_pct: t.accuracy_pct,
+          words_per_minute: t.words_per_minute,
+          words_to_practise: t.words_to_practise,
+          stars: t.stars,
+          recording_url: `${new URL(route.request().url()).origin}/fake-storage/recordings/${t.id}.webm`,
+          recording_expires_at: new Date(Date.now() + 7 * 86_400_000).toISOString(),
+        })),
+    );
+  }
+  const childId = route.request().headers()['x-child-id'];
+  if (!server.family.children.some((c) => c.id === childId)) {
+    return envelope(route, 403, null, 'CHILD_NOT_IN_FAMILY');
+  }
+  const mine = reading.tests.filter((t) => t.child_id === childId);
+  const today = mine.filter((t) => t.test_date === TODAY()).length;
+  const view = (t: FakeReadingTest, upload = false) => ({
+    ...t,
+    title: reading.passage?.title ?? '',
+    lang: reading.passage?.lang ?? 'en',
+    tests_left_today: Math.max(0, 2 - mine.filter((x) => x.test_date === TODAY()).length),
+    level: reading.level,
+    upload: upload
+      ? {
+          url: `${new URL(route.request().url()).origin}/fake-storage/recordings/${t.id}.webm`,
+          method: 'PUT',
+          headers: { 'Content-Type': t.recording_type ?? 'audio/webm' },
+          expires_at: new Date(Date.now() + 600_000).toISOString(),
+        }
+      : null,
+  });
+  if (path === '/family/kid/reading' && method === 'GET') {
+    const last = [...mine].reverse().find((t) => t.status === 'scored');
+    return envelope(route, 200, {
+      passage: reading.passage,
+      level: reading.level,
+      tests_left_today: Math.max(0, 2 - today),
+      any_tests: mine.length > 0,
+      last_result: last
+        ? {
+            id: last.id,
+            test_date: last.test_date,
+            accuracy_pct: last.accuracy_pct,
+            words_per_minute: last.words_per_minute,
+            words_to_practise: last.words_to_practise,
+            stars: last.stars,
+          }
+        : null,
+    });
+  }
+  if (path === '/family/kid/reading-tests' && method === 'POST') {
+    if (body['passage_item_id'] !== reading.passage?.id) {
+      return envelope(route, 400, null, 'VALIDATION_FAILED', {
+        fields: { passage_item_id: 'INVALID' },
+      });
+    }
+    if (today >= 2) {
+      return envelope(route, 429, null, 'READING_LIMIT');
+    }
+    const test: FakeReadingTest = {
+      id: String(body['id']),
+      child_id: childId,
+      passage_item_id: String(body['passage_item_id']),
+      status: 'awaiting_audio',
+      test_date: TODAY(),
+      stars: 0,
+      accuracy_pct: null,
+      words_per_minute: null,
+      words_read: null,
+      word_count: null,
+      words_to_practise: [],
+      recording_type: String(body['content_type']),
+    };
+    reading.tests.push(test);
+    return envelope(route, 201, view(test, true));
+  }
+  for (const test of mine) {
+    if (path === `/family/kid/reading-tests/${test.id}/submit` && method === 'POST') {
+      if (!server.family.stored.includes(`/fake-storage/recordings/${test.id}.webm`)) {
+        return envelope(route, 400, null, 'VALIDATION_FAILED', {
+          fields: { recording: 'REQUIRED' },
+        });
+      }
+      if (test.status === 'awaiting_audio') {
+        test.status = 'processing';
+      }
+      return envelope(route, 200, view(test));
+    }
+    if (path === `/family/kid/reading-tests/${test.id}` && method === 'GET') {
+      if (test.status === 'processing') {
+        test.status = reading.outcome;
+        if (reading.outcome === 'scored') {
+          Object.assign(test, {
+            stars: 3,
+            accuracy_pct: 87.5,
+            words_per_minute: 96,
+            words_read: 14,
+            word_count: 16,
+            words_to_practise: ['red', 'park'],
+          });
+        }
+      }
+      return envelope(route, 200, view(test));
     }
   }
   return envelope(route, 404, null, 'NOT_FOUND');

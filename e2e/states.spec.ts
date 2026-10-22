@@ -1,5 +1,6 @@
 import { Page, expect, test } from '@playwright/test';
 import { FakeServer, enterPin, signInFamily, unlockParent } from './fakes';
+import { fakeMicrophone } from './microphone';
 import { goOffline, goOnline } from './offline';
 import { navigateInApp } from './routes';
 
@@ -80,8 +81,14 @@ test.describe('App Flow §9 empty and loading states', () => {
     await expect(page.locator('app-empty-state img')).toBeVisible();
   });
 
-  test.fixme('K12 no reading test yet: "Let\'s read your first story!" (K12 arrives with Plan 8.3)', () => {
-    // EN.kid.reading.firstStory holds the words; K12 is a placeholder until Plan 8.3
+  test('K12 no reading test yet: "Let\'s read your first story!" with a big start button', async ({
+    page,
+  }) => {
+    await signInFamily(page);
+    await asAsha(page);
+    await navigateInApp(page, '/kid/read');
+    await expect(page.getByRole('heading', { name: "Let's read your first story!" })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Start reading' })).toBeVisible();
   });
 
   test('P1 no activity yet: the getting-started checklist', async ({ page }) => {
@@ -98,8 +105,12 @@ test.describe('App Flow §9 empty and loading states', () => {
     }
   });
 
-  test.fixme('P3 no reading history: "Reading results will appear after the first test." (Plan 8.3)', () => {
-    // P3 is a placeholder until Plan 8.3; P1 already shows the line under Reading
+  test('P3 no reading history: "Reading results will appear after the first test."', async ({
+    page,
+  }) => {
+    await signInFamily(page);
+    await unlockParent(page, '/parent/progress/reading');
+    await expect(page.getByText('Reading results will appear after the first test.')).toBeVisible();
   });
 
   test('P4 no books: every subject offers Upload book and Add chapter and says practice is ready', async ({
@@ -241,12 +252,29 @@ test.describe('App Flow §10 error states', () => {
       .toBeGreaterThan(before);
   });
 
-  test.fixme('microphone not allowed: "Ask Mummy/Papa to turn on the microphone." (K13, Plan 8.3)', () => {
-    // EN.kid.reading.micOff holds the words
+  test('microphone not allowed: "Ask Mummy/Papa to turn on the microphone." and steps for a parent', async ({
+    page,
+  }) => {
+    await fakeMicrophone(page, true);
+    await signInFamily(page);
+    await asAsha(page);
+    await navigateInApp(page, '/kid/read/test');
+    await page.getByRole('button', { name: 'Start recording' }).click();
+    await expect(page.getByText('Ask Mummy/Papa to turn on the microphone.')).toBeVisible();
+    await expect(page.getByText(/^For a parent: /)).toBeVisible();
   });
 
-  test.fixme('recording not understood: "Let\'s try again." and no score (K13–K14, Plan 8.3)', () => {
-    // EN.kid.reading.notUnderstood holds the words
+  test('recording not understood: "Let\'s try again." and no score', async ({ page }) => {
+    await fakeMicrophone(page);
+    const server = await signInFamily(page);
+    server.reading.outcome = 'not_understood';
+    await asAsha(page);
+    await navigateInApp(page, '/kid/read/test');
+    await page.getByRole('button', { name: 'Start recording' }).click();
+    await page.getByRole('button', { name: "I'm done" }).click();
+    await expect(page.getByRole('heading', { name: "Let's try again." })).toBeVisible();
+    await expect(page.getByText(/You got \d stars?/)).toHaveCount(0);
+    expect(server.reading.tests[0]).toMatchObject({ status: 'not_understood', stars: 0 });
   });
 
   test('camera not allowed: steps to allow it, and Choose file for the gallery', async ({

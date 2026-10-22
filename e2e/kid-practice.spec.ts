@@ -43,10 +43,13 @@ test('a practice set gives instant feedback and records the first answers', asyn
     ['p-noun', false],
     ['p-verb', true],
   ]);
-  const attempt = server.family.syncs
-    .flatMap((s) => (s.body['attempts'] ?? []) as Record<string, unknown>[])
-    .find((a) => a['completed_at']);
-  expect(attempt).toMatchObject({
+  // The finished attempt can come in a later sync than the answers
+  const completed = () =>
+    server.family.syncs
+      .flatMap((s) => (s.body['attempts'] ?? []) as Record<string, unknown>[])
+      .find((a) => a['completed_at']);
+  await expect.poll(() => completed() !== undefined).toBe(true);
+  expect(completed()).toMatchObject({
     kind: 'practice',
     subject_id: 1,
     correct_count: 1,
