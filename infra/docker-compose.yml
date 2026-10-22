@@ -217,6 +217,32 @@ services:
       seaweedfs:
         condition: service_healthy
 
+  # Plan 8.2: narrates read-along chapters and published lessons. It needs about 8 GB of memory, so it
+  # starts only with the voice profile (make voice); until then the jobs wait in their queues.
+  voice-maker:
+    <<: *restart
+    profiles: [voice]
+    build:
+      context: ../workers/voice-maker
+      secrets: [hf_token]
+    image: fullstar/voice-maker:local
+    environment:
+      SQS_ENDPOINT: http://elasticmq:9324
+      SQS_ACCESS_KEY_ID: ${SQS_ACCESS_KEY_ID:-local}
+      SQS_SECRET_ACCESS_KEY: ${SQS_SECRET_ACCESS_KEY:-local}
+      QUEUE_PREFIX: ${QUEUE_PREFIX:-}
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_REGION: ${S3_REGION:-auto}
+      S3_BUCKET: ${S3_BUCKET:?set S3_BUCKET in .env}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?set S3_ACCESS_KEY_ID in .env}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?set S3_SECRET_ACCESS_KEY in .env}
+      VOICE_THREADS: ${VOICE_THREADS:-4}
+    depends_on:
+      elasticmq:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+
   loki:
     <<: *restart
     image: grafana/loki:3.7.8
@@ -300,6 +326,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 6
+
+# Build-time only: the gated voice model download (Plan 8.2)
+secrets:
+  hf_token:
+    environment: HF_TOKEN
 
 volumes:
   caddy-data:

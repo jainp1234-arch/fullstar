@@ -79,3 +79,35 @@ test('a lesson finished offline syncs once when back online', async ({ page, con
   expect(completed(server)).toHaveLength(1);
   expect(Object.values(server.family.attempts).reduce((sum, a) => sum + a.stars, 0)).toBe(3);
 });
+
+test('Read aloud plays the lesson narration, or the device voice until it is made', async ({
+  page,
+}) => {
+  // Count what the device voice is asked to say
+  await page.addInitScript(() => {
+    const said: string[] = [];
+    (window as unknown as { said: string[] }).said = said;
+    window.speechSynthesis.speak = (u: SpeechSynthesisUtterance) => void said.push(u.text);
+  });
+  const server = await signInFamily(page);
+  await openLesson(page);
+  const readAloud = page.getByRole('button', { name: 'Read aloud' });
+  await readAloud.click();
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as { said: string[] }).said))
+    .toEqual(['A bird builds a nest.']);
+  await expect(page.locator('audio')).toHaveCount(0);
+
+  // Plan 8.2: once narrated, the scene's part of the MP3 plays instead
+  server.family.lessonNarrated = true;
+  await page.getByRole('button', { name: 'Close' }).click();
+  await page.getByRole('button', { name: /Watch lesson/ }).click();
+  await expect(page.getByText('A bird builds a nest.')).toBeVisible();
+  await expect(page.locator('audio')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Read aloud' }).click();
+  await expect
+    .poll(() => page.locator('audio').evaluate((a: HTMLAudioElement) => a.currentTime))
+    .toBeGreaterThan(0);
+  expect(await page.evaluate(() => (window as unknown as { said: string[] }).said)).toHaveLength(1);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});

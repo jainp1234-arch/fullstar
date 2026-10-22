@@ -1,0 +1,4 @@
+# PyTorch CPU wheels from https://download.pytorch.org/whl/cpu (the PyPI ones bring several GB of CUDA).
+# torchaudio's last release is 2.11.0, so torch stays on 2.11.0 with it (Tech Stack §7).
+torch==2.11.0
+torchaudio==2.11.0

@@ -48,6 +48,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # Plan 8.2: the voice model is 3.75 GB in each platform's image
+      - if: matrix.name == 'voice-maker'
+        name: Free runner disk
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL && df -h /
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         with:
           image: tonistiigi/binfmt:qemu-v10.2.3-68
@@ -61,8 +65,11 @@ jobs:
           file: ${{ matrix.file }}
           platforms: linux/amd64,linux/arm64
           push: false
+          # Only voice-maker reads it: the gated Indic Parler-TTS download (a BuildKit secret, never a layer)
+          secrets: ${{ matrix.name == 'voice-maker' && format('hf_token={0}', secrets.HF_TOKEN) || '' }}
           cache-from: type=gha,scope=${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+          # The voice-maker models would fill the repository's 10 GB cache
+          cache-to: ${{ matrix.name != 'voice-maker' && format('type=gha,mode=max,scope={0}', matrix.name) || '' }}
 
   # Plan 5.3: the real Tesseract 5.5.3 and cwebp of the book-reader image read the sample pages
   book-reader-tools:
@@ -115,3 +122,29 @@ jobs:
           cache-from: type=gha,scope=reading-checker
       - name: Real model test
         run: docker run --rm fullstar/reading-checker:test
+
+  # Plan 8.2: Indic Parler-TTS narrates an English and a Hindi page; Whisper hears the MP3 again
+  voice-maker-model:
+    name: voice-maker narration in the image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free runner disk
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL && df -h /
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+        with:
+          driver-opts: image=moby/buildkit:v0.33.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: workers/voice-maker
+          file: workers/voice-maker/Dockerfile
+          target: test
+          platforms: linux/amd64
+          load: true
+          tags: fullstar/voice-maker:test
+          secrets: hf_token=${{ secrets.HF_TOKEN }}
+      - name: Real voice test
+        run: docker run --rm fullstar/voice-maker:test

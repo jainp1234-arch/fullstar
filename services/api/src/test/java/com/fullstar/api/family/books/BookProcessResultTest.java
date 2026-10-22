@@ -297,7 +297,7 @@ class BookProcessResultTest extends ApiTestSupport {
 		throw new AssertionError("no readalong-narrate job for " + chapterId);
 	}
 
-	/** What the stand-in writes and reports for a narrate job: silent audio and timings per page. */
+	/** What voice-maker writes and reports for a narrate job (Plan 8.2): audio and timings per page. */
 	private String narrate(JsonNode job, String outcome) {
 		JsonNode payload = job.path("payload");
 		String familyKey = "families/" + payload.path("family_id").asString();

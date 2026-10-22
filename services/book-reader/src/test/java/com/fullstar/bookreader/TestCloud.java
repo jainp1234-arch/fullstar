@@ -82,7 +82,7 @@ public abstract class TestCloud {
 			.region(Region.AP_SOUTH_1)
 			.credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("test", "test")))
 			.build()) {
-			for (String name : List.of("upload-scan", "book-process", "readalong-narrate", "job-results")) {
+			for (String name : List.of("upload-scan", "book-process", "job-results")) {
 				client.createQueue(request -> request.queueName(name));
 			}
 		}
