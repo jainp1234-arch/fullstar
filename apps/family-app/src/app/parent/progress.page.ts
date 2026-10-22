@@ -20,6 +20,8 @@ import {
   SectionHeader,
   Skeleton,
   errorMessage,
+  ErrorBar,
+  Connectivity,
 } from '@fullstar/ui';
 
 const AVATARS = new Set<string>(AVATAR_KEYS);
@@ -33,7 +35,7 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
 @Component({
   selector: 'app-progress-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Avatar, ListCard, SectionHeader, Skeleton],
+  imports: [Avatar, ErrorBar, ListCard, SectionHeader, Skeleton],
   template: `
     @if (children().length > 1) {
       <div class="tabs" role="tablist" [attr.aria-label]="text.childTabs">
@@ -51,6 +53,10 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
           </button>
         }
       </div>
+    }
+    @if (!online()) {
+      <!-- App Flow §11: progress offline is the last saved view -->
+      <p class="saved" role="status">{{ text.savedView }}</p>
     }
     @if (week(); as w) {
       @if (!w.any_activity) {
@@ -95,12 +101,17 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
       <app-section-header [title]="text.reading" />
       <p class="note">{{ text.noReading }}</p>
     } @else if (failure(); as message) {
-      <p class="warning" role="alert">{{ message }}</p>
+      <app-error-bar [message]="message" (retry)="retryLoad()" />
     } @else {
       <app-skeleton shape="list-card" [count]="3" />
     }
   `,
   styles: `
+    .saved {
+      margin: 0;
+      font: var(--type-small);
+      color: var(--color-text-2);
+    }
     :host {
       display: flex;
       flex-direction: column;
@@ -180,6 +191,7 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
 })
 export class ProgressPage {
   protected readonly text = EN.progress;
+  protected readonly online = inject(Connectivity).online;
   protected readonly week = signal<WeekSummary | null>(null);
   protected readonly failure = signal<string | null>(null);
   protected readonly childId = signal<string | null>(null);
@@ -246,6 +258,13 @@ export class ProgressPage {
     });
   }
 
+  protected retryLoad(): void {
+    const id = this.childId();
+    if (id) {
+      this.load(id);
+    }
+  }
+
   private load(childId: string): void {
     this.failure.set(null);
     this.week.set(null);
@@ -256,7 +275,7 @@ export class ProgressPage {
         next: (week) => this.week.set(week),
         error: (error: unknown) =>
           this.failure.set(
-            `${this.text.loadFailed} ${errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent')}`,
+            errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent'),
           ),
       });
   }

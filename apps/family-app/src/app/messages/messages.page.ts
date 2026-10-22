@@ -11,7 +11,7 @@ import {
   MessageLink,
   SubjectBookRow,
 } from '@fullstar/core';
-import { Button, EN, Skeleton, errorMessage } from '@fullstar/ui';
+import { Button, EN, Skeleton, errorMessage, ErrorBar } from '@fullstar/ui';
 import { Observable, forkJoin, map, of } from 'rxjs';
 
 /** Book screens a message can lead to, by App Flow id. */
@@ -28,7 +28,7 @@ const BOOK_PAGES: Readonly<Record<string, string>> = {
 @Component({
   selector: 'app-messages-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, DatePipe, Skeleton],
+  imports: [Button, DatePipe, ErrorBar, Skeleton],
   template: `
     @if (messages(); as list) {
       @if (list.length) {
@@ -63,7 +63,7 @@ const BOOK_PAGES: Readonly<Record<string, string>> = {
         <p class="note">{{ text.empty }}</p>
       }
     } @else if (failure(); as message) {
-      <p class="warning" role="alert">{{ message }}</p>
+      <app-error-bar [message]="message" (retry)="load(null)" />
     } @else {
       <app-skeleton shape="list-card" [count]="3" />
     }
@@ -164,7 +164,7 @@ export class MessagesPage {
         },
         error: (error: unknown) =>
           this.failure.set(
-            `${this.text.loadFailed} ${errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent')}`,
+            errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent'),
           ),
       });
   }

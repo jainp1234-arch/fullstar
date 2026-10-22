@@ -8,8 +8,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ApiError, FamilyApi } from '@fullstar/core';
-import { EN, PinPad, errorMessage } from '@fullstar/ui';
+import { ApiError, AuthService, FamilyApi } from '@fullstar/core';
+import { Button, Connectivity, EN, PinPad, errorMessage } from '@fullstar/ui';
 import { PAGE_STYLES } from '../setup/page-styles';
 
 const DEFAULT_NEXT = '/parent/progress';
@@ -26,13 +26,20 @@ export function safeNext(value: string | null): string {
 @Component({
   selector: 'app-parent-pin-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PinPad, RouterLink],
+  imports: [Button, PinPad, RouterLink],
   template: `
     <h1 class="page__title" tabindex="-1">{{ title }}</h1>
-    <p class="page__intro">{{ text.enter }}</p>
-    <app-pin-pad [disabled]="busy() || locked()" (completed)="verify($event)" />
-    <p class="page__error" role="alert">{{ failure() }}</p>
-    <a class="pin__forgot" routerLink="/parent/forgot-pin">{{ text.forgot }}</a>
+    @if (signedIn()) {
+      <p class="page__intro">{{ text.enter }}</p>
+      <app-pin-pad [disabled]="busy() || locked()" (completed)="verify($event)" />
+      <p class="page__error" role="alert">{{ failure() }}</p>
+      <a class="pin__forgot" routerLink="/parent/forgot-pin">{{ text.forgot }}</a>
+    } @else {
+      <!-- App Flow §10: the session ended; parent mode needs a new email code -->
+      <p class="page__intro" role="status">{{ signInAgain }}</p>
+      <app-button [label]="text.signIn" [fullWidth]="true" (pressed)="signIn()" />
+      <p class="page__error" role="alert">{{ failure() }}</p>
+    }
   `,
   styles: [
     PAGE_STYLES,
@@ -62,16 +69,28 @@ export class ParentPinPage {
   protected readonly busy = signal(false);
   protected readonly locked = signal(false);
   protected readonly failure = signal<string | null>(null);
+  protected readonly signInAgain = errorMessage('UNAUTHENTICATED', 'parent');
 
+  private readonly auth = inject(AuthService);
+  private readonly online = inject(Connectivity).online;
+  protected readonly signedIn = this.auth.authenticated;
   private readonly family = inject(FamilyApi);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly pad = viewChild.required(PinPad);
+  private readonly pad = viewChild(PinPad);
   private unlockTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     this.destroyRef.onDestroy(() => clearTimeout(this.unlockTimer));
+  }
+
+  protected signIn(): void {
+    if (!this.online()) {
+      this.failure.set(EN.parent.offline);
+      return;
+    }
+    void this.auth.signIn({ email: this.auth.user()?.email ?? undefined });
   }
 
   protected verify(pin: string): void {
@@ -85,7 +104,7 @@ export class ParentPinPage {
           void this.router.navigateByUrl(safeNext(this.route.snapshot.queryParamMap.get('next'))),
         error: (error: unknown) => {
           this.busy.set(false);
-          this.pad().reject();
+          this.pad()?.reject();
           if (!(error instanceof ApiError)) {
             this.failure.set(errorMessage('INTERNAL_ERROR', 'parent'));
             return;

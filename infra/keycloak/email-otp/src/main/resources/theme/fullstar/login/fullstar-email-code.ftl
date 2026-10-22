@@ -10,6 +10,7 @@
             <@field.input name="code" label=msg("fullstarCodeLabel", codeLength) autocomplete="one-time-code" autofocus=true />
             <@buttons.loginButton />
         </form>
+        <p id="kc-spam-hint" class="${properties.kcInputHelperTextBeforeClass!}">${msg("fullstarSpamHint")}</p>
         <form id="kc-fullstar-resend-form" action="${url.loginAction}" method="post">
             <@buttons.actionGroup>
                 <@buttons.button id="kc-resend" name="resend" label="fullstarResend" type="secondary" />

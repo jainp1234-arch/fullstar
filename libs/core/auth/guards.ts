@@ -34,10 +34,15 @@ export interface SetupPaths {
 export function familyGuard(consentPath: string, setup?: SetupPaths): CanActivateFn {
   return (): boolean | UrlTree | Observable<boolean | UrlTree> => {
     const router = inject(Router);
+    const family = inject(FamilyApi);
     if (!inject(AuthService).authenticated()) {
+      // App Flow §10: a session that ended on its own keeps the family this device knows
+      const ended = inject(AUTH_CONFIG).sessionEnded;
+      if (ended && family.restoreFromDevice()) {
+        return true;
+      }
       return router.parseUrl(inject(AUTH_CONFIG).signedOutPath);
     }
-    const family = inject(FamilyApi);
     const decide = (state: FamilyState): boolean | UrlTree => {
       if (state === 'new') {
         return router.parseUrl(consentPath);

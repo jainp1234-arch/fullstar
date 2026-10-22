@@ -150,10 +150,12 @@ export class FixPagesPage {
           this.retaking.set(null);
           if (step.upload.status === 'rejected') {
             this.failure.set(
-              this.books.rejected(
-                this.books.reasons[step.upload.reject_reason ?? 'unreadable'] ??
-                  this.books.reasons['unreadable'],
-              ),
+              step.upload.reject_reason === 'infected'
+                ? this.books.infected
+                : this.books.rejected(
+                    this.books.reasons[step.upload.reject_reason ?? 'unreadable'] ??
+                      this.books.reasons['unreadable'],
+                  ),
             );
             return;
           }

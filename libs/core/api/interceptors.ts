@@ -11,7 +11,9 @@ import { Router } from '@angular/router';
 import { Observable, catchError, from, switchMap, tap, throwError } from 'rxjs';
 import { AUTH_CONFIG } from '../auth/auth-config';
 import { AuthService } from '../auth/auth.service';
+import { DeviceFamily } from '../family/device-family';
 import { FamilySession } from '../family/family-session';
+import { deviceCopyInterceptor } from './device-copy';
 import { API_BASE, AUTH_RETRIED, CHILD_ID, IDEMPOTENCY_KEY, isApiUrl } from './api-context';
 import { toApiError } from './api-error';
 
@@ -27,6 +29,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const router = inject(Router);
   const config = inject(AUTH_CONFIG);
+  const session = inject(FamilySession);
+  const device = inject(DeviceFamily);
   const send = (request: HttpRequest<unknown>): Observable<HttpEvent<unknown>> =>
     from(auth.token()).pipe(
       switchMap((token) =>
@@ -43,7 +47,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       return from(auth.refreshNow()).pipe(
         switchMap((refreshed) => {
           if (!refreshed) {
-            void router.navigateByUrl(config.signedOutPath);
+            session.lockParent();
+            const ended = config.sessionEnded;
+            if (ended && device.read()) {
+              // App Flow §10: back to Who is learning?; a child keeps using what the device has
+              if (!ended.stayOn.some((prefix) => router.url.startsWith(prefix))) {
+                void router.navigateByUrl(ended.path);
+              }
+            } else {
+              void router.navigateByUrl(config.signedOutPath);
+            }
             return throwError(() => error);
           }
           return send(req.clone({ context: req.context.set(AUTH_RETRIED, true) }));
@@ -97,8 +110,9 @@ export const idempotencyInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req.clone({ setHeaders: { 'Idempotency-Key': key } }));
 };
 
-/** In order: idempotency key, family headers, then the token (which may retry). */
+/** In order: device copy, idempotency key, family headers, then the token (which may retry). */
 export const API_INTERCEPTORS: HttpInterceptorFn[] = [
+  deviceCopyInterceptor,
   idempotencyInterceptor,
   childInterceptor,
   parentGrantInterceptor,

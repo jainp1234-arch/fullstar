@@ -1,6 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, InjectionToken, computed, inject, signal } from '@angular/core';
 import Keycloak, { KeycloakLoginOptions } from 'keycloak-js';
+import { DeviceCopy } from '../api/device-copy';
+import { DeviceFamily } from '../family/device-family';
 import { AUTH_CONFIG } from './auth-config';
 import { TokenStore } from './token-store';
 
@@ -40,6 +42,8 @@ export class AuthService {
   private readonly store = inject(TokenStore);
   private readonly document = inject(DOCUMENT);
   private readonly keycloak = inject(KEYCLOAK_FACTORY)();
+  private readonly deviceFamily = inject(DeviceFamily);
+  private readonly deviceCopy = inject(DeviceCopy);
 
   private readonly signedIn = signal(false);
   private readonly claims = signal<UserInfo | null>(null);
@@ -99,6 +103,9 @@ export class AuthService {
       }
     }
     await this.store.clear();
+    // Plan 7.5: a real sign-out leaves nothing of the family on the device
+    this.deviceFamily.clear();
+    await this.deviceCopy.clear();
     this.signedIn.set(false);
     await this.keycloak.logout({ redirectUri: this.absolute(this.config.signedOutPath) });
   }

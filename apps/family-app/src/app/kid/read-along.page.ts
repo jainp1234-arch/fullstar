@@ -18,7 +18,7 @@ import {
   WordTiming,
   wordAt,
 } from '@fullstar/core';
-import { Button, EN, ProgressBar, Skeleton } from '@fullstar/ui';
+import { Button, EN, ProgressBar, KidRetry, OwlLoader } from '@fullstar/ui';
 
 /**
  * K5 Read-along (App Flow §5; Schema §11; Plan 6.3): the book page with each word highlighted as it
@@ -30,7 +30,7 @@ import { Button, EN, ProgressBar, Skeleton } from '@fullstar/ui';
 @Component({
   selector: 'app-read-along-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, ProgressBar, Skeleton],
+  imports: [Button, KidRetry, OwlLoader, ProgressBar],
   template: `
     <h1 class="title" tabindex="-1" [attr.lang]="lang()">
       {{ opened()?.chapter?.title ?? screenTitle }}
@@ -100,12 +100,9 @@ import { Button, EN, ProgressBar, Skeleton } from '@fullstar/ui';
         />
       </div>
     } @else if (failed()) {
-      <div class="failed" role="alert">
-        <p>{{ kid.somethingFailed }}</p>
-        <app-button [label]="kid.tryAgain" (pressed)="load()" />
-      </div>
+      <app-kid-retry (retry)="load()" />
     } @else {
-      <app-skeleton shape="list-card" [count]="2" />
+      <app-owl-loader />
     }
   `,
   styles: `
@@ -160,13 +157,6 @@ import { Button, EN, ProgressBar, Skeleton } from '@fullstar/ui';
       display: flex;
       justify-content: space-between;
       gap: var(--space-3);
-    }
-    .failed {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
-      font: var(--type-body);
     }
   `,
 })

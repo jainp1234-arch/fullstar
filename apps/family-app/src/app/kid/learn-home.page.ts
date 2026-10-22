@@ -5,13 +5,16 @@ import { Router } from '@angular/router';
 import { ContinueCard, KidApi, KidEvents, KidHome, KidSubjectTile } from '@fullstar/core';
 import {
   BannerCard,
-  Button,
   EN,
   IllustrationKey,
   ListCard,
-  Skeleton,
   StarPill,
+  KidRetry,
+  OwlLoader,
+  CardState,
+  ToastService,
 } from '@fullstar/ui';
+import { offlineMissing } from './kid-offline';
 
 /**
  * K1 My subjects (App Flow §5; Schema §11 GET /family/kid/home; Plan 6.1): a greeting with the star
@@ -21,7 +24,7 @@ import {
 @Component({
   selector: 'app-learn-home-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BannerCard, Button, ListCard, Skeleton, StarPill],
+  imports: [BannerCard, KidRetry, ListCard, OwlLoader, StarPill],
   template: `
     @if (home(); as h) {
       <div class="top">
@@ -48,18 +51,16 @@ import {
             [illustration]="illustrationOf(subject)"
             [title]="subject.name"
             [subtitle]="subject.mode === 'book' ? text.myBook : text.practice(h.child.class_level)"
+            [state]="stateOf(subject)"
             [attr.data-screen-link]="linkTo(subjectUrl(subject))"
-            (pressed)="go(subjectUrl(subject))"
+            (pressed)="$event === 'offline' ? needsInternet() : go(subjectUrl(subject))"
           />
         }
       </div>
     } @else if (failed()) {
-      <div class="failed" role="alert">
-        <p>{{ kid.somethingFailed }}</p>
-        <app-button [label]="kid.tryAgain" (pressed)="load()" />
-      </div>
+      <app-kid-retry (retry)="load()" />
     } @else {
-      <app-skeleton shape="list-card" [count]="4" />
+      <app-owl-loader />
     }
   `,
   styles: `
@@ -98,13 +99,6 @@ import {
       flex-direction: column;
       gap: var(--space-3);
     }
-    .failed {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
-      font: var(--type-body);
-    }
   `,
 })
 export class LearnHomePage {
@@ -118,6 +112,22 @@ export class LearnHomePage {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toasts = inject(ToastService);
+  /** Offline: subjects not opened before (App Flow §10, Plan 7.5). */
+  private readonly missing = offlineMissing(() =>
+    (this.home()?.subjects ?? []).map((s) => ({
+      id: String(s.subject_id),
+      call: { method: 'GET' as const, path: `/family/kid/subjects/${s.subject_id}` },
+    })),
+  );
+
+  protected stateOf(subject: KidSubjectTile): CardState {
+    return this.missing().has(String(subject.subject_id)) ? 'offline' : 'normal';
+  }
+
+  protected needsInternet(): void {
+    this.toasts.show(this.kid.offline);
+  }
 
   constructor() {
     this.load();

@@ -57,7 +57,13 @@ interface Picked {
       <app-button variant="secondary" [label]="text.backToBooks" (pressed)="leave()" />
     } @else if (result(); as done) {
       @if (done.status === 'rejected') {
-        <p class="warning" role="alert">{{ text.rejected(reason(done.reject_reason)) }}</p>
+        <p class="warning" role="alert">
+          {{
+            done.reject_reason === 'infected'
+              ? text.infected
+              : text.rejected(reason(done.reject_reason))
+          }}
+        </p>
         <app-button [label]="text.clear" (pressed)="reset()" />
       } @else {
         <p class="done" role="status">{{ text.sent }}</p>

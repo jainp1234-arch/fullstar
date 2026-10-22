@@ -31,10 +31,11 @@ import {
   QuestionCard,
   QuestionContent,
   ReadAloud,
-  Skeleton,
   SpeechBubble,
   contentValue,
   illustrationUrl,
+  KidRetry,
+  OwlLoader,
 } from '@fullstar/ui';
 import { gsap } from 'gsap';
 import { Choice, choicesOf, pairsOf } from './question-choices';
@@ -56,7 +57,16 @@ interface Quiz {
 @Component({
   selector: 'app-lesson-player-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AnswerButton, Button, ProgressBar, QuestionCard, ReadAloud, Skeleton, SpeechBubble],
+  imports: [
+    AnswerButton,
+    Button,
+    KidRetry,
+    OwlLoader,
+    ProgressBar,
+    QuestionCard,
+    ReadAloud,
+    SpeechBubble,
+  ],
   template: `
     <h1 class="title" tabindex="-1" [attr.lang]="lang()">{{ lesson()?.title ?? screenTitle }}</h1>
     @if (lesson(); as l) {
@@ -147,12 +157,9 @@ interface Quiz {
         />
       </div>
     } @else if (failed()) {
-      <div class="failed" role="alert">
-        <p>{{ kid.somethingFailed }}</p>
-        <app-button [label]="kid.tryAgain" (pressed)="load()" />
-      </div>
+      <app-kid-retry (retry)="load()" />
     } @else {
-      <app-skeleton shape="list-card" [count]="2" />
+      <app-owl-loader />
     }
   `,
   styles: `
@@ -201,13 +208,6 @@ interface Quiz {
       flex-wrap: wrap;
       justify-content: space-between;
       gap: var(--space-3);
-    }
-    .failed {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
-      font: var(--type-body);
     }
   `,
 })

@@ -678,6 +678,7 @@ export const EN = {
     sendCode: 'Email me a code',
     newPin: 'Choose a new PIN.',
     saved: 'Your new PIN is saved.',
+    signIn: 'Sign in with an email code',
   },
 
   /** Placeholder pages until each screen is built (Plan 2.3). */
@@ -697,6 +698,12 @@ export const EN = {
     lessonNotReady: 'Coming soon! Read along for now.',
     offline: 'This needs the internet.',
     needsParent: 'Ask Mummy or Papa to help.',
+    /** K12–K14 reading test (App Flow §9, §10); the screens arrive with Plan 8.3. */
+    reading: {
+      firstStory: "Let's read your first story!",
+      micOff: 'Ask Mummy/Papa to turn on the microphone.',
+      notUnderstood: "Let's try again.",
+    },
     /** K1–K3 Learn (Plan 6.1). */
     learn: {
       hello: (name: string) => `Hi ${name}!`,
@@ -851,6 +858,8 @@ export const EN = {
     title: 'Add pages',
     takePhotos: 'Take photos',
     chooseFile: 'Choose file',
+    cameraBlocked:
+      'The camera is not allowed for FullStar. To allow it, tap the lock next to the web address, open Permissions and turn on Camera. Or tap Choose file to pick photos from your gallery.',
     limits: 'PDF up to 50 MB and 300 pages, or JPG/PNG photos up to 10 MB each, 50 per upload.',
     page: (page: number) => `Page ${page}`,
     unclearPage: (page: number) => `Page ${page}, unclear`,
@@ -888,6 +897,8 @@ export const EN = {
       unreadable: 'we could not read the file.',
     } as Record<string, string>,
     scanning: 'We are checking your upload.',
+    // App Flow §10: a file that failed the virus check, said the same way everywhere (Plan 7.5)
+    infected: "This file couldn't be used. Please try a different copy.",
     loadFailed: "We couldn't load the books.",
     // Upload screens (P5 whole book, P7 a chapter)
     wholeIntro:
@@ -945,6 +956,7 @@ export const EN = {
   /** P1 Progress and P2 Subject detail (App Flow §6; Plan 6.4). */
   progress: {
     childTabs: 'Whose progress',
+    savedView: 'Last saved view. It updates when you are back online.',
     thisWeek: 'This week',
     minutes: (minutes: number) => `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} learning`,
     activeDays: (days: number) => `on ${days} ${days === 1 ? 'day' : 'days'}`,

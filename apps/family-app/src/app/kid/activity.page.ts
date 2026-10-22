@@ -3,7 +3,8 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { KidActivity, KidApi, KidLessonCard } from '@fullstar/core';
-import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
+import { CardState, EN, KidRetry, ListCard, OwlLoader, ToastService } from '@fullstar/ui';
+import { OfflineItem, offlineMissing } from './kid-offline';
 
 /**
  * K3 Chapter / topic (App Flow §5; Schema §11; Plan 6.1): Watch lesson (one card per published
@@ -14,7 +15,7 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
 @Component({
   selector: 'app-activity-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, ListCard, Skeleton],
+  imports: [KidRetry, ListCard, OwlLoader],
   template: `
     @if (activity(); as a) {
       <h2 class="title">
@@ -27,8 +28,9 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
             [title]="a.lessons.length === 1 ? text.watchLesson : lesson.title"
             [subtitle]="subtitleOf(lesson)"
             [cornerTab]="lesson.done ? { text: text.done, tone: 'green' } : null"
+            [state]="stateOf(lesson.content_item_id)"
             [attr.data-screen-link]="linkTo('/kid/lesson/' + lesson.content_item_id)"
-            (pressed)="watch(a, lesson)"
+            (pressed)="$event === 'offline' ? needsInternet() : watch(a, lesson)"
           />
         } @empty {
           <app-list-card
@@ -43,16 +45,18 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
           <app-list-card
             illustration="act-readalong"
             [title]="text.readAlong"
+            [state]="stateOf('read-along')"
             [attr.data-screen-link]="linkTo('/kid/read-along/' + a.id)"
-            (pressed)="readAlong(a)"
+            (pressed)="$event === 'offline' ? needsInternet() : readAlong(a)"
           />
         }
         @if (a.worksheet_id; as worksheetId) {
           <app-list-card
             illustration="act-worksheet"
             [title]="text.worksheet"
+            [state]="stateOf('worksheet')"
             [attr.data-screen-link]="linkTo('/kid/worksheet/' + worksheetId)"
-            (pressed)="openWorksheet(worksheetId)"
+            (pressed)="$event === 'offline' ? needsInternet() : openWorksheet(worksheetId)"
           />
         } @else {
           <app-list-card
@@ -65,12 +69,9 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
         }
       </div>
     } @else if (failed()) {
-      <div class="failed" role="alert">
-        <p>{{ kid.somethingFailed }}</p>
-        <app-button [label]="kid.tryAgain" (pressed)="load()" />
-      </div>
+      <app-kid-retry (retry)="load()" />
     } @else {
-      <app-skeleton shape="list-card" [count]="3" />
+      <app-owl-loader />
     }
   `,
   styles: `
@@ -89,13 +90,6 @@ import { Button, EN, ListCard, Skeleton, ToastService } from '@fullstar/ui';
       flex-direction: column;
       gap: var(--space-3);
     }
-    .failed {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
-      font: var(--type-body);
-    }
   `,
 })
 export class ActivityPage {
@@ -110,9 +104,39 @@ export class ActivityPage {
   private readonly location = inject(Location);
   private readonly toasts = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  /** Offline: cards whose content the device doesn't have (App Flow §10, Plan 7.5). */
+  private readonly missing = offlineMissing(() => {
+    const a = this.activity();
+    if (!a) {
+      return [];
+    }
+    const items: OfflineItem[] = a.lessons.map((lesson) => ({
+      id: lesson.content_item_id,
+      call: { method: 'GET', path: `/family/kid/lessons/${lesson.content_item_id}` },
+    }));
+    if (a.read_along) {
+      items.push({ id: 'read-along', readAlong: a.id });
+    }
+    if (a.worksheet_id) {
+      items.push({
+        id: 'worksheet',
+        call: { method: 'POST', path: `/family/kid/worksheets/${a.worksheet_id}/onscreen` },
+      });
+    }
+    return items;
+  });
 
   constructor() {
     this.load();
+  }
+
+  protected stateOf(id: string): CardState {
+    return this.missing().has(id) ? 'offline' : 'normal';
+  }
+
+  /** Guidelines §16 offline (kid): the card stays, tapping says why. */
+  protected needsInternet(): void {
+    this.toasts.show(this.kid.offline);
   }
 
   protected load(): void {

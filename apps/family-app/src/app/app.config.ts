@@ -30,6 +30,8 @@ export const appConfig: ApplicationConfig = {
       persist: true,
       redirectPath: '/sign-in/code',
       signedOutPath: '/welcome',
+      // App Flow §10: an ended session returns to C1; kid mode keeps working offline
+      sessionEnded: { path: '/who', stayOn: ['/kid/', '/who'] },
     }),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
