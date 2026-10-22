@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Page, chromium, expect, test } from '@playwright/test';
+import { navigateInApp } from '../routes';
 import { finishSetup, newEmail, signIn, signUp, skipWithoutStack } from './stack';
 
 /**
@@ -52,11 +53,8 @@ test("Child's session: a lesson to K7, tables and the 60-second challenge", asyn
   await expect(page).toHaveURL(/\/kid\/well-done\?stars=\d/);
   await expect(page.getByRole('heading', { name: /Well done!/ })).toBeVisible();
 
-  // Practice → Tables (K10): the 7 times table, ten sums
-  await page
-    .getByRole('navigation', { name: /Kid/ })
-    .getByRole('link', { name: 'Practice' })
-    .click();
+  // Practice → Tables (K10): the 7 times table, ten sums (K7 has no tab bar)
+  await navigateInApp(page, '/kid/practice');
   await page.getByRole('button', { name: /Maths tables/ }).click();
   await expect(page).toHaveURL(/\/kid\/practice\/tables/);
   await page.getByRole('button', { name: '7 times table', exact: true }).click();

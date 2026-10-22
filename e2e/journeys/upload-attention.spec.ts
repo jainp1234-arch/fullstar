@@ -55,7 +55,10 @@ test('Upload needs attention: unclear pages message, P8 retakes only those, Gett
 
   for (let i = 0; i < 3; i++) {
     const retake = page.getByRole('button', { name: /^Retake page \d+$/ }).first();
-    const number = ((await retake.textContent()) ?? '').match(/\d+/)?.[0] ?? '';
+    // The page number is in the button's accessible name, not its text
+    const label = (await retake.getAttribute('aria-label')) ?? (await retake.textContent()) ?? '';
+    const number = label.match(/\d+/)?.[0] ?? '';
+    expect(number).not.toBe('');
     await retake.click();
     await expect(page.getByText(`New photo of page ${number}`)).toBeVisible();
     await page

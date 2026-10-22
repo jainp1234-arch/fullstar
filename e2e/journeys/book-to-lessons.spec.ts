@@ -76,7 +76,12 @@ test('Parent adds a chapter: Hindi, six photos, Getting ready', async () => {
   ).toBeVisible({ timeout: 60_000 });
   await parent.getByRole('button', { name: 'Back to books' }).click();
   await expect(
-    parent.getByRole('listitem').filter({ hasText: 'Hindi' }).first().getByText('Getting ready'),
+    parent
+      .getByRole('listitem')
+      .filter({ hasText: 'Hindi' })
+      .first()
+      .getByText('Getting ready')
+      .first(),
   ).toBeVisible();
 });
 

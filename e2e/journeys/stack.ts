@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { createHmac } from 'node:crypto';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Page, expect, test } from '@playwright/test';
 import { navigateInApp } from '../routes';
@@ -63,7 +65,93 @@ export async function enterEmailAndCode(page: Page, email: string): Promise<void
   await expect(codeField).toBeVisible();
   await codeField.fill(await codeFor(email, sent));
   await codeField.press('Enter');
+}
+
+/** Keycloak's email page (A2) and code page (A3), through to the app (families). */
+async function emailCodeToApp(page: Page, email: string): Promise<void> {
+  await enterEmailAndCode(page, email);
   await expect(page).toHaveURL(/localhost:8080\/(?!auth\/)/);
+}
+
+/**
+ * Staff also need an authenticator app (Schema §8.3: email code, then TOTP; the first sign-in sets it
+ * up). The journeys keep the secret in a temp file, so every later sign-in, and the next run on the
+ * same stack, can make codes (RFC 6238 with Keycloak's default policy: SHA-1, 6 digits, 30 s).
+ */
+const TOTP_FILE = join(tmpdir(), 'fullstar-journeys-staff-totp.json');
+
+function base32(secret: string): Buffer {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits = '';
+  for (const char of secret.replace(/[\s=]/g, '').toUpperCase()) {
+    bits += alphabet.indexOf(char).toString(2).padStart(5, '0');
+  }
+  const bytes = bits.match(/.{8}/g) ?? [];
+  return Buffer.from(bytes.map((b) => parseInt(b, 2)));
+}
+
+function totp(secret: string, counter: number): string {
+  const message = Buffer.alloc(8);
+  message.writeBigUInt64BE(BigInt(counter));
+  const hmac = createHmac('sha1', base32(secret)).update(message).digest();
+  const offset = hmac[hmac.length - 1] & 0xf;
+  const value = (hmac.readUInt32BE(offset) & 0x7fffffff) % 1_000_000;
+  return value.toString().padStart(6, '0');
+}
+
+/** A code from a time step not used before: Keycloak refuses a code used twice. */
+async function freshCode(
+  secret: string,
+  lastUsed: number,
+): Promise<{ code: string; counter: number }> {
+  let counter = Math.floor(Date.now() / 30_000);
+  while (counter <= lastUsed) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    counter = Math.floor(Date.now() / 30_000);
+  }
+  return { code: totp(secret, counter), counter };
+}
+
+function savedTotp(email: string): { secret: string; lastUsed: number } | null {
+  if (!existsSync(TOTP_FILE)) {
+    return null;
+  }
+  const all = JSON.parse(readFileSync(TOTP_FILE, 'utf8')) as Record<
+    string,
+    { secret: string; lastUsed: number }
+  >;
+  return all[email] ?? null;
+}
+
+function saveTotp(email: string, secret: string, lastUsed: number): void {
+  const all = existsSync(TOTP_FILE)
+    ? (JSON.parse(readFileSync(TOTP_FILE, 'utf8')) as Record<string, unknown>)
+    : {};
+  writeFileSync(TOTP_FILE, JSON.stringify({ ...all, [email]: { secret, lastUsed } }));
+}
+
+async function staffSecondFactor(page: Page, email: string): Promise<void> {
+  const setup = page.locator('#totp');
+  const otp = page.locator('#otp');
+  await expect(setup.or(otp)).toBeVisible();
+  if (await setup.isVisible()) {
+    // First sign-in: Keycloak shows the key under "Unable to scan?"
+    await page.getByText('Unable to scan?').click();
+    const secret = ((await page.locator('#kc-totp-secret-key').textContent()) ?? '').trim();
+    const { code, counter } = await freshCode(secret, 0);
+    await setup.fill(code);
+    await page.locator('#saveTOTPBtn, input[type="submit"]').first().click();
+    saveTotp(email, secret, counter);
+    return;
+  }
+  const saved = savedTotp(email);
+  if (!saved) {
+    throw new Error(`No authenticator secret saved for ${email} (${TOTP_FILE})`);
+  }
+  const { code, counter } = await freshCode(saved.secret, saved.lastUsed);
+  await otp.fill(code);
+  await page.locator('#kc-login, input[type="submit"]').first().click();
+  saveTotp(email, saved.secret, counter);
 }
 
 /** A new family: Welcome → Sign up → consent → Keycloak → B1. */
@@ -73,7 +161,7 @@ export async function signUp(page: Page, email: string): Promise<void> {
   await expect(page).toHaveURL(/\/sign-up$/);
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: 'Continue to email' }).click();
-  await enterEmailAndCode(page, email);
+  await emailCodeToApp(page, email);
   await expect(page).toHaveURL(/\/setup\/pin$/);
 }
 
@@ -81,15 +169,16 @@ export async function signUp(page: Page, email: string): Promise<void> {
 export async function signIn(page: Page, email: string): Promise<void> {
   await page.goto('/welcome');
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await enterEmailAndCode(page, email);
+  await emailCodeToApp(page, email);
   await expect(page).toHaveURL(/\/who$/);
 }
 
-/** Studio staff: S1 → Sign in → Keycloak → dashboard. */
+/** Studio staff: S1 → Sign in → Keycloak email code and authenticator code → dashboard. */
 export async function signInStaff(page: Page, email: string = ADMIN_EMAIL): Promise<void> {
   await page.goto('/studio/sign-in');
   await page.getByRole('button', { name: 'Sign in' }).click();
   await enterEmailAndCode(page, email);
+  await staffSecondFactor(page, email);
   await expect(page).toHaveURL(/\/studio\/dashboard$/);
 }
 

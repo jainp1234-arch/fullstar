@@ -28,7 +28,7 @@ test('New school year: move to Class 4 after the warning; subjects reset', async
   await expect(page.getByRole('heading', { name: 'Class 4' })).toBeVisible();
 
   // The child's subjects are Class 4 now
-  await page.getByRole('button', { name: 'Back to kids' }).click();
+  await navigateInApp(page, '/who');
   await page.getByRole('button', { name: 'Dev' }).click();
   await expect(page.getByText('Class 4 practice').first()).toBeVisible();
 });
