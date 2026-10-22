@@ -1,8 +1,9 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 import { ApiClient } from '../api/api-client';
 import { ApiError } from '../api/api-error';
 import { FamilySession } from './family-session';
+import { DeviceFamily } from './device-family';
 
 /** GET /family/me (Schema §11), wire format: snake_case. */
 export interface FamilyMe {
@@ -91,6 +92,7 @@ export type FamilyState = FamilyMe | 'new' | null;
 export class FamilyApi {
   private readonly api = inject(ApiClient);
   private readonly session = inject(FamilySession);
+  private readonly device = inject(DeviceFamily);
   private readonly current = signal<FamilyState>(null);
 
   readonly state = this.current.asReadonly();
@@ -99,6 +101,27 @@ export class FamilyApi {
     const state = this.current();
     return state && state !== 'new' ? state : null;
   });
+
+  constructor() {
+    // Plan 7.5: the device keeps the family it last saw, for C1 after the session ends
+    effect(() => {
+      const state = this.current();
+      if (state === 'new') {
+        this.device.clear();
+      } else if (state) {
+        this.device.save(state);
+      }
+    });
+  }
+
+  /** The family this device last saw, used when the session has ended (App Flow §10). */
+  restoreFromDevice(): boolean {
+    const saved = this.device.read();
+    if (saved && !this.me()) {
+      this.current.set(saved);
+    }
+    return saved !== null;
+  }
 
   /** Loads /family/me; FAMILY_NOT_FOUND becomes 'new' (Schema §8.1). */
   loadMe(): Observable<FamilyState> {

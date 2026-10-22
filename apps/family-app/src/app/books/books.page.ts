@@ -28,6 +28,7 @@ import {
   StatusChip,
   ToastService,
   errorMessage,
+  ErrorBar,
 } from '@fullstar/ui';
 import { filter, switchMap } from 'rxjs';
 import { chipFor } from './book-status';
@@ -44,7 +45,7 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
 @Component({
   selector: 'app-books-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Avatar, Button, Skeleton, StatusChip],
+  imports: [Avatar, Button, ErrorBar, Skeleton, StatusChip],
   template: `
     @if (children().length > 1) {
       <div class="tabs" role="tablist" [attr.aria-label]="text.childTabs">
@@ -63,7 +64,7 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
         }
       </div>
     }
-    <p class="intro">{{ text.intro }} {{ text.practiceNote }}</p>
+    <p class="intro">{{ text.intro }}</p>
 
     @if (rows(); as list) {
       <ul class="rows" role="list">
@@ -73,6 +74,10 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
               <span class="row__subject">{{ row.subject_name }}</span>
               <app-status-chip [status]="chip(row)" />
             </div>
+            @if (!row.book) {
+              <!-- Guidelines §16: no book for a subject -->
+              <p class="note">{{ noBook }}</p>
+            }
             @if (row.book; as book) {
               @if (book.chapters.length) {
                 <ul class="chapters" role="list">
@@ -131,7 +136,11 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
               }
               @if (book.latest_upload?.status === 'rejected') {
                 <p class="warning" role="status">
-                  {{ text.latestRejected(reason(book.latest_upload?.reject_reason ?? null)) }}
+                  {{
+                    book.latest_upload?.reject_reason === 'infected'
+                      ? text.infected
+                      : text.latestRejected(reason(book.latest_upload?.reject_reason ?? null))
+                  }}
                 </p>
               } @else if (book.latest_upload?.status === 'scanning') {
                 <p class="note">{{ text.scanning }}</p>
@@ -184,7 +193,7 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
         }
       </ul>
     } @else if (failure(); as message) {
-      <p class="warning" role="alert">{{ message }}</p>
+      <app-error-bar [message]="message" (retry)="retryLoad()" />
     } @else {
       <app-skeleton shape="list-card" [count]="4" />
     }
@@ -282,6 +291,7 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
 })
 export class BooksPage {
   protected readonly text = EN.books;
+  protected readonly noBook = EN.parent.noBook;
   protected readonly rows = signal<readonly SubjectBookRow[] | null>(null);
   protected readonly failure = signal<string | null>(null);
   protected readonly childId = signal<string | null>(null);
@@ -474,6 +484,13 @@ export class BooksPage {
       });
   }
 
+  protected retryLoad(): void {
+    const id = this.childId();
+    if (id) {
+      this.load(id);
+    }
+  }
+
   private load(childId: string): void {
     this.failure.set(null);
     this.books
@@ -483,7 +500,7 @@ export class BooksPage {
         next: (rows) => this.rows.set(rows),
         error: (error: unknown) =>
           this.failure.set(
-            `${this.text.loadFailed} ${errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent')}`,
+            errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent'),
           ),
       });
   }

@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ApiClient } from '../api/api-client';
+import { AuthService } from '../auth/auth.service';
 
 /** Schema §4.4 activity kinds with a player so far (6.2 lesson, 6.3 readalong, 7.1 practice and tables). */
 export type AttemptKind =
@@ -72,6 +73,7 @@ export function starsFor(correct: number | null, total: number | null): number {
 @Injectable({ providedIn: 'root' })
 export class KidEvents {
   private readonly api = inject(ApiClient);
+  private readonly auth = inject(AuthService);
   /** Server totals from the last sync, by child. */
   readonly stars = signal<Readonly<Record<string, number>>>({});
   readonly minutesToday = signal<Readonly<Record<string, number>>>({});
@@ -122,7 +124,11 @@ export class KidEvents {
   }
 
   private async run(): Promise<void> {
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    // Offline, or the session has ended (App Flow §10): events wait on the device
+    if (
+      (typeof navigator !== 'undefined' && navigator.onLine === false) ||
+      !this.auth.authenticated()
+    ) {
       return;
     }
     const all = await this.all();

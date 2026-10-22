@@ -42,6 +42,10 @@ const FILE_TYPES = 'application/pdf,image/jpeg,image/png';
         />
       </div>
       <p class="zone__limits">{{ limits() }}</p>
+      @if (cameraBlocked()) {
+        <!-- App Flow §10: camera not allowed; the gallery still works -->
+        <p class="zone__camera" role="status">{{ text.cameraBlocked }}</p>
+      }
       <input
         #camera
         type="file"
@@ -68,6 +72,13 @@ const FILE_TYPES = 'application/pdf,image/jpeg,image/png';
   styles: `
     :host {
       display: block;
+    }
+    .zone__camera {
+      max-width: 44ch;
+      margin: 0;
+      font: var(--type-small);
+      color: var(--color-text);
+      text-align: center;
     }
     .zone {
       display: flex;
@@ -122,6 +133,19 @@ export class UploadZone {
   protected readonly photoTypes = PHOTO_TYPES;
   protected readonly fileTypes = FILE_TYPES;
   protected readonly dragOver = signal(false);
+  /** The browser reports the camera as not allowed for this site (Permissions API, where there is one). */
+  protected readonly cameraBlocked = signal(false);
+
+  constructor() {
+    const permissions = typeof navigator === 'undefined' ? undefined : navigator.permissions;
+    void permissions
+      ?.query({ name: 'camera' as PermissionName })
+      .then((status) => {
+        this.cameraBlocked.set(status.state === 'denied');
+        status.onchange = () => this.cameraBlocked.set(status.state === 'denied');
+      })
+      .catch(() => undefined);
+  }
 
   protected onPicked(event: Event): void {
     const field = event.target as HTMLInputElement;

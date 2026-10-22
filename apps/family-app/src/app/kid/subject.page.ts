@@ -4,14 +4,17 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { KidApi, KidEntry, KidSubject } from '@fullstar/core';
 import {
-  Button,
   EN,
   EmptyState,
   IllustrationKey,
   ListCard,
   SectionHeader,
-  Skeleton,
+  KidRetry,
+  OwlLoader,
+  CardState,
+  ToastService,
 } from '@fullstar/ui';
+import { offlineMissing } from './kid-offline';
 import { map, switchMap, throwError } from 'rxjs';
 
 /**
@@ -21,7 +24,7 @@ import { map, switchMap, throwError } from 'rxjs';
 @Component({
   selector: 'app-subject-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, EmptyState, ListCard, SectionHeader, Skeleton],
+  imports: [EmptyState, KidRetry, ListCard, OwlLoader, SectionHeader],
   template: `
     @if (subject(); as s) {
       <app-section-header
@@ -35,8 +38,9 @@ import { map, switchMap, throwError } from 'rxjs';
               [illustration]="illustration(s)"
               [title]="titleOf(entry)"
               [cornerTab]="entry.done ? { text: text.done, tone: 'green' } : null"
+              [state]="missing().has(entry.id) ? offline : normal"
               [attr.data-screen-link]="linkTo(s, entry)"
-              (pressed)="open(s, entry)"
+              (pressed)="$event === 'offline' ? needsInternet() : open(s, entry)"
             />
           }
         </div>
@@ -44,12 +48,9 @@ import { map, switchMap, throwError } from 'rxjs';
         <app-empty-state illustration="empty-books" [title]="text.nothingYet" />
       }
     } @else if (failed()) {
-      <div class="failed" role="alert">
-        <p>{{ kid.somethingFailed }}</p>
-        <app-button [label]="kid.tryAgain" (pressed)="load()" />
-      </div>
+      <app-kid-retry (retry)="load()" />
     } @else {
-      <app-skeleton shape="list-card" [count]="4" />
+      <app-owl-loader />
     }
   `,
   styles: `
@@ -62,14 +63,6 @@ import { map, switchMap, throwError } from 'rxjs';
       display: flex;
       flex-direction: column;
       gap: var(--space-3);
-    }
-    .failed {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
-      font: var(--type-body);
-      color: var(--color-text-on-sky);
     }
   `,
 })
@@ -84,6 +77,22 @@ export class SubjectPage {
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toasts = inject(ToastService);
+  protected readonly offline: CardState = 'offline';
+  protected readonly normal: CardState = 'normal';
+  /** Offline: chapters and topics not opened before (App Flow §10, Plan 7.5). */
+  protected readonly missing = offlineMissing(() => {
+    const s = this.subject();
+    const kind = s?.mode === 'book' ? 'chapters' : 'topics';
+    return (s?.entries ?? []).map((entry) => ({
+      id: entry.id,
+      call: { method: 'GET' as const, path: `/family/kid/${kind}/${entry.id}` },
+    }));
+  });
+
+  protected needsInternet(): void {
+    this.toasts.show(this.kid.offline);
+  }
 
   constructor() {
     this.load();

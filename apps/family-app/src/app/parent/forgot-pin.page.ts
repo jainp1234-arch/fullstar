@@ -10,7 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { ApiError, AuthService, FamilyApi } from '@fullstar/core';
-import { Button, EN, errorMessage } from '@fullstar/ui';
+import { Button, EN, errorMessage, Connectivity } from '@fullstar/ui';
 import { switchMap } from 'rxjs';
 import { PAGE_STYLES } from '../setup/page-styles';
 import { PinChoice } from '../setup/pin-choice';
@@ -53,6 +53,7 @@ export class ForgotPinPage {
   protected readonly failure = signal<string | null>(null);
 
   private readonly auth = inject(AuthService);
+  private readonly online = inject(Connectivity).online;
   private readonly family = inject(FamilyApi);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -66,6 +67,11 @@ export class ForgotPinPage {
   });
 
   protected sendCode(): void {
+    // App Flow §11: the email code needs the internet
+    if (!this.online()) {
+      this.failure.set(EN.parent.offline);
+      return;
+    }
     this.busy.set(true);
     rememberPinReset();
     void this.auth.signIn({ fresh: true, email: this.auth.user()?.email ?? undefined });

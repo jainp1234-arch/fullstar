@@ -9,7 +9,7 @@ import {
   WorksheetDetail,
   starsFor,
 } from '@fullstar/core';
-import { Button, EN, QuestionContent, Skeleton, contentValue } from '@fullstar/ui';
+import { EN, QuestionContent, contentValue, KidRetry, OwlLoader } from '@fullstar/ui';
 import { QuizRunner, RunnerAnswer, RunnerQuestion } from './quiz-runner';
 
 /**
@@ -20,7 +20,7 @@ import { QuizRunner, RunnerAnswer, RunnerQuestion } from './quiz-runner';
 @Component({
   selector: 'app-worksheet-onscreen-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, QuizRunner, Skeleton],
+  imports: [KidRetry, OwlLoader, QuizRunner],
   template: `
     <h1 class="title" tabindex="-1">{{ title() }}</h1>
     @if (questions(); as list) {
@@ -31,12 +31,9 @@ import { QuizRunner, RunnerAnswer, RunnerQuestion } from './quiz-runner';
         (finished)="finish($event.correct, $event.total)"
       />
     } @else if (failed()) {
-      <div class="failed" role="alert">
-        <p>{{ kid.somethingFailed }}</p>
-        <app-button [label]="kid.tryAgain" (pressed)="load()" />
-      </div>
+      <app-kid-retry (retry)="load()" />
     } @else {
-      <app-skeleton shape="list-card" [count]="2" />
+      <app-owl-loader />
     }
   `,
   styles: `
@@ -49,13 +46,6 @@ import { QuizRunner, RunnerAnswer, RunnerQuestion } from './quiz-runner';
       margin: 0;
       font: var(--type-h2);
       color: var(--color-ink-heading);
-    }
-    .failed {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
-      font: var(--type-body);
     }
   `,
 })

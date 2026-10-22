@@ -1020,6 +1020,7 @@ sequenceDiagram
     <li><strong>Keycloak realm</strong> <code>fullstar</code>. Clients: <code>family-app</code> and <code>content-studio</code> (public, PKCE S256), <code>family-api</code> and <code>studio-api</code> (bearer-only audiences).</li>
     <li><strong>Email code:</strong> custom authenticator (Tech Stack): 6 digits, valid 10 minutes, 5 tries, resend after 30 seconds. Keycloak brute-force detection on: lock 15 minutes after 10 failures.</li>
     <li><strong>Tokens:</strong> access token 5 minutes, refresh token 30 days (offline session, rotated on every use). Stored by keycloak-js in memory; refresh token in IndexedDB for the installed PWA.</li>
+    <li><strong>On the device (Plan 7.5, decided 22 Oct 2026):</strong> the last <code>/family/me</code> (localStorage <code>fullstar.device-family</code>) and a copy of the kid screens, lessons, on-screen worksheets and P1/P2 progress the device opened (Cache Storage <code>fullstar-device-copy</code>, per child). A session that ends on its own, when the refresh is refused, goes to C1 and kid mode keeps using them. Parent mode needs a new sign-in. Explicit sign-out deletes both. The API still checks every call.</li>
     <li><strong>API check:</strong> Spring Security resource server validates issuer, signature (Keycloak JWKS), expiry and audience <code>family-api</code>. The <code>sub</code> claim maps to <code>families.keycloak_user_id</code>.</li>
   </ul>
 

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { ApiError, FamilyApi, ProgressApi, SubjectDetail } from '@fullstar/core';
-import { EN, SectionHeader, Skeleton, errorMessage } from '@fullstar/ui';
+import { EN, SectionHeader, Skeleton, errorMessage, ErrorBar, Connectivity } from '@fullstar/ui';
 import { of, switchMap, throwError } from 'rxjs';
 
 const SUBJECT_IDS: Readonly<Record<string, number>> = { english: 1, hindi: 2, maths: 3, evs: 4 };
@@ -14,8 +14,12 @@ const SUBJECT_IDS: Readonly<Record<string, number>> = { english: 1, hindi: 2, ma
 @Component({
   selector: 'app-subject-progress-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SectionHeader, Skeleton],
+  imports: [ErrorBar, SectionHeader, Skeleton],
   template: `
+    @if (!online()) {
+      <!-- App Flow §11: progress offline is the last saved view -->
+      <p class="saved" role="status">{{ text.savedView }}</p>
+    }
     @if (detail(); as d) {
       <h2 class="title">{{ d.name }}</h2>
       <app-section-header [title]="text.chapters" />
@@ -58,12 +62,17 @@ const SUBJECT_IDS: Readonly<Record<string, number>> = { english: 1, hindi: 2, ma
         <p class="note">{{ text.noWeakSpots }}</p>
       }
     } @else if (failure(); as message) {
-      <p class="warning" role="alert">{{ message }}</p>
+      <app-error-bar [message]="message" (retry)="load()" />
     } @else {
       <app-skeleton shape="list-card" [count]="3" />
     }
   `,
   styles: `
+    .saved {
+      margin: 0;
+      font: var(--type-small);
+      color: var(--color-text-2);
+    }
     :host {
       display: flex;
       flex-direction: column;
@@ -110,6 +119,7 @@ const SUBJECT_IDS: Readonly<Record<string, number>> = { english: 1, hindi: 2, ma
 })
 export class SubjectProgressPage {
   protected readonly text = EN.progress;
+  protected readonly online = inject(Connectivity).online;
   protected readonly detail = signal<SubjectDetail | null>(null);
   protected readonly failure = signal<string | null>(null);
 
@@ -119,6 +129,11 @@ export class SubjectProgressPage {
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
+    this.load();
+  }
+
+  protected load(): void {
+    this.failure.set(null);
     const subjectId = SUBJECT_IDS[this.route.snapshot.paramMap.get('subject') ?? ''];
     const wanted = this.route.snapshot.queryParamMap.get('child');
     // The child comes from ?child= once the family is known
@@ -131,7 +146,7 @@ export class SubjectProgressPage {
         next: (detail) => this.detail.set(detail),
         error: (error: unknown) =>
           this.failure.set(
-            `${this.text.loadFailed} ${errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent')}`,
+            errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent'),
           ),
       });
   }

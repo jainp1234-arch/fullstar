@@ -10,7 +10,16 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { KidApi, PracticeHome } from '@fullstar/core';
-import { Button, CardState, EN, IllustrationKey, Skeleton, Tile, ToastService } from '@fullstar/ui';
+import {
+  CardState,
+  Connectivity,
+  EN,
+  IllustrationKey,
+  Tile,
+  ToastService,
+  KidRetry,
+  OwlLoader,
+} from '@fullstar/ui';
 
 interface PracticeTile {
   readonly key: string;
@@ -29,7 +38,7 @@ interface PracticeTile {
 @Component({
   selector: 'app-practice-home-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, Skeleton, Tile],
+  imports: [KidRetry, OwlLoader, Tile],
   template: `
     @if (tiles(); as list) {
       <div class="tiles">
@@ -44,12 +53,9 @@ interface PracticeTile {
         }
       </div>
     } @else if (failed()) {
-      <div class="failed" role="alert">
-        <p>{{ kid.somethingFailed }}</p>
-        <app-button [label]="kid.tryAgain" (pressed)="load()" />
-      </div>
+      <app-kid-retry (retry)="load()" />
     } @else {
-      <app-skeleton shape="tile" [count]="5" />
+      <app-owl-loader />
     }
   `,
   styles: `
@@ -66,14 +72,6 @@ interface PracticeTile {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
-    .failed {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
-      font: var(--type-body);
-      color: var(--color-text-on-sky);
-    }
   `,
 })
 export class PracticeHomePage {
@@ -89,20 +87,24 @@ export class PracticeHomePage {
     }
     const has = (code: string) => (home.subjects.find((s) => s.code === code)?.questions ?? 0) > 0;
     const set = (code: string) => `/kid/practice/set/${code}`;
+    // App Flow §11: only tables are made on the device; the others need the internet
+    const online = this.online();
+    const needs = (state: CardState): CardState =>
+      online || state !== 'normal' ? state : 'offline';
     return [
       {
         key: 'english',
         label: this.text.englishGrammar,
         illustration: 'subject-english',
         url: set('english'),
-        state: has('english') ? 'normal' : 'locked',
+        state: needs(has('english') ? 'normal' : 'locked'),
       },
       {
         key: 'hindi',
         label: this.text.hindiGrammar,
         illustration: 'subject-hindi',
         url: set('hindi'),
-        state: has('hindi') ? 'normal' : 'locked',
+        state: needs(has('hindi') ? 'normal' : 'locked'),
       },
       {
         key: 'tables',
@@ -116,7 +118,7 @@ export class PracticeHomePage {
         label: this.text.evsQuiz,
         illustration: 'subject-evs',
         url: set('evs'),
-        state: has('evs') ? 'normal' : 'locked',
+        state: needs(has('evs') ? 'normal' : 'locked'),
       },
       {
         key: 'mistakes',
@@ -125,11 +127,12 @@ export class PracticeHomePage {
           : this.text.mistakes,
         illustration: 'act-mistakes',
         url: '/kid/practice/mistakes',
-        state: 'normal',
+        state: needs('normal'),
       },
     ];
   });
 
+  private readonly online = inject(Connectivity).online;
   private readonly api = inject(KidApi);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
@@ -157,7 +160,7 @@ export class PracticeHomePage {
 
   protected open(tile: PracticeTile): void {
     if (tile.state !== 'normal') {
-      this.toasts.show(this.text.nothingYet);
+      this.toasts.show(tile.state === 'offline' ? this.kid.offline : this.text.nothingYet);
       return;
     }
     void this.router.navigateByUrl(tile.url);

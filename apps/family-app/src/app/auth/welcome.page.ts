@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '@fullstar/core';
-import { Button, EN, illustrationUrl } from '@fullstar/ui';
+import { Button, Connectivity, EN, illustrationUrl } from '@fullstar/ui';
 
 /** A1 Welcome (App Flow §4): Sign in goes to the Keycloak email page; Sign up asks consent first. */
 @Component({
@@ -22,6 +22,9 @@ import { Button, EN, illustrationUrl } from '@fullstar/ui';
           (pressed)="signUp()"
         />
       </div>
+      @if (offline()) {
+        <p class="welcome__offline" role="alert">{{ offlineText }}</p>
+      }
     </div>
   `,
   styles: `
@@ -50,6 +53,11 @@ import { Button, EN, illustrationUrl } from '@fullstar/ui';
       font: var(--type-body);
       color: var(--color-text-2);
     }
+    .welcome__offline {
+      margin: 0;
+      font: var(--type-small);
+      color: var(--color-error-700);
+    }
     .welcome__actions {
       display: flex;
       flex-direction: column;
@@ -65,10 +73,20 @@ export class WelcomePage {
   protected readonly appName = EN.app.name;
   protected readonly owl = illustrationUrl('mascot-owl');
 
+  protected readonly offline = signal(false);
+  protected readonly offlineText = EN.parent.offline;
+
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly online = inject(Connectivity).online;
 
+  /** App Flow §11: signing in needs the internet; offline, say so instead of leaving the app. */
   protected signIn(): void {
+    if (!this.online()) {
+      this.offline.set(true);
+      return;
+    }
+    this.offline.set(false);
     void this.auth.signIn();
   }
 

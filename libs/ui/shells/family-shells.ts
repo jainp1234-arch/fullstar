@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { EN } from '../strings/en';
 import { AppNav } from './app-nav';
 import { CurrentScreen } from './current-screen';
+import { OfflineBanner } from './offline-banner';
 import { SkyHeader } from './sky-header';
 
 /**
@@ -100,12 +101,13 @@ export class SkyListShell {
 @Component({
   selector: 'app-shell-sky-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FamilyFrame, RouterOutlet, SkyHeader],
+  imports: [FamilyFrame, OfflineBanner, RouterOutlet, SkyHeader],
   host: { 'data-shell': 'B', '[attr.data-screen]': 'screen()?.id' },
   template: `
     <app-family-frame>
       <div class="sky ui-sky"><app-sky-header /></div>
       <main class="sheet">
+        <app-offline-banner />
         <div class="ui-shell-content"><router-outlet /></div>
       </main>
     </app-family-frame>
@@ -136,12 +138,13 @@ export class SkySheetShell {
 @Component({
   selector: 'app-shell-focus',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FamilyFrame, RouterOutlet, SkyHeader],
+  imports: [FamilyFrame, OfflineBanner, RouterOutlet, SkyHeader],
   host: { 'data-shell': 'C', '[attr.data-screen]': 'screen()?.id' },
   template: `
     <app-family-frame>
       <div class="sky ui-sky"><app-sky-header [focus]="true" /></div>
       <main class="body">
+        <app-offline-banner />
         <div class="ui-shell-content"><router-outlet /></div>
       </main>
     </app-family-frame>

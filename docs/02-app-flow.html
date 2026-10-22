@@ -350,6 +350,7 @@ flowchart TD
       <tr><td class="id">Any</td><td>Loading</td><td>Kid mode: a friendly animated character. Parent mode: grey placeholder blocks. Never a blank screen.</td></tr>
     </tbody>
   </table></div>
+  <p>Implemented in Plan 7.5 (decided 22 Oct 2026): every row has a Playwright test in <code>e2e/states.spec.ts</code>. Kid screens load with the bobbing owl (<code>app-owl-loader</code>), parent screens with <code>app-skeleton</code>. P4 shows the Guidelines §16 line on each subject without a book. K12 and P3 are built in Plan 8.3, with their rows; the words are in <code>en.ts</code> already.</p>
 </section>
 
 <section id="errors">
@@ -375,6 +376,17 @@ flowchart TD
       <tr><td class="hi">Signed out (session expired)</td><td>Returns to C1 (kid mode keeps working offline).</td><td>Sign in again with an email code when opening parent mode.</td></tr>
     </tbody>
   </table></div>
+  <p>Implemented in Plan 7.5 (decided 22 Oct 2026), one Playwright test per row in <code>e2e/states.spec.ts</code>:</p>
+  <ul>
+    <li><strong>Kid errors:</strong> <code>app-kid-retry</code> shows the owl, "Let's try again." and one Try again button, never red. Offline it shows the cloud picture and "This needs the internet."</li>
+    <li><strong>Parent screen errors:</strong> <code>app-error-bar</code> shows the §16 text with a Try again ghost button.</li>
+    <li><strong>No internet:</strong> parent screens show a 40 px gold banner under the header. On K1–K3 and K8, cards whose content is not on the device are dimmed with the cloud, and tapping one says "This needs the internet."</li>
+    <li><strong>Email code:</strong> the screens use the words above, "That code didn't match. <em>n</em> tries left.", "Code expired. Tap Resend…", "No email? Check your spam folder…", Resend and Change email. They are checked by <code>ThemeMessagesTest</code> and <code>OtpChallengeTest</code>, because Keycloak serves them.</li>
+    <li><strong>Camera not allowed:</strong> where the browser reports it, the upload zone shows how to allow the camera and points to Choose file for the gallery.</li>
+    <li><strong>Virus check:</strong> a failed check shows the sentence above on P4, P5/P7 and P8.</li>
+    <li><strong>Session expired:</strong> the device keeps the family from <code>/family/me</code> until a real sign-out. When the session ends on its own, the app returns to C1. Kid mode uses what the device has, and its progress waits on the device. Opening parent mode asks to sign in again with an email code.</li>
+    <li><strong>Deferred:</strong> the microphone and "not understood" rows arrive with K13–K14 in Plan 8.3.</li>
+  </ul>
 </section>
 
 <section id="offline">
@@ -391,6 +403,15 @@ flowchart TD
       <tr><td>Sign-in, email code, PIN reset</td><td><span class="tag no">No</span></td></tr>
     </tbody>
   </table></div>
+  <p>Implemented in Plan 7.5 (decided 22 Oct 2026), one Playwright test per row in <code>e2e/offline.spec.ts</code>:</p>
+  <ul>
+    <li><strong>Device copy:</strong> what a child opened online is kept per child in Cache Storage and used when the API can't be reached. That covers K1 home, K2 subjects, K3 chapters and topics, lessons (K4; narration arrives with Plan 8.2), K6 on-screen worksheets, K8 practice home, and P1/P2 progress.</li>
+    <li><strong>Read-along and PDFs:</strong> read-along (Plan 6.3) and saved worksheet PDFs (Plan 7.2) keep their own copies.</li>
+    <li><strong>Tables:</strong> tables practice and the challenge are made on the device.</li>
+    <li><strong>Progress:</strong> offline, progress says "Last saved view".</li>
+    <li><strong>Need the internet:</strong> uploads, sign-in and Forgot PIN say "You're offline. Some features are paused." instead of leaving the app.</li>
+    <li><strong>Sign-out:</strong> a real sign-out deletes the device copy and the saved family.</li>
+  </ul>
 </section>
 
 <section id="later">

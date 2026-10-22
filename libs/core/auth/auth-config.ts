@@ -14,6 +14,11 @@ export interface AuthConfig {
   readonly redirectPath: string;
   /** Where to go after sign-out or when the session ends, relative to the base href. */
   readonly signedOutPath: string;
+  /**
+   * When the session ends on its own and the device knows the family (App Flow §10, Plan 7.5): go
+   * to path (Who is learning?) unless already on one of the stayOn prefixes (kid mode keeps going).
+   */
+  readonly sessionEnded?: { readonly path: string; readonly stayOn: readonly string[] };
 }
 
 export const AUTH_CONFIG = new InjectionToken<AuthConfig>('AUTH_CONFIG');

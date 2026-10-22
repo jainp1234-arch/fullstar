@@ -111,6 +111,11 @@ export class ReadAlongCache {
     }
   }
 
+  /** Whether the chapter was opened online before, so it reads offline (K3 offline cards). */
+  async has(familyChapterId: string): Promise<boolean> {
+    return (await this.storedChapter(familyChapterId)) !== null;
+  }
+
   private async storedChapter(familyChapterId: string): Promise<ReadAlongChapter | null> {
     try {
       const response = await (await openCache())?.match(chapterKey(familyChapterId));

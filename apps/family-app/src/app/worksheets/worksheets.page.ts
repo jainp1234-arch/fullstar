@@ -18,6 +18,7 @@ import {
   ListCard,
   Skeleton,
   errorMessage,
+  ErrorBar,
 } from '@fullstar/ui';
 
 /**
@@ -27,7 +28,7 @@ import {
 @Component({
   selector: 'app-worksheets-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, EmptyState, ListCard, Skeleton],
+  imports: [Button, EmptyState, ErrorBar, ListCard, Skeleton],
   template: `
     @if (worksheets(); as list) {
       @if (list.length) {
@@ -75,7 +76,7 @@ import {
         />
       }
     } @else if (failure(); as message) {
-      <p class="warning" role="alert">{{ message }}</p>
+      <app-error-bar [message]="message" (retry)="load()" />
     } @else {
       <app-skeleton shape="list-card" [count]="3" />
     }
@@ -129,6 +130,11 @@ export class WorksheetsPage {
     if (!this.family.me()) {
       this.family.loadMe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
+    this.load();
+  }
+
+  protected load(): void {
+    this.failure.set(null);
     this.api
       .list()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -136,7 +142,7 @@ export class WorksheetsPage {
         next: (list) => this.worksheets.set(list),
         error: (error: unknown) =>
           this.failure.set(
-            `${this.text.loadFailed} ${errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent')}`,
+            errorMessage(error instanceof ApiError ? error.code : 'INTERNAL_ERROR', 'parent'),
           ),
       });
   }

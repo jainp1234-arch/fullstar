@@ -10,13 +10,13 @@ import {
   starsFor,
 } from '@fullstar/core';
 import {
-  Button,
   CurrentScreen,
   EN,
   EmptyState,
   QuestionContent,
-  Skeleton,
   contentValue,
+  KidRetry,
+  OwlLoader,
 } from '@fullstar/ui';
 import { Observable } from 'rxjs';
 import { QuizRunner, RunnerAnswer, RunnerQuestion } from './quiz-runner';
@@ -33,7 +33,7 @@ const SUBJECT_IDS: Readonly<Record<string, number>> = { english: 1, hindi: 2, ma
 @Component({
   selector: 'app-practice-set-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Button, EmptyState, QuizRunner, Skeleton],
+  imports: [EmptyState, KidRetry, OwlLoader, QuizRunner],
   template: `
     <h1 class="title" tabindex="-1">{{ title() }}</h1>
     @if (questions(); as list) {
@@ -51,12 +51,9 @@ const SUBJECT_IDS: Readonly<Record<string, number>> = { english: 1, hindi: 2, ma
         />
       }
     } @else if (failed()) {
-      <div class="failed" role="alert">
-        <p>{{ kid.somethingFailed }}</p>
-        <app-button [label]="kid.tryAgain" (pressed)="load()" />
-      </div>
+      <app-kid-retry (retry)="load()" />
     } @else {
-      <app-skeleton shape="list-card" [count]="2" />
+      <app-owl-loader />
     }
   `,
   styles: `
@@ -69,13 +66,6 @@ const SUBJECT_IDS: Readonly<Record<string, number>> = { english: 1, hindi: 2, ma
       margin: 0;
       font: var(--type-h2);
       color: var(--color-ink-heading);
-    }
-    .failed {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--space-3);
-      font: var(--type-body);
     }
   `,
 })
