@@ -28,3 +28,4 @@ export * from './family/progress-api';
 export * from './family/worksheet-api';
 export * from './family/support-api';
 export * from './studio/support-api';
+export * from './family/reading-api';

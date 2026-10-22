@@ -80,8 +80,14 @@ test('tables practice and the 60-second challenge: yes', async ({ page, context 
   await expect(page.locator('app-question-card').getByText(/3 × \d+ = \?/)).toBeVisible();
 });
 
-test.fixme('reading test: no (K12–K14 arrive with Plan 8.3)', () => {
-  // K12 will show "This needs the internet." offline
+test('reading test: no', async ({ page, context }) => {
+  await signInFamily(page);
+  await page.getByRole('button', { name: 'Asha' }).click();
+  await goOffline(page, context);
+  await navigateInApp(page, '/kid/read');
+  const retry = page.locator('app-kid-retry');
+  await expect(retry.getByText('This needs the internet.')).toBeVisible();
+  await expect(retry.locator('img')).toHaveAttribute('src', /state-offline/);
 });
 
 test('uploading books or chapters: no', async ({ page, context }) => {

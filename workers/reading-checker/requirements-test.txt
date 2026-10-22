@@ -1,0 +1,5 @@
+# The image test target only (Tech Stack §7). Exact == pins only, as requirements-dev.txt.
+pytest==9.1.1
+iniconfig==2.3.1
+pluggy==1.7.0
+Pygments==2.21.0

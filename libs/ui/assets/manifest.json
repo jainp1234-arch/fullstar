@@ -319,6 +319,30 @@
       "convert": "webp256",
       "key": "mascot-owl",
       "fluentName": "Owl"
+    },
+    {
+      "out": "illustrations/level-seed.webp",
+      "source": "fluent",
+      "path": "assets/Seedling/3D/seedling_3d.png",
+      "convert": "webp256",
+      "key": "level-seed",
+      "fluentName": "Seedling"
+    },
+    {
+      "out": "illustrations/level-plant.webp",
+      "source": "fluent",
+      "path": "assets/Herb/3D/herb_3d.png",
+      "convert": "webp256",
+      "key": "level-plant",
+      "fluentName": "Herb"
+    },
+    {
+      "out": "illustrations/level-tree.webp",
+      "source": "fluent",
+      "path": "assets/Deciduous tree/3D/deciduous_tree_3d.png",
+      "convert": "webp256",
+      "key": "level-tree",
+      "fluentName": "Deciduous tree"
     }
   ],
   "generated": [

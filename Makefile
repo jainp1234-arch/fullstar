@@ -20,7 +20,7 @@ py = MSYS_NO_PATHCONV=1 docker run --rm -v "$(CURDIR):/w" -v fullstar-pip-cache:
 	-r /w/requirements-dev.txt && $(2)"
 endif
 
-.PHONY: help up down test lint api book-reader test-ocr test-pages family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
+.PHONY: help up down test lint api book-reader test-ocr test-reading reading-check test-pages family studio db-bootstrap db-migrate bootstrap bootstrap-admin seed-content vendor-assets
 
 help:
 	@echo "make up / make down   start / stop local services (docker compose)"
@@ -36,6 +36,8 @@ help:
 	@echo "make bootstrap        create the queues + DLQs (and the trial bucket)"
 	@echo "make bootstrap-admin EMAIL=you@example.com NAME=\"Your Name\"   make the first Studio super admin"
 	@echo "make seed-content     load the Class 3 starter content (infra/seed/class3), checked and published"
+	@echo "make test-reading       real reading-checker model on synthetic speech (Docker)"
+	@echo "make reading-check DIR= score your own recordings against their passages"
 	@echo "make vendor-assets    download and convert fonts, icons and illustrations (libs/ui/assets)"
 
 up:
@@ -87,6 +89,17 @@ book-reader:
 test-ocr:
 	docker build -f services/book-reader/Dockerfile -t fullstar/book-reader:local .
 	$(MVNW) -f services/book-reader/pom.xml test -Dtest=RealToolsImageTest -Dbookreader.image=fullstar/book-reader:local
+
+# Plan 8.3: the real model in the reading-checker test image scores synthetic speech
+test-reading:
+	docker build --target test -t fullstar/reading-checker:test workers/reading-checker
+	docker run --rm fullstar/reading-checker:test
+
+# Plan 8.3 manual check: scores each recording in DIR against the passage in the .txt of the same name
+reading-check:
+	@test -n "$(DIR)" || { echo "Usage: make reading-check DIR=<folder with kite.m4a + kite.txt ...>"; exit 1; }
+	docker build -t fullstar/reading-checker:local workers/reading-checker
+	MSYS_NO_PATHCONV=1 docker run --rm -v "$(abspath $(DIR)):/check:ro" fullstar/reading-checker:local python -m reading_checker.check /check
 
 # Renders the sample pages of test-ocr (services/book-reader/src/test/resources/pages)
 test-pages:

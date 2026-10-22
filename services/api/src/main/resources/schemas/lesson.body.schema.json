@@ -23,7 +23,7 @@
             "required": ["illustration", "animation"],
             "additionalProperties": false,
             "properties": {
-              "illustration": { "enum": ["subject-english","subject-hindi","subject-maths","subject-evs","act-lesson","act-readalong","act-worksheet","act-tables","act-grammar","act-quiz","act-mistakes","act-reading","reward-star","celebrate","empty-books","empty-done","state-offline","state-retry","state-wait","mascot-owl","avatar-cat","avatar-dog","avatar-lion","avatar-panda","avatar-rabbit","avatar-tiger","avatar-fox","avatar-koala","avatar-monkey","avatar-penguin","avatar-frog","avatar-unicorn"] },
+              "illustration": { "enum": ["subject-english","subject-hindi","subject-maths","subject-evs","act-lesson","act-readalong","act-worksheet","act-tables","act-grammar","act-quiz","act-mistakes","act-reading","reward-star","celebrate","empty-books","empty-done","state-offline","state-retry","state-wait","mascot-owl","level-seed","level-plant","level-tree","avatar-cat","avatar-dog","avatar-lion","avatar-panda","avatar-rabbit","avatar-tiger","avatar-fox","avatar-koala","avatar-monkey","avatar-penguin","avatar-frog","avatar-unicorn"] },
               "animation": { "enum": ["fade-up", "slide-in", "pop", "none"] }
             }
           },

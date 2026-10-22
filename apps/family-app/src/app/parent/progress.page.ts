@@ -9,7 +9,15 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiError, FamilyApi, FamilyChild, ProgressApi, WeekSummary } from '@fullstar/core';
+import {
+  ApiError,
+  FamilyApi,
+  FamilyChild,
+  ProgressApi,
+  WeekSummary,
+  ReadingApi,
+  ReadingHistoryEntry,
+} from '@fullstar/core';
 import {
   AVATAR_KEYS,
   Avatar,
@@ -29,8 +37,8 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
 /**
  * P1 Progress (App Flow §6; Schema §7 child_week_summary, §11; Plan 6.4): one child at a time (tabs
  * with two children, ?child=), never compared. This week: time, chapters and worksheets done, and
- * areas to work on; then progress by subject (opens P2) and reading, which arrives with reading
- * tests (Phase 7). A child with no activity yet sees the getting-started checklist.
+ * areas to work on; then progress by subject (opens P2) and reading: the latest test and P3 history
+ * (Plan 8.3). A child with no activity yet sees the getting-started checklist.
  */
 @Component({
   selector: 'app-progress-page',
@@ -99,7 +107,17 @@ const AVATARS = new Set<string>(AVATAR_KEYS);
         }
       </div>
       <app-section-header [title]="text.reading" />
-      <p class="note">{{ text.noReading }}</p>
+      @if (latestReading(); as r) {
+        <p class="note">{{ text.latestReading(r.words_per_minute ?? 0, r.accuracy_pct ?? 0) }}</p>
+      } @else {
+        <p class="note">{{ text.noReading }}</p>
+      }
+      <app-list-card
+        illustration="act-reading"
+        [title]="text.readingHistory"
+        [attr.data-screen-link]="readingLink()"
+        (pressed)="openReading()"
+      />
     } @else if (failure(); as message) {
       <app-error-bar [message]="message" (retry)="retryLoad()" />
     } @else {
@@ -195,6 +213,8 @@ export class ProgressPage {
   protected readonly week = signal<WeekSummary | null>(null);
   protected readonly failure = signal<string | null>(null);
   protected readonly childId = signal<string | null>(null);
+  protected readonly latestReading = signal<ReadingHistoryEntry | null>(null);
+  private readonly reading = inject(ReadingApi);
 
   private readonly family = inject(FamilyApi);
   private readonly progress = inject(ProgressApi);
@@ -248,6 +268,16 @@ export class ProgressPage {
     });
   }
 
+  protected readingLink(): string {
+    return this.location.prepareExternalUrl('/parent/progress/reading');
+  }
+
+  protected openReading(): void {
+    void this.router.navigate(['/parent/progress/reading'], {
+      queryParams: { child: this.childId() },
+    });
+  }
+
   protected linkTo(code: string): string {
     return this.location.prepareExternalUrl(`/parent/progress/subject/${code}`);
   }
@@ -268,6 +298,15 @@ export class ProgressPage {
   private load(childId: string): void {
     this.failure.set(null);
     this.week.set(null);
+    this.latestReading.set(null);
+    // Plan 8.3: the newest scored reading test; none yet keeps the line about the first test
+    this.reading
+      .history(childId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (tests) => this.latestReading.set(tests.find((t) => t.status === 'scored') ?? null),
+        error: () => undefined,
+      });
     this.progress
       .week(childId)
       .pipe(takeUntilDestroyed(this.destroyRef))

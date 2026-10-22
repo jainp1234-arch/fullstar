@@ -1,1 +1,32 @@
-# Exact == pins only (Tech Stack §1, §7). Dependencies are added in phase 8.
+# Exact == pins only (Tech Stack §1, §7), including what these need; each released at least 14 days
+# before 22 Oct 2026 (Plan 8.3). Checked together with pip check.
+faster-whisper==1.2.1
+ctranslate2==4.8.2
+boto3==1.43.108
+botocore==1.43.108
+s3transfer==0.19.2
+jmespath==1.1.0
+python-dateutil==2.9.0.post0
+six==1.17.0
+urllib3==2.8.0
+av==19.0.1
+numpy==2.5.3
+onnxruntime==1.30.0
+flatbuffers==25.12.19
+protobuf==7.36.2
+packaging==26.3
+tokenizers==0.23.2
+huggingface_hub==1.33.0
+hf-xet==1.7.0
+filelock==4.0.12
+fsspec==2026.9.0
+PyYAML==6.0.3
+tqdm==4.70.1
+typing_extensions==4.16.0
+httpx==0.28.1
+httpcore==1.0.9
+certifi==2026.7.22
+anyio==4.15.1
+idna==3.20
+h11==0.16.0
+click==8.5.0

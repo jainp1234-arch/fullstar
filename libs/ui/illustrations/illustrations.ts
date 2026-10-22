@@ -37,6 +37,9 @@ export type IllustrationKey =
   | 'state-retry'
   | 'state-wait'
   | 'mascot-owl'
+  | 'level-seed'
+  | 'level-plant'
+  | 'level-tree'
   | `avatar-${AvatarKey}`;
 
 /** Relative to the app's base href, so it works under /studio/ too. */
@@ -66,5 +69,8 @@ export const ILLUSTRATION_KEYS: readonly IllustrationKey[] = [
   'state-retry',
   'state-wait',
   'mascot-owl',
+  'level-seed',
+  'level-plant',
+  'level-tree',
   ...AVATAR_KEYS.map((animal) => `avatar-${animal}` as const),
 ];
