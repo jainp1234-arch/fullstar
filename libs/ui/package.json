@@ -1,0 +1,7 @@
+{
+  "name": "@fullstar/ui",
+  "private": true,
+  "sideEffects": [
+    "*.css"
+  ]
+}

@@ -23,11 +23,32 @@ const SCREEN = '[data-screen]';
  * parent grant survive; page.goto would start a new session state.
  */
 export async function navigateInApp(page: Page, path: string): Promise<void> {
+  // Plan 9.3: family-app screens load on first visit; once all are in, a navigation no longer
+  // waits for one (Studio loads its screens up front)
+  if (!(await page.locator('html[data-mode="studio"]').count())) {
+    await page.locator('html[data-screens-loaded]').waitFor({ state: 'attached', timeout: 30_000 });
+  }
+  const from = new URL(page.url()).pathname;
+  const before = await page
+    .locator(SCREEN)
+    .getAttribute('data-screen', { timeout: 1000 })
+    .catch(() => null);
   await page.evaluate((target) => {
     history.pushState(null, '', target);
     dispatchEvent(new PopStateEvent('popstate', { state: null }));
   }, path);
   await expect(page).toHaveURL((url) => url.pathname === path);
+  if (before && from !== path) {
+    // Another path is usually another screen: let it replace the old one (same id: no wait)
+    await expect(page.locator(SCREEN))
+      .not.toHaveAttribute('data-screen', before, { timeout: 2000 })
+      .catch(() => undefined);
+  }
+}
+
+/** Waits until the given screen is showing (it may still be loading after a click). */
+export async function onScreen(page: Page, id: string): Promise<void> {
+  await expect(page.locator(SCREEN)).toHaveAttribute('data-screen', id);
 }
 
 /** Which navigation is on screen: the first visible variant. */

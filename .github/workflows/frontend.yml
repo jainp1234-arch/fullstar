@@ -32,7 +32,7 @@ concurrency:
 jobs:
   frontend:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -60,3 +60,6 @@ jobs:
       - run: npm run e2e
         env:
           CI: 'true'
+      # Plan 9.3: phone-profile Lighthouse on the production build (Performance, Accessibility,
+      # Best Practices each at least 90); the budget and installability are in the pwa e2e project
+      - run: npm run lighthouse

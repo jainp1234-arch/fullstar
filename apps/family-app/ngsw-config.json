@@ -14,7 +14,10 @@
           "/*.css",
           "/*.js",
           "/media/*.woff2",
-          "/media/*.svg"
+          "/media/*.svg",
+          "/ui/illustrations/*.webp",
+          "/icons/icon-192x192.png",
+          "/icons/icon-512x512.png"
         ]
       }
     },

@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { Page, expect, test } from '@playwright/test';
 import { FakeServer, signInFamily } from './fakes';
+import { screensLoaded } from './offline';
 
 /** Plan 6.2: K4 lesson with an inline quiz, K7 well done, offline events synced once. */
 
@@ -61,6 +62,7 @@ test('a lesson plays scene by scene, the quiz counts the first answer, and K7 sh
 test('a lesson finished offline syncs once when back online', async ({ page, context }) => {
   const server = await signInFamily(page);
   await openLesson(page);
+  await screensLoaded(page);
   await context.setOffline(true);
   await page.getByRole('button', { name: 'Next' }).click();
   await page.getByRole('button', { name: /A nest/ }).click();

@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import { enterPin, signInFamily, unlockParent } from './fakes';
-import { WIDTHS, WidthName, navigateInApp, walk } from './routes';
+import { WIDTHS, WidthName, navigateInApp, onScreen, walk } from './routes';
 
 /**
  * App Flow §4–§6 screen IDs and their shells (Guidelines §10), walked signed in. A1 (signed out
@@ -39,6 +39,7 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       // Kid mode needs a picked child and parent mode the PIN, both in memory: no reloads
       const seen = await walk(page);
       await page.getByRole('button', { name: 'Asha' }).click();
+      await onScreen(page, 'K1');
       await walk(page, [], seen);
       // K3 opens read-along only for book chapters and worksheets arrive in Phase 7 (Plan 6.1)
       // K12 opens K13 with a button, and K14 needs a test id (Plan 8.3)
@@ -54,9 +55,11 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       }
       await navigateInApp(page, '/kid/learn');
       await page.getByRole('button', { name: 'Parent mode' }).click();
+      await onScreen(page, 'P0');
       await walk(page, [], seen);
       await enterPin(page);
       await expect(page).toHaveURL(/\/parent\/progress$/);
+      await onScreen(page, 'P1');
       await walk(page, [], seen);
       // P14 opens these with buttons, not links
       for (const path of [
@@ -90,6 +93,7 @@ for (const [name, size] of Object.entries(WIDTHS) as [WidthName, (typeof WIDTHS)
       await expect(page).toHaveURL(/\/parent\/pin\?next=%2Fsetup%2Ftime-limit$/);
       await enterPin(page);
       await expect(page).toHaveURL(/\/setup\/time-limit$/);
+      await onScreen(page, 'B4');
       await walk(page, [], seen);
       expect([...seen.keys()].sort()).toEqual(EXPECTED.map((e) => e.id).sort());
       for (const { id, shell } of EXPECTED) {

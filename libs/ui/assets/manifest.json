@@ -19,28 +19,52 @@
   },
   "files": [
     {
-      "out": "fonts/poppins-400.woff2",
+      "out": "fonts/poppins-400-latin.woff2",
       "source": "poppins",
       "path": "ofl/poppins/Poppins-Regular.ttf",
-      "convert": "woff2"
+      "convert": "woff2-latin"
     },
     {
-      "out": "fonts/poppins-500.woff2",
+      "out": "fonts/poppins-400-devanagari.woff2",
+      "source": "poppins",
+      "path": "ofl/poppins/Poppins-Regular.ttf",
+      "convert": "woff2-devanagari"
+    },
+    {
+      "out": "fonts/poppins-500-latin.woff2",
       "source": "poppins",
       "path": "ofl/poppins/Poppins-Medium.ttf",
-      "convert": "woff2"
+      "convert": "woff2-latin"
     },
     {
-      "out": "fonts/poppins-600.woff2",
+      "out": "fonts/poppins-500-devanagari.woff2",
+      "source": "poppins",
+      "path": "ofl/poppins/Poppins-Medium.ttf",
+      "convert": "woff2-devanagari"
+    },
+    {
+      "out": "fonts/poppins-600-latin.woff2",
       "source": "poppins",
       "path": "ofl/poppins/Poppins-SemiBold.ttf",
-      "convert": "woff2"
+      "convert": "woff2-latin"
     },
     {
-      "out": "fonts/poppins-700.woff2",
+      "out": "fonts/poppins-600-devanagari.woff2",
+      "source": "poppins",
+      "path": "ofl/poppins/Poppins-SemiBold.ttf",
+      "convert": "woff2-devanagari"
+    },
+    {
+      "out": "fonts/poppins-700-latin.woff2",
       "source": "poppins",
       "path": "ofl/poppins/Poppins-Bold.ttf",
-      "convert": "woff2"
+      "convert": "woff2-latin"
+    },
+    {
+      "out": "fonts/poppins-700-devanagari.woff2",
+      "source": "poppins",
+      "path": "ofl/poppins/Poppins-Bold.ttf",
+      "convert": "woff2-devanagari"
     },
     {
       "out": "fonts/OFL-Poppins.txt",

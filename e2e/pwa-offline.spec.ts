@@ -10,7 +10,8 @@ test('fonts load from the service worker cache when offline', async ({ page, con
     const config = await (await fetch('/ngsw.json?ngsw-bypass=true')).json();
     return config.assetGroups.find((group: { name: string }) => group.name === 'app').urls;
   });
-  expect(prefetched.filter((url) => url.endsWith('.woff2'))).toHaveLength(5);
+  // Plan 9.3: Poppins in Latin and Devanagari files per weight, and the icon font
+  expect(prefetched.filter((url) => url.endsWith('.woff2'))).toHaveLength(9);
   // expect.poll, not waitForFunction: an async predicate resolves waitForFunction on its first
   // settled promise, even when that promise resolves to false
   await expect
@@ -56,7 +57,7 @@ test('fonts load from the service worker cache when offline', async ({ page, con
     return faces.map((face) => `${face.family.replaceAll('"', '')} ${face.weight} ${face.status}`);
   });
 
-  expect(fonts).toHaveLength(5);
+  expect(fonts).toHaveLength(9);
   for (const face of fonts) {
     expect(face).toMatch(/ loaded$/);
   }

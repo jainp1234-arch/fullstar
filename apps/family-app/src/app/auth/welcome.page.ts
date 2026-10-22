@@ -10,7 +10,7 @@ import { Button, Connectivity, EN, illustrationUrl } from '@fullstar/ui';
   imports: [Button],
   template: `
     <div class="welcome">
-      <img [src]="owl" alt="" width="120" height="120" />
+      <img [src]="owl" alt="" width="120" height="120" fetchpriority="high" />
       <h1 class="welcome__title" tabindex="-1">{{ appName }}</h1>
       <p class="welcome__tagline">{{ text.welcomeTagline }}</p>
       <div class="welcome__actions">
