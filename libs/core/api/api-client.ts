@@ -2,13 +2,15 @@ import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, retry, throwError, timer } from 'rxjs';
 import { ApiError, parseEnvelope, toApiError } from './api-error';
-import { API_BASE, IDEMPOTENCY_KEY } from './api-context';
+import { API_BASE, CHILD_ID, IDEMPOTENCY_KEY } from './api-context';
 
 export type QueryParams = Readonly<Record<string, string | number | boolean | undefined>>;
 
 export interface WriteOptions {
   /** Default true: sends an Idempotency-Key so a retried write runs once (Schema §10). */
   readonly idempotent?: boolean;
+  /** Kid-mode writes for a child other than the active one, e.g. queued offline events (Plan 6.2). */
+  readonly childId?: string;
 }
 
 /** Retries for dropped connections and an unavailable dependency, with exponential backoff. */
@@ -92,6 +94,9 @@ function writeContext(options?: WriteOptions): HttpContext {
   const context = new HttpContext();
   if (options?.idempotent !== false) {
     context.set(IDEMPOTENCY_KEY, crypto.randomUUID());
+  }
+  if (options?.childId) {
+    context.set(CHILD_ID, options.childId);
   }
   return context;
 }

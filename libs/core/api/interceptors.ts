@@ -12,7 +12,7 @@ import { Observable, catchError, from, switchMap, tap, throwError } from 'rxjs';
 import { AUTH_CONFIG } from '../auth/auth-config';
 import { AuthService } from '../auth/auth.service';
 import { FamilySession } from '../family/family-session';
-import { API_BASE, AUTH_RETRIED, IDEMPOTENCY_KEY, isApiUrl } from './api-context';
+import { API_BASE, AUTH_RETRIED, CHILD_ID, IDEMPOTENCY_KEY, isApiUrl } from './api-context';
 import { toApiError } from './api-error';
 
 const KID_PREFIX = `${API_BASE}/family/kid/`;
@@ -58,7 +58,7 @@ export const childInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(KID_PREFIX)) {
     return next(req);
   }
-  const childId = inject(FamilySession).activeChildId();
+  const childId = req.context.get(CHILD_ID) ?? inject(FamilySession).activeChildId();
   return next(childId ? req.clone({ setHeaders: { 'X-Child-Id': childId } }) : req);
 };
 

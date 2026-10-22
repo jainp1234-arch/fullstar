@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fullstar.bookreader.config.ReaderProperties;
 import java.io.ByteArrayInputStream;
 import java.io.UncheckedIOException;
+import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
@@ -50,8 +51,14 @@ class ClamdClientTest {
 		assertThatThrownBy(() -> client.scan(new ByteArrayInputStream(new byte[10])))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("size limit");
-		clamd.close();
-		assertThatThrownBy(() -> client.scan(new ByteArrayInputStream(new byte[10])))
+		// A port nothing listens on (closing the fake while it serves could still answer one connection)
+		int closedPort;
+		try (ServerSocket probe = new ServerSocket(0)) {
+			closedPort = probe.getLocalPort();
+		}
+		ClamdClient noClamd = new ClamdClient(new ReaderProperties(null, null,
+				new ReaderProperties.Clamav("127.0.0.1", closedPort, Duration.ofSeconds(5))));
+		assertThatThrownBy(() -> noClamd.scan(new ByteArrayInputStream(new byte[10])))
 			.isInstanceOf(UncheckedIOException.class);
 	}
 

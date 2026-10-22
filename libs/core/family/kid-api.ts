@@ -94,4 +94,34 @@ export class KidApi {
   topic(topicId: string): Observable<KidActivity> {
     return this.api.get<KidActivity>(`/family/kid/topics/${encodeURIComponent(topicId)}`);
   }
+
+  lesson(contentItemId: string): Observable<KidLesson> {
+    return this.api.get<KidLesson>(`/family/kid/lessons/${encodeURIComponent(contentItemId)}`);
+  }
+}
+
+/** A quiz question of a lesson, with its solution so the player can check answers offline. */
+export interface KidQuizQuestion {
+  readonly id: string;
+  readonly version_id: string;
+  readonly question_type: 'mcq' | 'true_false' | 'fill_blank' | 'match';
+  readonly topic_id: string | null;
+  readonly body: unknown;
+  readonly solution: unknown;
+}
+
+/** K4 (Plan 6.2): the published version, its quiz questions and where the child left off. */
+export interface KidLesson {
+  readonly id: string;
+  readonly version_id: string;
+  readonly title: string;
+  readonly lang: 'en' | 'hi';
+  readonly duration_seconds: number | null;
+  readonly subject_id: number;
+  readonly topic_id: string | null;
+  readonly catalog_chapter_id: string | null;
+  /** Schema §5 lesson body; @fullstar/ui content-body.ts has the types. */
+  readonly body: unknown;
+  readonly questions: readonly KidQuizQuestion[];
+  readonly resume: { readonly attempt_id: string; readonly resume_state: unknown } | null;
 }
