@@ -1,4 +1,7 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { Page, expect, test } from '@playwright/test';
+import { navigateInApp } from '../routes';
 
 /**
  * Plan 9.5: helpers for the App Flow §8 journeys against the full local stack (infra/journeys):
@@ -126,4 +129,39 @@ export async function finishSetup(
   await page.getByRole('button', { name: 'Start' }).click();
   await expect(page).toHaveURL(/\/who$/);
   await expect(page.getByRole('button', { name: child.name })).toBeVisible();
+}
+
+/** From a kid or C1 screen: Parent mode → P0 PIN → Progress (P1). */
+export async function parentMode(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Parent mode' }).click();
+  await expect(page).toHaveURL(/\/parent\/pin/);
+  await typePin(page);
+  await expect(page).toHaveURL(/\/parent\//);
+}
+
+/**
+ * Waits on P19 until a message with this text arrives (workers and staff finish in the background),
+ * leaving and coming back in-app so the list is fetched again without losing the parent PIN.
+ */
+export async function waitForMessage(page: Page, text: string, timeout = 300_000): Promise<void> {
+  const deadline = Date.now() + timeout;
+  for (;;) {
+    await navigateInApp(page, '/parent/messages');
+    if (await page.getByText(text, { exact: false }).first().isVisible()) {
+      return;
+    }
+    if (Date.now() > deadline) {
+      throw new Error(`No message "${text}" within ${timeout / 1000} s`);
+    }
+    await page.waitForTimeout(5000);
+    await navigateInApp(page, '/parent/progress');
+  }
+}
+
+/** A page image from the book-reader OCR test set (services/book-reader/src/test/resources/pages). */
+export function pagePhoto(file: string): { name: string; mimeType: string; buffer: Buffer } {
+  const buffer = readFileSync(
+    join(__dirname, '../../services/book-reader/src/test/resources/pages', file),
+  );
+  return { name: file, mimeType: file.endsWith('.png') ? 'image/png' : 'image/jpeg', buffer };
 }

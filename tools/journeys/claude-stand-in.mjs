@@ -44,7 +44,8 @@ function lesson(user) {
   const chapter = user.includes('<chapter>');
   const lines = hindi
     ? [
-        'आज हम कुछ नया सीखेंगे।',
+        // A chapter lesson starts with the misspelt line in either language (the warning)
+        chapter ? MISSPELT : 'आज हम कुछ नया सीखेंगे।',
         'ध्यान से देखो।',
         'यह बहुत आसान है।',
         'चलो साथ में पढ़ें।',

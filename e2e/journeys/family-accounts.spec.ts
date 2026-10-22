@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { finishSetup, newEmail, signIn, signUp, skipWithoutStack, typePin } from './stack';
+import { finishSetup, newEmail, signIn, signUp, skipWithoutStack } from './stack';
 
 /**
  * App Flow §8 "New parent signs up" and "Returning parent on a new phone" against the full stack:
@@ -28,9 +28,7 @@ test('New parent signs up: consent, emailed code, PIN, child, English book, 30 m
           .filter({ hasText: 'English' })
           .getByRole('button', { name: 'Upload book' })
           .click();
-        // B3 may add the first book with the PIN just set
-        await expect(p).toHaveURL(/\/parent\/pin\?next=/);
-        await typePin(p);
+        // The parent grant from B1 is still valid, so B3 opens the upload without the PIN
         await expect(p).toHaveURL(/\/parent\/books\/english\/upload/);
         const photo = readFileSync(join(PAGES, 'english-page.png'));
         await p
