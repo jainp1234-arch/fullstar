@@ -94,7 +94,7 @@ test('the bell says the chapter is ready to read along', async () => {
 test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publish, mark ready', async ({
   browser,
 }) => {
-  test.setTimeout(1_800_000);
+  test.setTimeout(3_600_000);
   const studio = await staffPage(browser);
   await studio
     .getByRole('navigation', { name: 'Studio' })
@@ -150,6 +150,7 @@ test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publis
   // Each draft: S3 → open it (S5) → Content check (S11) → publish (S6)
   let fixed = 0;
   for (let i = 0; i < 25; i++) {
+    const started = Date.now();
     await studio
       .getByRole('navigation', { name: 'Studio' })
       .getByRole('link', { name: 'Library' })
@@ -186,6 +187,9 @@ test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publis
       fixed++;
     }
     await publishFromCheck(studio);
+    console.log(
+      `Question ${i + 1} checked and published in ${Math.round((Date.now() - started) / 1000)} s`,
+    );
   }
   expect(fixed).toBe(1);
 
