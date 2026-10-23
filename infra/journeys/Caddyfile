@@ -1,0 +1,31 @@
+# Plan 9.5: the journey stack on http://localhost:8080, like the local one (infra/caddy/Caddyfile) but
+# with the built apps instead of ng serve and the API container instead of make api.
+{
+	auto_https off
+	admin off
+}
+
+:80 {
+	handle /auth/* {
+		reverse_proxy keycloak:8080
+	}
+	handle /api/* {
+		reverse_proxy api:8081
+	}
+	handle /{$S3_BUCKET}/* {
+		reverse_proxy seaweedfs:8333
+	}
+	redir /studio /studio/
+	handle_path /studio/* {
+		root * /srv/studio
+		import /etc/caddy/security-headers.caddy Content-Security-Policy
+		try_files {path} /index.html
+		file_server
+	}
+	handle {
+		root * /srv/family
+		import /etc/caddy/security-headers.caddy Content-Security-Policy
+		try_files {path} /index.html
+		file_server
+	}
+}

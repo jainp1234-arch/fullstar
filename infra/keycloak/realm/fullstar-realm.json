@@ -37,11 +37,11 @@
     "port": "${SMTP_PORT}",
     "from": "${MAIL_FROM}",
     "fromDisplayName": "FullStar",
-    "auth": "true",
+    "auth": "${SMTP_AUTH:true}",
     "authType": "basic",
     "user": "${SMTP_USERNAME}",
     "password": "${SMTP_PASSWORD}",
-    "starttls": "true",
+    "starttls": "${SMTP_STARTTLS:true}",
     "ssl": "false"
   },
   "roles": {

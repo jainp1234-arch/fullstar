@@ -1,0 +1,131 @@
+# Plan 9.5: the full local stack for the App Flow §8 journey tests, on top of infra/docker-compose.yml:
+#   docker compose --env-file .env -f infra/docker-compose.yml -f infra/journeys/compose.yml up -d ...
+# Paths are relative to infra/ (the first file). Real: Keycloak (codes caught by Mailpit), the API on
+# its own Postgres, Caddy serving the built apps, ClamAV, Gotenberg, book-reader and reading-checker.
+# Stand-ins: Claude (tools/journeys/claude-stand-in.mjs) and the narration voice (voice-maker stand-in).
+# Decided 23 Oct 2026; CI only (.github/workflows/journeys.yml).
+
+x-api-env: &api-env
+  API_PORT: "8081"
+  DB_JDBC_URL: jdbc:postgresql://app-db:5432/fullstar
+  DB_MIGRATE_JDBC_URL: jdbc:postgresql://app-db:5432/fullstar
+  DB_APP_OWNER_PASSWORD: ${JOURNEY_DB_PASSWORD:?set JOURNEY_DB_PASSWORD}
+  DB_APP_API_PASSWORD: ${JOURNEY_DB_PASSWORD}
+  DB_APP_SYSTEM_PASSWORD: ${JOURNEY_DB_PASSWORD}
+  PARENT_GRANT_SECRET: ${PARENT_GRANT_SECRET:?set PARENT_GRANT_SECRET}
+  KEYCLOAK_ISSUER_URI: http://localhost:8080/auth/realms/fullstar
+  KEYCLOAK_JWK_SET_URI: http://keycloak:8080/auth/realms/fullstar/protocol/openid-connect/certs
+  KEYCLOAK_ADMIN_URL: http://keycloak:8080/auth
+  KEYCLOAK_API_ADMIN_SECRET: ${KEYCLOAK_API_ADMIN_SECRET}
+  SQS_ENDPOINT: http://elasticmq:9324
+  SQS_ACCESS_KEY_ID: ${SQS_ACCESS_KEY_ID:-local}
+  SQS_SECRET_ACCESS_KEY: ${SQS_SECRET_ACCESS_KEY:-local}
+  S3_ENDPOINT: http://seaweedfs:8333
+  S3_PUBLIC_ENDPOINT: http://localhost:8080
+  S3_BUCKET: ${S3_BUCKET}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+  S3_CREATE_BUCKET: "true"
+  GOTENBERG_URL: http://gotenberg:3000
+  CORS_ALLOWED_ORIGINS: http://localhost:8080
+  FEATURE_AI_DRAFTS: "true"
+  FEATURE_AI_CHECK: "true"
+  ANTHROPIC_API_KEY: stand-in
+  FULLSTAR_AI_BASEURL: http://claude:8090
+
+services:
+  keycloak:
+    environment:
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_AUTH: "false"
+      SMTP_STARTTLS: "false"
+      MAIL_FROM: journeys@fullstar.test
+
+  mailpit:
+    image: axllent/mailpit:v1.31.3
+    ports:
+      - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app-db:
+    image: postgres:18.6
+    environment:
+      POSTGRES_DB: fullstar
+      POSTGRES_PASSWORD: ${JOURNEY_DB_PASSWORD}
+      APP_OWNER_PASSWORD: ${JOURNEY_DB_PASSWORD}
+      APP_API_PASSWORD: ${JOURNEY_DB_PASSWORD}
+      APP_SYSTEM_PASSWORD: ${JOURNEY_DB_PASSWORD}
+    volumes:
+      - ./db/bootstrap-roles.sql:/bootstrap/bootstrap-roles.sql:ro
+      - ./zap/init-db.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "fullstar"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api-migrate:
+    image: fullstar/api:journeys
+    build:
+      context: ..
+      dockerfile: services/api/Dockerfile
+    command: ["--spring.profiles.active=migrate"]
+    environment: *api-env
+    depends_on:
+      app-db:
+        condition: service_healthy
+
+  api:
+    image: fullstar/api:journeys
+    environment: *api-env
+    volumes:
+      - ./seed:/seed:ro
+    depends_on:
+      api-migrate:
+        condition: service_completed_successfully
+      elasticmq:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  claude:
+    image: node:24.21.0-slim
+    command: ["node", "/stand-in/claude-stand-in.mjs", "8090"]
+    user: "1000"
+    volumes:
+      - ../tools/journeys:/stand-in:ro
+
+  narrator:
+    build:
+      context: ../workers/voice-maker
+      target: stand-in
+    image: fullstar/voice-maker:stand-in
+    environment:
+      SQS_ENDPOINT: http://elasticmq:9324
+      SQS_ACCESS_KEY_ID: ${SQS_ACCESS_KEY_ID:-local}
+      SQS_SECRET_ACCESS_KEY: ${SQS_SECRET_ACCESS_KEY:-local}
+      S3_ENDPOINT: http://seaweedfs:8333
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY}
+    depends_on:
+      elasticmq:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+
+  caddy:
+    volumes:
+      - ./journeys/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../dist/family-app/browser:/srv/family:ro
+      - ../dist/content-studio/browser:/srv/studio:ro
+    depends_on:
+      api:
+        condition: service_started

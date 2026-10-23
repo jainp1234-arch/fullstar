@@ -1,0 +1,11 @@
+# Plan 9.5: the journey-test stand-in (no model, no PyTorch). Exact pins taken from requirements.txt;
+# installed with --no-deps and checked with pip check, like the full set.
+av==16.1.0
+boto3==1.43.108
+botocore==1.43.108
+jmespath==1.1.0
+numpy==2.5.3
+python-dateutil==2.9.0.post0
+s3transfer==0.19.2
+six==1.17.0
+urllib3==2.8.0
