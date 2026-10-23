@@ -155,12 +155,16 @@ test("Child's session: the story read aloud is scored with stars, then the time 
   await expect(page).toHaveURL(/\/kid\/read\/result\?test=/, { timeout: 30_000 });
   const stars = page.getByRole('heading', { name: /Well done! You got [1-3] stars?\./ });
   const notUnderstood = page.getByRole('heading', { name: "Let's try again." });
-  await expect(story.lang === 'hi' ? stars.or(notUnderstood) : stars).toBeVisible({
-    timeout: 90_000,
-  });
+  // Whatever K14 shows, say so: scoring takes Whisper a while on the CI runner's CPU
+  await stars
+    .or(notUnderstood)
+    .waitFor({ timeout: 180_000 })
+    .catch(() => undefined);
+  const headings = await page.getByRole('heading').allTextContents();
   console.log(
-    `Reading test (${story.lang}): ${await page.getByRole('heading', { level: 1 }).first().textContent()}`,
+    `Reading test (${story.lang}, ${story.text.split(/\s+/).length} words): ${headings.join(' | ')}`,
   );
+  await expect(story.lang === 'hi' ? stars.or(notUnderstood) : stars).toBeVisible();
 
   // 31 minutes in kid mode: the bar shows the limit is used; the child finishes and stops
   await navigateInApp(page, '/kid/learn');

@@ -175,6 +175,10 @@ test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publis
       await navigateInApp(studio, `/studio/library/${item}/edit`);
       // The right answer is listed by its letter and text: choose the one that says Five
       const right = studio.getByLabel('Right answer');
+      // The options are built from the answers once the item has loaded
+      await expect(right.locator('option', { hasText: 'Five' })).toHaveCount(1, {
+        timeout: 15_000,
+      });
       const five = (await right.locator('option').allTextContents()).find((o) =>
         o.includes('Five'),
       );
