@@ -94,7 +94,7 @@ test('the bell says the chapter is ready to read along', async () => {
 test('Admin prepares it: S8 claim, S9 link, Claude drafts, content check, publish, mark ready', async ({
   browser,
 }) => {
-  test.setTimeout(3_600_000);
+  test.setTimeout(1_200_000);
   const studio = await staffPage(browser);
   await studio
     .getByRole('navigation', { name: 'Studio' })

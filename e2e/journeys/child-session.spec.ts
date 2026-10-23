@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { chmodSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Page, chromium, expect, test } from '@playwright/test';
 import { navigateInApp } from '../routes';
@@ -106,22 +106,25 @@ test("Child's session: a lesson to K7, tables and the 60-second challenge", asyn
 test("Child's session: the story read aloud is scored with stars, then the time bar turns red", async () => {
   test.setTimeout(300_000);
   // The story spoken by espeak-ng (pinned in the reading-checker test image), as the microphone
-  mkdirSync(AUDIO, { recursive: true });
-  execFileSync('docker', [
+  mkdirSync(AUDIO, { recursive: true, mode: 0o777 });
+  chmodSync(AUDIO, 0o777);
+  writeFileSync(join(AUDIO, 'story.txt'), story.text);
+  const made = execFileSync('docker', [
     'run',
     '--rm',
     '-v',
     `${AUDIO}:/out`,
-    'fullstar/reading-checker:test',
-    'espeak-ng',
     '-v',
-    story.lang === 'hi' ? 'hi' : 'en-gb',
-    '-s',
-    '120',
-    '-w',
-    '/out/story.wav',
-    story.text,
+    `${resolve('tools/journeys')}:/tools:ro`,
+    '--entrypoint',
+    'sh',
+    'fullstar/reading-checker:test',
+    '-c',
+    // espeak-ng speaks it; 48 kHz 16-bit mono is what Chromium's fake microphone plays well
+    `espeak-ng -v ${story.lang === 'hi' ? 'hi' : 'en-gb'} -s 120 -w /out/raw.wav -f /out/story.txt` +
+      ' && python /tools/fake-microphone.py /out/raw.wav /out/story.wav',
   ]);
+  console.log(made.toString().trim());
   const browser = await chromium.launch({
     args: [
       '--use-fake-ui-for-media-stream',
