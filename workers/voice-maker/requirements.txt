@@ -24,7 +24,7 @@ einops==0.8.2
 executing==2.2.1
 faster-whisper==1.2.1
 ffmpy==1.0.0
-filelock==4.0.12
+filelock==4.2.1
 fire==0.7.1
 flatbuffers==25.12.19
 flatten-dict==0.5.0
