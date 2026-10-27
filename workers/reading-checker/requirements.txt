@@ -15,7 +15,7 @@ onnxruntime==1.30.0
 flatbuffers==25.12.19
 protobuf==7.36.2
 packaging==26.3
-tokenizers==0.23.2
+tokenizers==0.23.3
 huggingface_hub==1.33.0
 hf-xet==1.7.0
 filelock==4.0.12
