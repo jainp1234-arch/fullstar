@@ -18,7 +18,7 @@ packaging==26.3
 tokenizers==0.23.2
 huggingface_hub==1.33.0
 hf-xet==1.7.0
-filelock==4.0.12
+filelock==4.1.1
 fsspec==2026.9.0
 PyYAML==6.0.3
 tqdm==4.70.1
