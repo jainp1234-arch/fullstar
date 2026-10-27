@@ -9,5 +9,5 @@ COPY infra/keycloak/email-otp/pom.xml infra/keycloak/email-otp/pom.xml
 COPY infra/keycloak/email-otp/src infra/keycloak/email-otp/src
 RUN --mount=type=cache,target=/root/.m2 sh ./mvnw -B -ntp -q -f infra/keycloak/email-otp/pom.xml package -DskipTests
 
-FROM quay.io/keycloak/keycloak:26.8.0
+FROM quay.io/keycloak/keycloak:26.8.1-1
 COPY --from=build /src/infra/keycloak/email-otp/target/email-otp-0.0.1-SNAPSHOT.jar /opt/keycloak/providers/email-otp.jar
