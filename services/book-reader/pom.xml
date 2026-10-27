@@ -16,7 +16,7 @@
 		<java.version>21</java.version>
 		<!-- Not Boot-managed (Tech Stack §6); same versions as services/api -->
 		<resilience4j.version>2.4.0</resilience4j.version>
-		<awssdk.version>2.55.11</awssdk.version>
+		<awssdk.version>2.55.15</awssdk.version>
 		<pdfbox.version>3.0.8</pdfbox.version>
 	</properties>
 	<dependencyManagement>
