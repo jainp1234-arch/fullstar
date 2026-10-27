@@ -1,5 +1,5 @@
 # Python dev tools for workers/ (Tech Stack §7). Exact == pins only.
-ruff==0.16.10
+ruff==0.17.0
 pytest==9.1.1
 # pytest dependencies
 iniconfig==2.3.1
