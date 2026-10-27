@@ -17,7 +17,7 @@
 		<!-- Not Boot-managed (Tech Stack §6) -->
 		<resilience4j.version>2.4.0</resilience4j.version>
 		<springdoc.version>3.1.1</springdoc.version>
-		<anthropic-java.version>2.68.0</anthropic-java.version>
+		<anthropic-java.version>2.71.0</anthropic-java.version>
 		<awssdk.version>2.55.11</awssdk.version>
 	</properties>
 	<dependencyManagement>
