@@ -1,4 +1,4 @@
 # Vendoring tools only (Tech Stack: build tools); never shipped. Exact pins.
-pillow==12.3.0
+pillow==13.0.0
 fonttools==4.66.1
 brotli==1.2.0
